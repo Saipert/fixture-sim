@@ -1018,14 +1018,31 @@
       startKO2(rep, lib, lp.seeded.concat(lp.unseeded), lp);
       if (sud && sud.groups) {
         var sq = qualifiers(sud);
-        var playoffField = [];
+        /* El play-off es SIEMPRE tercero de Libertadores contra segundo de
+           Sudamericana. Se barajan los dos bombos por separado y se cruzan
+           uno contra uno: metiéndolos en una sola lista y barajándola,
+           salían cruces entre dos terceros de la Libertadores. */
+        var terceros = [], segundos = [];
         for (var i = 0; i < 8; i++) {
-          if (lq.thirds[i]) playoffField.push(lq.thirds[i].t);
-          if (sq.second[i]) playoffField.push(sq.second[i].t);
+          if (lq.thirds[i]) terceros.push(lq.thirds[i].t);
+          if (sq.second[i]) segundos.push(sq.second[i].t);
         }
+        terceros = shuffle(terceros);
+        segundos = shuffle(segundos);
+        var poTies = [];
+        var cuantos = Math.min(terceros.length, segundos.length);
+        for (var k = 0; k < cuantos; k++) {
+          /* el de la Libertadores cierra la serie en casa: va de segundo */
+          poTies.push({ a: segundos[k], b: terceros[k], leg1: null, leg2: null,
+            agg: null, pens: null, w: null });
+        }
+        /* si por lo que sea sobran equipos de un lado, se emparejan entre
+           ellos antes que dejarlos fuera del torneo */
+        var sobran = terceros.slice(cuantos).concat(segundos.slice(cuantos));
+        makeTies(sobran).forEach(function (t) { poTies.push(t); });
         sud.playoffWinners = [];
         sud.koRounds.push({
-          name: 'Play-off de octavos', slot: 0, ties: makeTies(shuffle(playoffField)),
+          name: 'Play-off de octavos', slot: 0, ties: poTies,
           done: false, isPlayoff: true
         });
         sud.groupWinners = sq.first.map(function (r) { return r.t; });
