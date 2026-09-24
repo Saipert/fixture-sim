@@ -1,0 +1,192 @@
+/* =========================================================================
+   MODO CARRERA — tablero a pantalla completa
+   ========================================================================= */
+#view-world.active { display: flex; flex-direction: column; }
+/* el modo carrera ocupa exactamente la ventana: nada de scroll de pagina */
+body.career { height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+body.career footer { display: none; }
+body.career main { flex: 1; min-height: 0; overflow: auto; padding: 12px 18px; max-width: 1660px; width: 100%; }
+body.career #view-world.active { height: 100%; min-height: 0; }
+.wlayout { display: flex; flex-direction: column; height: 100%; min-height: 0; }
+.wtop {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 10px 14px; margin-bottom: 10px;
+  background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+}
+.wtop .big { font-size: 17px; font-weight: 800; line-height: 1.15; }
+.wtop .sub2 { color: var(--dim); font-size: 11.5px; }
+.wtop .spacer { flex: 1; }
+.wmain { flex: 1; min-height: 0; overflow: hidden; }
+
+/* paneles con cabecera fija y cuerpo con scroll propio */
+.panel {
+  display: flex; flex-direction: column; min-height: 0; background: var(--card);
+  border: 1px solid var(--line); border-radius: 12px; overflow: hidden;
+}
+.panel > h3 {
+  margin: 0; padding: 9px 13px; font-size: 12px; text-transform: uppercase; letter-spacing: 1.1px;
+  color: var(--dim); border-bottom: 1px solid var(--line); display: flex; justify-content: space-between;
+  align-items: center; gap: 8px; flex: 0 0 auto;
+}
+.panel > h3 small { text-transform: none; letter-spacing: 0; font-size: 11px; }
+.pbody { flex: 1; min-height: 0; overflow: auto; padding: 10px 13px; }
+.pbody.tight { padding: 6px 8px; }
+
+/* tablero */
+.dash { display: grid; grid-template-columns: 1fr 1.35fr 1fr; gap: 12px; height: 100%; min-height: 0; }
+.dcol { display: grid; gap: 12px; min-height: 0; }
+.dcol.r2 { grid-template-rows: 1fr 1fr; }
+.dcol.r21 { grid-template-rows: auto 1fr; }
+
+/* próximo partido */
+.nextm { text-align: center; padding: 6px 0; }
+.nextm .vs2 { display: flex; align-items: center; justify-content: center; gap: 14px; margin: 10px 0; }
+.nextm .side2 { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.nextm .side2 b { font-size: 14px; line-height: 1.2; }
+.nextm .mid { color: var(--dim); font-weight: 800; font-size: 20px; }
+.nextm .where { color: var(--dim); font-size: 12px; }
+.nextm .comp { color: var(--acc2); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+.simbtns { display: flex; gap: 8px; justify-content: center; margin-top: 12px; flex-wrap: wrap; }
+
+/* calendario */
+.cal { display: flex; flex-direction: column; gap: 3px; }
+.calrow {
+  display: grid; grid-template-columns: minmax(0, 1fr) 54px; gap: 10px; align-items: center;
+  padding: 5px 7px; border-radius: 7px; font-size: 12.5px; background: var(--bg2);
+}
+.calrow.next { background: rgba(61, 157, 255, .13); border-left: 3px solid var(--acc2); }
+.calrow.w { border-left: 3px solid var(--acc); }
+.calrow.d { border-left: 3px solid #6b7688; }
+.calrow.l { border-left: 3px solid var(--red); }
+.calrow .wk { color: var(--dim); font-size: 10.5px; text-align: center; }
+.calrow .op { overflow: hidden; }
+.calrow .op .o1 { display: flex; align-items: center; gap: 6px; overflow: hidden; }
+.calrow .op .o1 em { font-style: normal; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.calrow .op i { font-style: normal; color: var(--dim); font-size: 10px; }
+.calrow .rs { text-align: center; font-weight: 800; font-variant-numeric: tabular-nums; }
+.calrow .cmp { color: var(--dim); font-size: 10px; text-transform: uppercase; letter-spacing: .6px; display: block; }
+
+/* zonas de la tabla */
+.z-top .pos-chip { background: #1d5d45; color: #7dffcd; }
+.z-po .pos-chip { background: #1d4a63; color: #8fd6ff; }
+.z-pre .pos-chip { background: #16394d; color: #7ec4ef; }
+.z-secondPo .pos-chip { background: #4a2f1a; color: #e8b483; }
+.z-prelim .pos-chip { background: #1d4a63; color: #8fd6ff; }
+.z-second .pos-chip { background: #5d3a1d; color: #ffc58f; }
+.z-promo .pos-chip { background: #1d5d45; color: #7dffcd; }
+.z-rel .pos-chip { background: #5d1d1d; color: #ff9f9f; }
+.z-cup .pos-chip { box-shadow: 0 0 0 2px var(--gold); }
+.zleg { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; font-size: 11px; color: var(--dim); }
+.zleg span.k { display: inline-flex; align-items: center; gap: 5px; }
+.zleg i { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
+.zleg i.top, .zleg i.promo { background: #1d5d45; }
+.zleg i.prelim { background: #1d4a63; }
+.zleg i.second { background: #5d3a1d; }
+.zleg i.rel { background: #5d1d1d; }
+.zleg i.cup { background: transparent; box-shadow: 0 0 0 2px var(--gold); }
+
+/* visor de partido compacto */
+.mv-wrap { display: flex; flex-direction: column; height: 100%; min-height: 0; gap: 10px; }
+.mv-wrap .scoreboard { margin-bottom: 0; padding: 10px 14px; }
+.mv-wrap .sb-score { font-size: 32px; }
+.mv-wrap .sb-name { font-size: 16px; }
+.mv-wrap .sb-scorers { font-size: 11px; margin-top: 3px; }
+.mv-wrap .match-grid { flex: 1; min-height: 0; margin: 0; }
+.mv-wrap .match-grid > .card { min-height: 0; overflow: auto; margin: 0; }
+.mv-wrap .feed { height: auto; flex: 1; min-height: 0; }
+.mv-wrap .center-col { overflow: hidden; }
+.mv-wrap .pl { padding: 2px 5px; font-size: 12px; }
+.mv-wrap .lineup h3 { font-size: 12.5px; }
+.mv-wrap .stats { gap: 5px; margin-bottom: 8px; }
+.mbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;
+  background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 8px 13px; }
+
+/* campo para la alineación */
+.lineupgrid { display: grid; grid-template-columns: 1.25fr 1fr; gap: 12px; height: 100%; min-height: 0; }
+.pitch {
+  position: relative; border: 2px solid rgba(255, 255, 255, .18); border-radius: 10px;
+  height: 100%; min-height: 330px; overflow: hidden;
+  background: repeating-linear-gradient(0deg, #163c24 0 34px, #14351f 34px 68px);
+}
+.pitch .halfway { position: absolute; left: 6%; right: 6%; top: 50%; border-top: 2px solid rgba(255, 255, 255, .16); }
+.pitch .circle {
+  position: absolute; left: 50%; top: 50%; width: 88px; height: 88px; margin: -44px 0 0 -44px;
+  border: 2px solid rgba(255, 255, 255, .16); border-radius: 50%;
+}
+.slot { position: absolute; transform: translate(-50%, -50%); width: 78px; text-align: center; cursor: pointer; z-index: 2; }
+.slot.sel .sdot { outline: 3px solid #fff; outline-offset: 2px; }
+.sdot {
+  width: 34px; height: 34px; margin: 0 auto; border-radius: 50%; display: grid; place-items: center;
+  font-weight: 900; font-size: 11px; color: #04150f; background: var(--acc); box-shadow: 0 2px 6px rgba(0, 0, 0, .55);
+}
+.sdot.off { background: #ffb347; }
+.slot .sname {
+  font-size: 10.5px; margin-top: 3px; line-height: 1.15; color: #eaf6ef;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, .95); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.slot .spos { font-size: 9px; color: #9fe8c6; letter-spacing: .6px; }
+.benchlist { display: flex; flex-direction: column; gap: 2px; }
+.bp { display: flex; align-items: center; gap: 8px; padding: 5px 7px; border-radius: 7px; background: var(--bg2);
+  font-size: 12.5px; cursor: pointer; }
+.bp:hover { background: #1b2430; }
+.bp.sel { outline: 2px solid var(--acc); }
+.bp .pos { width: 28px; font-size: 10px; font-weight: 800; color: var(--dim); }
+.bp .nm { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* llaves de copa */
+.bracket2 { display: flex; gap: 34px; padding: 8px 4px 14px; min-width: min-content; height: 100%; }
+.br-round { display: flex; flex-direction: column; min-width: 205px; }
+.br-round h5 {
+  margin: 0 0 6px; font-size: 10.5px; text-transform: uppercase; letter-spacing: 1.1px;
+  color: var(--dim); text-align: center; flex: 0 0 auto;
+}
+.br-col { display: flex; flex-direction: column; justify-content: space-around; flex: 1; gap: 8px; }
+.br-pair { position: relative; display: flex; flex-direction: column; justify-content: space-around; flex: 1; gap: 8px; }
+.br-pair::after { content: ""; position: absolute; right: -17px; top: 25%; bottom: 25%; border-right: 1px solid var(--line); }
+.br-tie { position: relative; background: var(--bg2); border: 1px solid var(--line); border-radius: 8px; padding: 5px 8px; }
+.br-tie.mine { border-color: var(--acc); background: rgba(46, 230, 168, .10); }
+.br-tie .t { display: flex; align-items: center; gap: 6px; font-size: 12px; padding: 1px 0; }
+.br-tie .t em { flex: 1; font-style: normal; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.br-tie .t b { font-variant-numeric: tabular-nums; min-width: 18px; text-align: right; }
+.br-tie .t.win { color: var(--acc); font-weight: 800; }
+.br-tie .lg { color: var(--dim); font-size: 10px; margin-top: 3px; border-top: 1px solid rgba(35, 45, 59, .7); padding-top: 3px; }
+.br-round:not(:last-child) .br-tie::after {
+  content: ""; position: absolute; left: 100%; top: 50%; width: 17px; border-top: 1px solid var(--line);
+}
+.br-champ {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+  background: linear-gradient(180deg, #2a2410, #151c26); border: 1px solid #6b5a1d; border-radius: 10px; padding: 14px;
+}
+.br-champ b { color: var(--gold); font-size: 15px; text-align: center; }
+
+/* mini tabla del tablero */
+.minitab td, .minitab th { padding: 5px 5px; font-size: 12.5px; }
+
+@media (max-width: 1150px) {
+  .dash { grid-template-columns: 1fr; overflow: auto; }
+  .lineupgrid { grid-template-columns: 1fr; }
+  .wlayout { height: auto; }
+  .wmain { overflow: visible; }
+}
+
+/* la columna del medio lleva tres bloques: partido, copas y los dos paneles
+   de abajo; sin esto el primero se quedaba sin altura */
+.dcol.r3 { grid-template-rows: auto auto minmax(0, 1fr); }
+
+/* La columna del partido: la ficha manda y conserva su alto; los dos paneles
+   de abajo se encogen y hacen scroll por dentro. Con «1fr» a secas el mínimo
+   es el contenido, y las listas de goleadores se comían el partido entero. */
+.dcol.rpart { grid-template-rows: auto minmax(0, 1fr); }
+.dcol.rpart > .panel { min-height: min-content; }
+.dsplit { min-height: 0; }
+.dsplit > .panel { min-height: 0; }
+.dsplit > .panel > .pbody { overflow: auto; }
+
+/* La ficha del próximo partido en la carrera de jugador usaba «.side», que no
+   centra nada: con un nombre largo el escudo quedaba pegado a la izquierda en
+   vez de justo encima del nombre. */
+.nextm .vs2 .side,
+.nextm .vs2 .side2 { flex: 1 1 0; min-width: 0; text-align: center; }
+.nextm .vs2 .side { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.nextm .vs2 .side b { font-size: 14px; line-height: 1.2; }
+.nextm .vs2 .side .cw,
+.nextm .vs2 .side2 .cw { margin-left: auto; margin-right: auto; }

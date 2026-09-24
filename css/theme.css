@@ -1,0 +1,1566 @@
+/* =========================================================================
+   TEMA — paleta ampliada y piezas nuevas (selector visual, velocidades…)
+   Se carga después de styles.css y career.css, así que manda sobre ellas.
+   ========================================================================= */
+:root{
+  --bg:#070a10;
+  --bg2:#111a26;
+  --card:#141d2a;
+  --card2:#18222f;
+  --line:#26334a;
+  --line2:#334259;
+  --txt:#eaf1f9;
+  --dim:#8ba0ba;
+  --acc:#2ee6a8;      /* verde  — acción principal */
+  --acc2:#4aa3ff;     /* azul   — navegación */
+  --acc3:#a97bff;     /* violeta— competiciones */
+  --acc4:#ff8f5a;     /* naranja— copas */
+  --acc5:#ff5c8a;     /* rosa   — selecciones */
+  --warn:#ffc95c;
+  --red:#ff6b6b;
+  --gold:#ecc86b;
+  --radius:15px;
+}
+
+body{
+  background:
+    radial-gradient(900px 520px at 12% -8%, rgba(74,163,255,.16), transparent 62%),
+    radial-gradient(760px 460px at 88% 2%, rgba(169,123,255,.14), transparent 60%),
+    radial-gradient(1100px 700px at 50% 108%, rgba(46,230,168,.08), transparent 62%),
+    var(--bg);
+  background-attachment:fixed;
+}
+
+/* ---------- cabecera ---------- */
+.topbar{
+  background:linear-gradient(180deg,rgba(12,18,28,.96),rgba(10,14,22,.86));
+  border-bottom:1px solid var(--line);
+  box-shadow:0 10px 30px -22px #000;
+}
+.brand h1{
+  background:linear-gradient(92deg,var(--acc),var(--acc2) 55%,var(--acc3));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.ball{filter:drop-shadow(0 2px 6px rgba(46,230,168,.45))}
+
+/* ---------- tarjetas ---------- */
+.card{
+  background:linear-gradient(180deg,var(--card2),var(--card));
+  border:1px solid var(--line);
+  box-shadow:0 18px 40px -34px #000;
+}
+
+/* ---------- menú principal a color ---------- */
+.menu-grid{gap:16px}
+.mcard{
+  position:relative;overflow:hidden;padding:20px 18px 18px;
+  background:linear-gradient(160deg,var(--card2),var(--card) 62%);
+  border:1px solid var(--line);
+}
+.mcard::before{
+  content:'';position:absolute;inset:0 0 auto 0;height:3px;
+  background:linear-gradient(90deg,var(--mc,var(--acc2)),transparent 85%);
+}
+.mcard::after{
+  content:'';position:absolute;right:-45px;top:-45px;width:135px;height:135px;border-radius:50%;
+  background:var(--mc,var(--acc2));opacity:.10;filter:blur(14px);transition:.2s;
+}
+.mcard:hover{
+  border-color:var(--mc,var(--acc2));transform:translateY(-3px);
+  background:linear-gradient(160deg,#1b2634,var(--card) 62%);
+  box-shadow:0 22px 44px -30px var(--mc,var(--acc2));
+}
+.mcard:hover::after{opacity:.2}
+.mcard .ic{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:42px;height:42px;border-radius:12px;margin-bottom:6px;font-size:21px;
+  background:color-mix(in srgb,var(--mc,var(--acc2)) 18%,transparent);
+  border:1px solid color-mix(in srgb,var(--mc,var(--acc2)) 40%,transparent);
+}
+.mcard b{font-size:15.5px}
+.mcard[data-go="match"]{--mc:var(--acc)}
+.mcard[data-go="world"]{--mc:var(--acc2)}
+.mcard[data-go="domestic"]{--mc:var(--acc4)}
+.mcard[data-go="contin"]{--mc:var(--acc3)}
+.mcard[data-go="nations"]{--mc:var(--acc5)}
+.mcard[data-go="builder"]{--mc:var(--gold)}
+.mcard[data-go="editor"]{--mc:#5ad1e6}
+.mcard[data-go="squads"]{--mc:#9fb2c8}
+
+/* ---------- botones ---------- */
+.primary{
+  background:linear-gradient(135deg,var(--acc),#19c9a0 55%,#12b7c4);
+  color:#031611;box-shadow:0 10px 24px -14px rgba(46,230,168,.8);
+}
+.primary:hover{filter:brightness(1.07);transform:translateY(-1px)}
+.mini{background:linear-gradient(180deg,#1a2432,#151e2a);border-color:var(--line2)}
+.mini:hover{border-color:var(--acc2);color:var(--txt);background:#1d2836}
+
+/* ---------- pestañas ---------- */
+.tabs button.active,.tabs.sub button.active{
+  background:linear-gradient(180deg,var(--acc2),#2f7fd6);color:#05131f;border-color:transparent;
+}
+
+/* ---------- resultados sólo con escudo ---------- */
+.fx div.scline{
+  display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;
+  background:linear-gradient(180deg,#18222f,#141c27);padding:7px 12px;
+}
+.scline .sc-c{display:flex;align-items:center}
+.scline .sc-c:last-of-type{justify-content:flex-end}
+.scline b{font-size:13.5px;letter-spacing:.5px}
+.fx div.scline.mine{background:rgba(46,230,168,.14);border-left:3px solid var(--acc)}
+
+/* =========================================================================
+   SELECTOR VISUAL (Picker)
+   ========================================================================= */
+.pk-ov{
+  position:fixed;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;
+  background:rgba(4,7,12,.72);backdrop-filter:blur(5px);padding:24px;
+}
+.pk-ov.hidden{display:none}
+.pk-box{
+  width:min(1080px,100%);max-height:min(86vh,820px);display:flex;flex-direction:column;
+  background:linear-gradient(180deg,#16202e,#111925);
+  border:1px solid var(--line2);border-radius:18px;overflow:hidden;
+  box-shadow:0 40px 90px -40px #000;
+}
+.pk-head{
+  display:flex;align-items:center;gap:12px;padding:14px 16px;
+  border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg,rgba(74,163,255,.10),transparent);
+}
+.pk-titles{display:flex;flex-direction:column;min-width:0;flex:0 0 auto}
+.pk-titles b{font-size:16px}
+.pk-titles small{color:var(--dim);font-size:11.5px}
+.pk-search{
+  flex:1;min-width:120px;background:#0e1622;border:1px solid var(--line);
+  border-radius:10px;padding:9px 12px;
+}
+.pk-back,.pk-close{
+  width:34px;height:34px;flex:0 0 auto;border-radius:10px;
+  background:#0e1622;border:1px solid var(--line);color:var(--dim);font-size:16px;line-height:1;
+}
+.pk-back{font-size:22px}
+.pk-back:hover,.pk-close:hover{color:var(--txt);border-color:var(--acc2)}
+.pk-tabs{display:flex;gap:6px;padding:10px 16px;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.pk-tab{
+  background:#0e1622;border:1px solid var(--line);color:var(--dim);
+  border-radius:999px;padding:6px 14px;font-size:12.5px;font-weight:600;
+}
+.pk-tab:hover{color:var(--txt);border-color:var(--line2)}
+.pk-tab.on{background:linear-gradient(180deg,var(--acc2),#2f7fd6);color:#05131f;border-color:transparent}
+.pk-body{padding:16px;overflow:auto;flex:1}
+.pk-sec{
+  margin:2px 0 10px;font-size:11px;color:var(--dim);
+  text-transform:uppercase;letter-spacing:1.4px;font-weight:700;
+}
+.pk-sec + .pk-lgs, .pk-sec + .pk-tms{margin-bottom:18px}
+
+.pk-lgs{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}
+.pk-lg{
+  display:flex;align-items:center;gap:12px;text-align:left;padding:10px 12px;
+  background:linear-gradient(180deg,#18222f,#141c27);border:1px solid var(--line);
+  border-radius:12px;color:var(--txt);transition:.15s;
+}
+.pk-lg:hover{border-color:var(--acc2);transform:translateY(-2px);background:#1c2735}
+/* Muchos logos de liga son oscuros o monocromos sobre fondo transparente:
+   sobre el panel oscuro no se veían. Se pintan sobre una placa clara. */
+.pk-lg-logo{
+  position:relative;width:46px;height:46px;flex:0 0 46px;border-radius:10px;padding:5px;
+  background:linear-gradient(180deg,#ffffff,#e8eef6);
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.10);
+  display:flex;align-items:center;justify-content:center;
+}
+.pk-lg-logo img{max-width:100%;max-height:100%;object-fit:contain;display:block}
+.pk-lg-flag{position:absolute;right:-4px;bottom:-4px;line-height:0}
+.pk-lg-flag svg{width:20px;height:14px;border-radius:2px}
+.pk-lg-txt{display:flex;flex-direction:column;min-width:0}
+.pk-lg-txt b{font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pk-lg-txt small{color:var(--dim);font-size:11px}
+
+.pk-tms{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:9px}
+.pk-tm{
+  display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 8px;
+  background:linear-gradient(180deg,#18222f,#141c27);border:1px solid var(--line);
+  border-radius:12px;color:var(--txt);transition:.15s;position:relative;
+}
+.pk-tm:hover{border-color:var(--acc);transform:translateY(-2px);background:#1c2735}
+.pk-tm-crest{height:40px;display:flex;align-items:center}
+.pk-tm b{font-size:12px;text-align:center;line-height:1.25;overflow:hidden;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.pk-tm small{
+  position:absolute;top:6px;right:8px;font-size:10.5px;font-weight:800;color:var(--acc2);
+}
+.pk-globe{font-size:14px}
+
+/* botón que sustituye a los desplegables */
+.pickbtn{
+  display:flex;align-items:center;gap:10px;width:100%;text-align:left;
+  background:linear-gradient(180deg,#18222f,#131b26);border:1px solid var(--line);
+  border-radius:11px;padding:9px 12px;color:var(--txt);transition:.15s;
+}
+.pickbtn:hover{border-color:var(--acc2);background:#1c2735}
+.pickbtn .pb-crest{width:30px;height:30px;display:flex;align-items:center;justify-content:center;flex:0 0 30px}
+.pickbtn .pb-txt{display:flex;flex-direction:column;min-width:0;flex:1}
+.pickbtn .pb-txt b{font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pickbtn .pb-txt small{color:var(--dim);font-size:11px}
+.pickbtn .pb-ch{color:var(--dim);font-size:15px}
+
+@media (max-width:720px){
+  .pk-head{flex-wrap:wrap}
+  .pk-search{order:3;width:100%;flex:1 0 100%}
+}
+
+/* ---------- escudo-selector del partido rápido ---------- */
+.team-badge.pick{
+  width:100%;text-align:left;cursor:pointer;border:1px solid var(--line);
+  background:linear-gradient(180deg,#18222f,#131b26);transition:.15s;
+}
+.team-badge.pick:hover{border-color:var(--acc);background:#1c2735}
+.badge-info span{display:block}
+.badge-info .pickhint{color:var(--acc2);font-size:11px;font-weight:700;margin-top:3px}
+
+/* ---------- barra de torneo paso a paso ---------- */
+.rn-bar{
+  display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;
+  border-left:3px solid var(--acc2);
+}
+.rn-now{display:flex;flex-direction:column;min-width:0}
+.rn-now b{font-size:15px}
+.rn-now small{color:var(--dim);font-size:12px}
+.rn-now small i{color:var(--warn);font-style:normal}
+.rn-btns{display:flex;gap:8px;flex-wrap:wrap}
+.drawline.wait{background:rgba(74,163,255,.14);border-radius:7px}
+.drawline small.tag{white-space:nowrap}
+
+/* la barra de control del torneo se queda a la vista al hacer scroll */
+.rn-bar{position:sticky;top:86px;z-index:6}
+
+/* =========================================================================
+   CUADRO DE ELIMINATORIAS SIMÉTRICO
+   Mitad izquierda, final en el centro, mitad derecha. Sin scroll.
+   ========================================================================= */
+.br2{display:flex;align-items:stretch;gap:12px;height:100%;min-height:0;width:100%}
+.br-side{display:flex;gap:10px;flex:1;min-width:0}
+.br-side .br-round{flex:1;min-width:0;display:flex;flex-direction:column;min-height:0}
+.br-round h5{margin:0 0 6px;font-size:10px;text-transform:uppercase;letter-spacing:1px;
+  color:var(--dim);text-align:center;flex:0 0 auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.br-col{display:flex;flex-direction:column;justify-content:space-around;gap:6px;flex:1;min-height:0}
+.br-center{flex:0 0 200px;display:flex;flex-direction:column;justify-content:center;gap:12px;min-width:0}
+.br-empty{flex:1}
+.brnote{margin:0 0 6px}
+
+.br-tie,.br-col .tie{background:linear-gradient(180deg,#18222f,#141c27);border:1px solid var(--line);
+  border-radius:9px;padding:6px 8px;font-size:11.5px}
+.br-tie.mine{border-color:var(--acc);background:rgba(46,230,168,.12)}
+.br-tie .t,.br-col .tie .row{display:flex;align-items:center;gap:6px;padding:1px 0}
+.br-tie .t em,.br-col .tie .row em{flex:1;font-style:normal;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.br-tie .t b,.br-col .tie .row b{font-variant-numeric:tabular-nums;min-width:16px;text-align:right}
+.br-tie .t.win,.br-col .tie .row.win{color:var(--acc);font-weight:800}
+.br-tie .lg,.br-col .tie .pens{color:var(--dim);font-size:10px;margin-top:3px;
+  border-top:1px solid rgba(35,45,59,.7);padding-top:3px}
+.br-center .br-tie{font-size:13px;padding:10px 12px;border-color:var(--gold)}
+.br-champ{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+  background:linear-gradient(180deg,#2b2410,#151c26);border:1px solid #6b5a1d;border-radius:12px;padding:12px}
+.br-champ .cup{font-size:22px}
+.br-champ b{color:var(--gold);font-size:14px;text-align:center;line-height:1.2}
+
+@media (max-width:900px){
+  .br2{flex-direction:column;height:auto}
+  .br-side{flex-wrap:wrap}
+  .br-center{flex:0 0 auto}
+}
+
+/* =========================================================================
+   RESULTADOS MÁS GRANDES
+   ========================================================================= */
+.fx{grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:8px}
+.fx div.scline{gap:12px;padding:10px 14px;border-radius:10px}
+.scline b{font-size:19px;font-weight:800;letter-spacing:1px}
+.scline .sc-c .cw{flex:0 0 auto}
+
+/* =========================================================================
+   PANEL DE SORTEO — entra entero en pantalla
+   Bombos en una fila arriba, grupos abajo en rejilla de 4 columnas.
+   ========================================================================= */
+#wDrawPanel{display:flex;flex-direction:column;gap:10px;max-height:calc(100vh - 104px);overflow:hidden}
+#wDrawPanel h3{margin:0}
+#wDrawPanel .toolbar{margin-bottom:0}
+.drawsplit{display:flex;flex-direction:column;align-items:stretch;gap:12px;flex:1;min-height:0}
+.drawcol{display:flex;flex-direction:column;min-height:0;min-width:0}
+.drawcol.pots-col{flex:0 1 auto;min-height:0}
+.drawcol.groups-col{flex:1;min-height:0}
+.pots{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;
+  max-height:none;overflow:auto;flex:1;min-height:0;align-content:start}
+.potbox{min-width:0}
+.potbox h4{font-size:10.5px;margin-bottom:3px}
+.potbox{padding:8px 9px}
+#wDrawGroups.groups{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;
+  flex:1;min-height:0;overflow:auto;align-content:start}
+#wDrawGroups .gbox{padding:8px 9px;min-width:0}
+#wDrawGroups .gbox h4{font-size:10.5px;margin-bottom:4px}
+#wDrawGroups .drawline{font-size:11.5px;padding:3px 1px;gap:6px}
+#wDrawGroups .drawline small{font-size:9.5px}
+.pots .drawline{font-size:11px;padding:1px 1px;gap:6px;line-height:1.45}
+.pots .drawline small{font-size:9.5px}
+@media (max-width:1050px){ #wDrawGroups.groups{grid-template-columns:repeat(2,minmax(0,1fr))} }
+
+/* ---------- simular hasta la semana X ---------- */
+.sim-until{display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.04);
+  border:1px solid var(--line);border-radius:10px;padding:4px 8px}
+.sim-until label{color:var(--dim);font-size:11.5px;white-space:nowrap}
+.sim-until input{width:64px;padding:4px 6px;text-align:center;font-variant-numeric:tabular-nums}
+
+/* =========================================================================
+   FICHA DE CLUB
+   ========================================================================= */
+.cw.tclick{cursor:pointer;transition:transform .12s}
+.cw.tclick:hover{transform:scale(1.14)}
+.pf-ov{position:fixed;inset:0;z-index:95;display:flex;align-items:center;justify-content:center;
+  background:rgba(4,7,12,.74);backdrop-filter:blur(5px);padding:24px}
+.pf-ov.hidden{display:none}
+.pf-box{width:min(1100px,100%);max-height:min(88vh,860px);display:flex;flex-direction:column;
+  background:linear-gradient(180deg,#16202e,#111925);border:1px solid var(--line2);
+  border-radius:18px;overflow:hidden;box-shadow:0 40px 90px -40px #000}
+.pf-head{display:flex;align-items:center;gap:14px;padding:14px 16px;border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg,rgba(169,123,255,.12),transparent)}
+.pf-id{display:flex;flex-direction:column;min-width:0;flex:1}
+.pf-id b{font-size:19px}
+.pf-id small{color:var(--dim);font-size:12px}
+.pf-st{display:flex;gap:14px;align-items:center}
+.pf-st span{display:flex;flex-direction:column;align-items:center;font-size:15px;font-weight:800;
+  font-variant-numeric:tabular-nums}
+.pf-st span i{font-style:normal;color:var(--dim);font-size:9.5px;letter-spacing:1px;font-weight:600}
+.pf-st .big{color:var(--acc);font-size:22px}
+.pf-close{width:34px;height:34px;flex:0 0 auto;border-radius:10px;background:#0e1622;
+  border:1px solid var(--line);color:var(--dim);font-size:15px}
+.pf-close:hover{color:var(--txt);border-color:var(--acc2)}
+.pf-body{padding:14px 16px;overflow:auto;flex:1}
+.pf-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:18px;align-items:start}
+.pf-col{min-width:0}
+.pf-h{margin:0 0 8px;font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:1.3px}
+.pf-col + .pf-col .pf-h:not(:first-child){margin-top:16px}
+.pf-squad,.pf-tab{width:100%;border-collapse:collapse;font-size:12.5px}
+.pf-squad th,.pf-tab th{color:var(--dim);font-size:10px;text-transform:uppercase;letter-spacing:.8px;
+  text-align:left;padding:4px 6px;border-bottom:1px solid var(--line)}
+.pf-squad td,.pf-tab td{padding:4px 6px;border-bottom:1px solid rgba(35,45,59,.55)}
+.pf-squad .num,.pf-tab .num{text-align:right}
+.pf-squad tr.sub td{color:var(--dim)}
+.pf-squad td.pos{color:var(--dim);font-size:11px}
+.pf-tab tr.me{background:rgba(46,230,168,.12);font-weight:700}
+.pf-two{display:grid;grid-template-columns:1fr;gap:14px;margin-top:14px}
+.pf-row{display:flex;align-items:center;gap:9px;padding:5px 8px;border-radius:8px;
+  background:var(--bg2);margin-bottom:4px;font-size:12.5px;border-left:3px solid transparent}
+.pf-row .cmp{color:var(--dim);font-size:10px;text-transform:uppercase;letter-spacing:.7px;
+  width:74px;flex:0 0 74px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pf-row .opp{flex:1;display:flex;align-items:center;gap:7px;min-width:0}
+.pf-row .opp em{font-style:normal;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pf-row b{font-variant-numeric:tabular-nums}
+.pf-row.w{border-left-color:var(--acc)}
+.pf-row.d{border-left-color:var(--warn)}
+.pf-row.l{border-left-color:var(--red)}
+@media (max-width:820px){ .pf-grid{grid-template-columns:1fr} }
+.potbox.wait{border-color:var(--acc2);box-shadow:0 0 0 1px rgba(74,163,255,.25)}
+.potbox h4 small{white-space:nowrap}
+.gbox h4 small{color:var(--dim);font-size:9.5px;letter-spacing:.4px;text-transform:none;float:right;font-weight:600}
+
+/* =========================================================================
+   PALMARÉS
+   ========================================================================= */
+.palm{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:8px;margin-bottom:6px}
+.trow2{display:grid;grid-template-columns:130px 1fr 1fr;align-items:center;gap:10px;
+  background:linear-gradient(180deg,#18222f,#141c27);border:1px solid var(--line);
+  border-left:3px solid var(--gold);border-radius:10px;padding:8px 11px}
+.trow2.mine{border-color:var(--acc);border-left-color:var(--acc);background:rgba(46,230,168,.10)}
+.trow2 .cmp{color:var(--dim);font-size:10.5px;text-transform:uppercase;letter-spacing:.7px;
+  line-height:1.25;overflow:hidden}
+.trow2 .win,.trow2 .sec{display:flex;align-items:center;gap:7px;min-width:0;position:relative}
+.trow2 em{font-style:normal;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12.5px}
+.trow2 .win em{font-weight:800;color:var(--gold)}
+.trow2 .sec em{color:var(--dim)}
+.trow2 i{font-style:normal;font-size:8.5px;text-transform:uppercase;letter-spacing:.8px;
+  color:var(--dim);position:absolute;left:30px;top:-9px;opacity:.75}
+.trow2 .sec i{left:28px}
+@media (max-width:760px){ .trow2{grid-template-columns:1fr} }
+.mextra{text-align:center;color:var(--warn);font-size:12.5px;margin-top:8px;letter-spacing:.2px}
+.mextra b{color:var(--txt)}
+.scline b .pen{display:block;font-style:normal;font-size:9.5px;font-weight:700;
+  color:var(--warn);letter-spacing:.4px;margin-top:1px}
+
+/* =========================================================================
+   CRÉDITOS DE LA PORTADA
+   ========================================================================= */
+.credits{
+  display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;
+  margin-top:22px;padding:16px 20px;border-radius:var(--radius);
+  background:linear-gradient(120deg,rgba(46,230,168,.10),rgba(74,163,255,.08) 45%,rgba(169,123,255,.10));
+  border:1px solid var(--line);
+}
+.cr-main{display:flex;align-items:baseline;gap:8px}
+.cr-by{color:var(--dim);font-size:12px;text-transform:uppercase;letter-spacing:1.4px}
+.cr-main b{
+  font-size:19px;letter-spacing:.2px;
+  background:linear-gradient(92deg,var(--acc),var(--acc2) 60%,var(--acc3));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.cr-contact{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.cr-lbl{color:var(--dim);font-size:12.5px}
+.cr-link{
+  display:inline-flex;align-items:center;gap:7px;text-decoration:none;color:var(--txt);
+  background:linear-gradient(180deg,#18222f,#131b26);border:1px solid var(--line);
+  border-radius:999px;padding:6px 14px;font-size:12.5px;font-weight:600;transition:.15s;
+}
+.cr-link:hover{border-color:var(--acc2);color:var(--acc2);transform:translateY(-1px)}
+.cr-ic{font-size:13px;opacity:.85}
+@media (max-width:640px){ .credits{flex-direction:column;align-items:flex-start} }
+
+/* liga sin archivo de logo: manda la bandera, sin placa blanca vacía */
+.pk-lg-logo.noimg{background:linear-gradient(180deg,#1d2937,#16202c);box-shadow:inset 0 0 0 1px var(--line);padding:6px}
+.pk-lg-only{line-height:0;display:flex;align-items:center;justify-content:center;width:100%;height:100%}
+.pk-lg-only svg{width:100%;height:auto;border-radius:3px}
+
+/* banderas reales de logos/paises/ (PNG 4:3 con fondo transparente) */
+.cflag{vertical-align:-2px;margin-right:6px;object-fit:contain}
+.pk-lg-flag .cflag{margin:0;filter:drop-shadow(0 1px 2px rgba(0,0,0,.6))}
+.pk-lg-only .cflag{margin:0;width:100%;height:auto}
+.crest-img.flag-img{object-fit:contain}
+.pf-h .cflag,.trow2 .cmp .cflag{margin-right:5px}
+
+/* =========================================================================
+   CLASIFICATORIAS AL MUNDIAL
+   ========================================================================= */
+.qhost{display:flex;align-items:center;gap:12px;margin-bottom:12px;padding:10px 14px;
+  background:linear-gradient(100deg,rgba(236,200,107,.16),transparent);
+  border:1px solid #6b5a1d;border-radius:12px}
+.qhost b{font-size:16px;color:var(--gold);display:block}
+.qhost small{color:var(--dim);font-size:11.5px}
+.qgrid{display:flex;flex-wrap:wrap;gap:6px}
+.qteam{display:inline-flex;align-items:center;gap:7px;font-size:12px;
+  background:linear-gradient(180deg,#18222f,#141c27);border:1px solid var(--line);
+  border-radius:999px;padding:4px 11px 4px 5px}
+.qteam.host{border-color:var(--gold);color:var(--gold)}
+.qteam.pool{border-color:var(--warn);color:var(--warn)}
+
+/* =========================================================================
+   SORTEO DEL MUNDIAL (dentro del panel de torneo)
+   ========================================================================= */
+.wcdraw .drawsplit{display:flex;flex-direction:column;align-items:stretch;gap:12px}
+.wcdraw .pots{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;
+  max-height:none;overflow:visible;align-content:start}
+.wcdraw .groups{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;align-content:start}
+.wcdraw .gbox{padding:8px 9px;min-width:0}
+.wcdraw .gbox h4{font-size:10.5px;margin-bottom:4px}
+.wcdraw .drawline{font-size:11.5px;padding:3px 1px;gap:6px}
+.wcdraw .drawline small{font-size:9.5px}
+.wcdraw .potbox h4{font-size:10.5px}
+@media (max-width:1050px){ .wcdraw .groups{grid-template-columns:repeat(2,minmax(0,1fr))} }
+
+/* botón para cerrar la ficha del partido al terminar */
+.sb-close{margin-top:8px;min-height:0}
+.sb-close .closebtn{padding:5px 14px;font-size:11.5px;font-weight:700;
+  border-color:var(--acc);color:var(--acc)}
+.sb-close .closebtn:hover{background:rgba(46,230,168,.14);color:var(--acc)}
+
+/* panel del anfitrion plegable en las clasificatorias */
+.qhostcard h3{display:flex;align-items:center;gap:10px}
+.qhostcard h3 .hosttog{margin-left:auto}
+.qhost.slim{margin-bottom:0;padding:6px 10px;gap:8px}
+.qhost.slim b{font-size:13.5px}
+
+/* clasificados por confederacion */
+.qconfs{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.qconf h4{display:flex;align-items:baseline;gap:8px;margin:0 0 8px;font-size:12.5px;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--gold)}
+.qconf h4 small{color:var(--dim);letter-spacing:0;text-transform:none;font-size:11.5px}
+.qteam em{font-style:normal;color:var(--dim);font-size:10.5px}
+
+/* bombos del Mundial: solo banderas, para que entre todo */
+.potflags{display:flex;flex-wrap:wrap;gap:5px}
+.potflag{position:relative;display:inline-flex;line-height:0;border-radius:4px;overflow:hidden;
+  box-shadow:0 0 0 1px rgba(255,255,255,.12)}
+.potflag .cw{width:26px!important;height:18px!important;border-radius:0}
+.potflag .cw > *{width:100%;height:100%;object-fit:cover;display:block;border-radius:0}
+.potflag.done{opacity:.42}
+.potflag i{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-style:normal;font-weight:800;font-size:11px;color:#fff;background:rgba(0,0,0,.55);
+  text-shadow:0 1px 2px rgba(0,0,0,.9)}
+.wcdraw .pots{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+
+/* clasificatorias: tabla del grupo + partidos de la jornada al lado */
+.qsplit{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr) minmax(0,1fr);
+  gap:16px;align-items:start}
+.qcol{min-width:0}
+.qcol table{width:100%}
+.qres{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:4px;align-content:start}
+.qrline{display:flex;align-items:center;gap:6px;padding:4px 8px;border-radius:7px;
+  background:rgba(255,255,255,.035);font-size:12px;white-space:nowrap}
+.qrline .cw{width:20px!important;height:14px!important;border-radius:2px;flex:0 0 auto}
+.qrline .cw > *{width:100%;height:100%;object-fit:cover;display:block;border-radius:2px}
+.qrline span{color:var(--dim);font-weight:600;letter-spacing:.04em}
+.qrline b{font-variant-numeric:tabular-nums;margin:0 2px}
+.qrline em{font-style:normal;color:var(--dim);font-size:10px;opacity:.7}
+.qrline u{text-decoration:none;font-size:10px;color:var(--dim)}
+.qrline i{font-style:normal;font-size:10px;color:var(--dim);margin-left:auto}
+.qrline.next{background:rgba(74,163,255,.16);box-shadow:inset 0 0 0 1px rgba(74,163,255,.35)}
+.qrline.done{opacity:.85}
+.qrline.done span{color:var(--txt)}
+@media (max-width:1100px){.qsplit{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+@media (max-width:720px){.qsplit{grid-template-columns:1fr}}
+
+/* cuadro del Mundial: 9 columnas simetricas, sin scroll */
+.wcbr{display:grid;grid-template-columns:repeat(4,minmax(0,1fr)) minmax(0,1.15fr) repeat(4,minmax(0,1fr));
+  gap:6px;align-items:stretch}
+.wcbr-col{display:flex;flex-direction:column;justify-content:space-around;gap:4px;min-width:0}
+.wcbr-col h5{margin:0 0 2px;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--dim);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wt{background:rgba(255,255,255,.04);border-radius:6px;padding:3px 4px;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}
+.wt.ahora{background:rgba(74,163,255,.16);box-shadow:inset 0 0 0 1px rgba(74,163,255,.4)}
+.wtrow{display:flex;align-items:center;gap:4px;font-size:11px;line-height:1.5}
+.wr{display:flex;align-items:center;gap:4px;min-width:0;flex:1}
+.wr .cw{width:18px!important;height:12px!important;border-radius:2px;flex:0 0 auto}
+.wr .cw > *{width:100%;height:100%;object-fit:cover;display:block;border-radius:2px}
+.wr em{font-style:normal;font-weight:600;letter-spacing:.01em;color:var(--dim);
+  min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wr.win em{color:var(--gold)}
+.wr.vacia i{font-style:normal;color:var(--dim);opacity:.4}
+.wtrow b{font-variant-numeric:tabular-nums;min-width:9px;text-align:right;font-size:11px}
+.wt u{display:block;text-decoration:none;font-size:9px;color:var(--dim);text-align:right}
+.wcbr-col.centro{justify-content:center;gap:8px}
+.wcbr-champ{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11.5px;
+  color:var(--gold);text-align:center}
+.wcbr-champ .cw{width:34px!important;height:24px!important}
+@media (max-width:900px){.wcbr{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .wcbr-col.centro{grid-column:1 / -1}}
+
+.wcbr-bronce{margin-top:2px}
+.wcbr-bronce h5{margin:0 0 2px;font-size:9px;letter-spacing:.08em;text-transform:uppercase;
+  color:#C97B3C;text-align:center}
+.wr.vacia i{font-size:9px;letter-spacing:.02em}
+
+/* el partido que se juega a continuacion, destacado */
+.qnext{background:linear-gradient(180deg,rgba(74,163,255,.20),rgba(74,163,255,.08));
+  border-radius:10px;padding:9px 10px 8px;margin-bottom:8px;text-align:center;
+  box-shadow:inset 0 0 0 1px rgba(74,163,255,.45)}
+.qnext-tag{display:block;font-size:9px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--acc,#4aa3ff);margin-bottom:6px;font-weight:700}
+.qnext-duelo{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:6px}
+.qnext-eq{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0}
+.qnext-eq b{font-size:11.5px;line-height:1.25;word-break:break-word}
+.qnext-eq .cw{width:38px!important;height:26px!important;border-radius:3px}
+.qnext-eq .cw > *{width:100%;height:100%;object-fit:cover;display:block;border-radius:3px}
+.qnext-vs{font-size:10px;color:var(--dim);letter-spacing:.08em;text-transform:uppercase}
+.qnext small{display:block;margin-top:6px;font-size:10px;color:var(--dim)}
+
+/* pestanas de grupo y de fases terminadas */
+.gchips{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}
+.fases-hechas{display:flex;flex-wrap:wrap;gap:6px}
+.gchip{font:inherit;font-size:10.5px;font-weight:700;letter-spacing:.05em;padding:3px 9px;
+  border:0;border-radius:999px;cursor:pointer;background:rgba(255,255,255,.06);
+  color:var(--dim);transition:background .12s,color .12s}
+.gchip:hover{background:rgba(255,255,255,.14);color:var(--txt)}
+.gchip.on{background:rgba(74,163,255,.28);color:#fff;
+  box-shadow:inset 0 0 0 1px rgba(74,163,255,.55)}
+.gchip.vivo::after{content:"";display:inline-block;width:5px;height:5px;border-radius:50%;
+  background:#4ade80;margin-left:5px;vertical-align:middle}
+.gchip.auto{background:rgba(74,222,128,.16);color:#6ee7a0;letter-spacing:.03em}
+.fases-hechas .gchip{font-size:11px;padding:4px 11px}
+
+/* tabla del grupo anterior, secundaria */
+.qprev{margin-top:14px;padding-top:10px;border-top:1px solid rgba(255,255,255,.08);opacity:.8}
+.qprev:hover{opacity:1}
+.qprev .subh small{color:var(--dim);font-weight:400;letter-spacing:0;text-transform:none}
+
+/* cuadro de una repesca: columnas de izquierda a derecha */
+.kobr{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:10px;
+  align-items:stretch;max-width:760px}
+.kobr .wcbr-col{justify-content:space-around}
+
+/* resultado recien jugado, en grande */
+.qnext.hecho{background:linear-gradient(180deg,rgba(74,222,128,.18),rgba(74,222,128,.06));
+  box-shadow:inset 0 0 0 1px rgba(74,222,128,.40)}
+.qnext.hecho .qnext-tag{color:#6ee7a0}
+.qnext-marc{font-size:26px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;
+  letter-spacing:.02em;white-space:nowrap}
+.qnext-marc i{font-style:normal;opacity:.35;margin:0 3px;font-size:20px}
+.qnext-eq.gana b{color:var(--gold)}
+.qnext-eq:not(.gana) b{opacity:.72}
+.qsig{display:flex;align-items:center;justify-content:center;gap:5px;margin-top:8px;
+  padding-top:7px;border-top:1px solid rgba(255,255,255,.12);font-size:11px}
+.qsig-tag{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);
+  margin-right:2px}
+.qsig b{font-weight:700;letter-spacing:.04em}
+.qsig em{font-style:normal;color:var(--dim);font-size:9.5px}
+.qsig .cw{width:20px!important;height:14px!important;border-radius:2px;flex:0 0 auto}
+.qsig .cw > *{width:100%;height:100%;object-fit:cover;display:block;border-radius:2px}
+.qsig.vacia{color:var(--dim);justify-content:center}
+
+/* partido en juego: se ve antes del resultado */
+.qnext.jugando{background:linear-gradient(180deg,rgba(243,180,36,.20),rgba(243,180,36,.06));
+  box-shadow:inset 0 0 0 1px rgba(243,180,36,.45)}
+.qnext.jugando .qnext-tag{color:#f3b424}
+.qnext-puntos{display:inline-flex;gap:5px;align-items:center;height:26px}
+.qnext-puntos i{width:7px;height:7px;border-radius:50%;background:#f3b424;
+  animation:latido 1s infinite ease-in-out}
+.qnext-puntos i:nth-child(2){animation-delay:.18s}
+.qnext-puntos i:nth-child(3){animation-delay:.36s}
+@keyframes latido{0%,80%,100%{opacity:.25;transform:scale(.8)}40%{opacity:1;transform:scale(1.15)}}
+
+/* imagen de fondo de cada tarjeta del menu principal */
+.mcard .mimg{position:absolute;inset:0;background-size:cover;background-position:center;
+  opacity:.34;transform:scale(1.04);transition:opacity .25s ease,transform .45s ease;
+  pointer-events:none;z-index:0}
+.mcard:hover .mimg{opacity:.52;transform:scale(1.10)}
+.mcard .ic,.mcard b,.mcard span:last-child{position:relative;z-index:1}
+.mcard b{text-shadow:0 1px 8px rgba(0,0,0,.75)}
+.mcard span:last-child{text-shadow:0 1px 6px rgba(0,0,0,.8);color:#c9d3e4}
+.mcard::after{z-index:0}
+
+/* ---- selector de club del modo carrera (rejilla incrustada) ---- */
+.wsel{padding:0;overflow:hidden}
+.wsel-head{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line)}
+.wsel-titles{display:flex;flex-direction:column;min-width:0;flex:1}
+.wsel-titles b{font-size:16px}
+.wsel-titles small{color:var(--dim);font-size:11.5px}
+.wsel-head .pk-search{flex:0 0 260px}
+.wsel-body{padding:14px 16px;overflow:auto;max-height:min(54vh,560px)}
+.wsel-foot{display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  padding:12px 16px;border-top:1px solid var(--line);background:#141d28}
+.wsel-pick{display:flex;align-items:center;gap:9px;min-width:0;flex:1}
+.wsel-pick .pb-crest{line-height:0}
+.wsel-pick .pb-txt{display:flex;flex-direction:column;min-width:0}
+.wsel-pick .pb-txt b{font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wsel-pick .pb-txt small{color:var(--dim);font-size:11px}
+.pk-tm.sel{border-color:var(--acc);background:#1c2735;box-shadow:inset 0 0 0 2px var(--acc)}
+@media (max-width:720px){
+  .wsel-head{flex-direction:column;align-items:stretch}
+  .wsel-head .pk-search{flex:1 1 auto}
+}
+
+/* ---- estrellas de valoración ---- */
+span.stars{position:relative;display:inline-block;line-height:1;white-space:nowrap;
+  font-size:12px;letter-spacing:1.5px;font-weight:400;text-align:left;
+  vertical-align:middle;-webkit-text-fill-color:currentColor}
+.stars .sb,.stars .sf{display:block;font-size:inherit;letter-spacing:inherit;
+  line-height:1;font-weight:400;font-style:normal;text-align:left;-webkit-line-clamp:none}
+.stars .sb{color:#3f556e}
+.stars .sf{position:absolute;left:0;top:0;width:var(--p);overflow:hidden;
+  color:var(--gold);text-shadow:0 0 6px rgba(232,196,106,.4)}
+span.stars.big{font-size:16px}
+/* en la placa GLOBAL las estrellas van en su propia linea, centradas */
+.ovr > span{display:block}
+.ovr > span.stars{display:inline-block;margin-top:4px}
+.pk-tm .stars{font-size:11px;letter-spacing:1px}
+.pickbtn .stars{margin-left:auto;flex:0 0 auto}
+.wsel-pick .stars{flex:0 0 auto}
+
+/* ---- flecha de atrás y casita del menú ---- */
+.navb{display:flex;align-items:center;gap:6px}
+/* sigue ocupando su hueco aunque no se vea: si no, el titulo se descentra */
+.navb.oculta{visibility:hidden}
+.navb button{
+  width:38px;height:38px;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(180deg,#1a2432,#151e2a);border:1px solid var(--line2);
+  border-radius:10px;color:var(--dim);font-size:19px;line-height:1;padding:0;
+}
+.navb button:hover{color:var(--txt);border-color:var(--acc2);background:#1d2836;transform:translateY(-1px)}
+.navb button:active{transform:translateY(0)}
+#btnBack{font-size:24px;padding-bottom:3px}
+#btnMenu{font-size:16px}
+
+/* ---- cupos continentales: quién entra por cada liga ---- */
+.cuposhead{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:12px}
+.cuposhead h3{margin:0 0 3px}
+.cupopais{padding:9px 0;border-top:1px solid var(--line)}
+.cupopais:first-child{border-top:0;padding-top:0}
+.cupopais-h{display:flex;align-items:center;gap:8px;font-size:13.5px;margin-bottom:7px;flex-wrap:wrap}
+.cupos{display:flex;gap:7px;flex-wrap:wrap}
+.cupo{
+  display:flex;align-items:center;gap:7px;padding:6px 10px 6px 7px;
+  background:linear-gradient(180deg,#1a2432,#151e2a);border:1px solid var(--line);
+  border-radius:9px;color:var(--txt);min-width:0;
+}
+.cupo:hover{border-color:var(--acc);background:#1c2735;transform:translateY(-1px)}
+.cupo-n{color:var(--dim);font-size:11px;font-weight:700;min-width:16px}
+.cupo-cr{line-height:0;display:flex}
+.cupo b{font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px}
+.cupo small{color:var(--dim);font-size:11px}
+
+.modos{display:flex;gap:6px;flex-shrink:0}
+.modos.hidden{display:none}
+.modos button.on{background:linear-gradient(180deg,var(--acc2),#2f7fd6);color:#05131f;border-color:transparent}
+.cupo.fijo{opacity:.85;cursor:default}
+.cupo.fijo:hover{border-color:var(--line);background:linear-gradient(180deg,#1a2432,#151e2a);transform:none}
+
+/* la llave generica: el numero de columnas depende del tamano del cuadro */
+.wcbr.cols-1{grid-template-columns:minmax(0,1fr) minmax(0,1.15fr) minmax(0,1fr)}
+.wcbr.cols-2{grid-template-columns:repeat(2,minmax(0,1fr)) minmax(0,1.15fr) repeat(2,minmax(0,1fr))}
+.wcbr.cols-3{grid-template-columns:repeat(3,minmax(0,1fr)) minmax(0,1.15fr) repeat(3,minmax(0,1fr))}
+.wcbr.cols-4{grid-template-columns:repeat(4,minmax(0,1fr)) minmax(0,1.15fr) repeat(4,minmax(0,1fr))}
+.wcbr.cols-5{grid-template-columns:repeat(5,minmax(0,1fr)) minmax(0,1.15fr) repeat(5,minmax(0,1fr))}
+.wcbr.una{grid-template-columns:minmax(0,1fr);max-width:320px;margin:0 auto}
+.qsplit.dos{grid-template-columns:1.1fr 1fr 1fr}
+
+/* llave grande (copas nacionales): columnas seguidas y scroll lateral */
+.llave-larga{overflow-x:auto;padding-bottom:6px}
+.llave-cols{display:flex;gap:10px;align-items:stretch;min-width:min-content}
+.llave-cols .wcbr-col{flex:0 0 168px;justify-content:space-around}
+.llave-larga .wcbr-champ{margin-top:10px;justify-content:center}
+
+/* vista de liga: la tabla manda, los partidos al lado */
+.qsplit.liga{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) minmax(0,1fr)}
+.qsplit.liga .qcol.ancha table{width:100%}
+@media (max-width:1000px){.qsplit.liga{grid-template-columns:1fr}}
+
+/* ---- cabecera: el nombre, centrado en la pantalla ---- */
+.topbar{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:14px;flex-wrap:nowrap}
+.topbar .navb{justify-self:start}
+.topbar .brand{justify-self:center;text-align:center}
+.topbar .crumb{justify-self:end;text-align:right;overflow:hidden;white-space:nowrap}
+.brand h1{font-size:21px;letter-spacing:.4px;white-space:nowrap}
+.ball{font-size:26px}
+/* el menú, sin descripciones: sólo icono y nombre */
+.menu-grid .mcard{gap:8px;min-height:132px;justify-content:flex-end}
+.menu-grid .mcard b{font-size:16.5px}
+@media (max-width:640px){
+  .topbar{grid-template-columns:auto 1fr;row-gap:6px}
+  .topbar .brand{justify-self:end}
+  .topbar .crumb{grid-column:1 / -1;justify-self:center}
+}
+
+/* ---- goleadores de cada partido ---- */
+.qgoles{display:grid;grid-template-columns:1fr auto 1fr;gap:6px;align-items:start;
+  margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.10)}
+.qg{display:flex;flex-direction:column;gap:2px;min-width:0;font-size:10.5px}
+.qg.izq{text-align:right;align-items:flex-end}
+.qg.der{text-align:left;align-items:flex-start}
+.qg i{font-style:normal;color:var(--txt);line-height:1.35}
+.qg u{text-decoration:none;color:var(--dim);font-variant-numeric:tabular-nums}
+.qg-bola{font-size:11px;opacity:.55;align-self:center}
+.qrbloque{margin-bottom:5px}
+.qrgol{font-size:9.5px;color:var(--dim);line-height:1.35;padding:1px 4px 0 26px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.scline .sc-gols{grid-column:1 / -1;display:grid;grid-template-columns:1fr 1fr;gap:8px;
+  margin-top:5px;font-size:10px}
+.sc-g{display:flex;flex-direction:column;gap:1px;min-width:0}
+.sc-g.izq{text-align:right;align-items:flex-end}
+.sc-g.der{text-align:left;align-items:flex-start}
+.sc-g i{font-style:normal;color:var(--txt)}
+.sc-g u{text-decoration:none;color:var(--dim)}
+.sc-g i{line-height:1.3;word-break:break-word}
+.scline .sc-gols{padding-top:5px;border-top:1px solid rgba(255,255,255,.08)}
+
+/* ---- menú principal: tarjetas grandes, la imagen manda ---- */
+.menu-grid{grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.menu-grid .mcard{
+  min-height:0;aspect-ratio:3/2;justify-content:flex-end;gap:10px;padding:18px 20px 20px;
+}
+.menu-grid .mcard b{font-size:19px;letter-spacing:.2px}
+.menu-grid .mcard .ic{width:48px;height:48px;font-size:25px;margin-bottom:2px}
+.mcard .mimg{opacity:.5}
+.mcard:hover .mimg{opacity:.68;transform:scale(1.07)}
+/* un velo abajo para que el nombre se lea sobre cualquier foto */
+.mcard::after{
+  content:'';position:absolute;right:auto;top:auto;left:0;bottom:0;width:100%;height:62%;
+  border-radius:0;filter:none;opacity:1;
+  background:linear-gradient(180deg,transparent,rgba(8,12,17,.82));
+}
+.mcard:hover::after{opacity:1}
+
+/* la descripción de cada sección (clase propia: antes la regla pillaba al emoji) */
+.mcard .desc{
+  position:relative;z-index:1;color:#c9d3e4;font-size:12.5px;line-height:1.45;
+  text-shadow:0 1px 6px rgba(0,0,0,.85);
+}
+.menu-grid .mcard{aspect-ratio:16/10;padding:18px 22px 20px}
+.menu-grid .mcard .desc{font-size:13px}
+/* en el menú la rejilla usa toda la pantalla, que es donde sobraba sitio */
+body.menu main{max-width:1680px}
+@media (max-width:1180px){.menu-grid{grid-template-columns:repeat(auto-fill,minmax(270px,1fr))}}
+@media (max-width:620px){
+  .menu-grid{grid-template-columns:1fr}
+  .menu-grid .mcard{aspect-ratio:auto;min-height:150px}
+}
+
+/* Son ocho secciones: en pantalla ancha, cuatro y cuatro, así cada imagen
+   ocupa todo lo que puede en vez de quedarse en una columna estrecha. */
+.menu-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+.menu-grid .mcard{aspect-ratio:3/2}
+@media (max-width:1180px){.menu-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:860px){.menu-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){
+  .menu-grid{grid-template-columns:1fr}
+  .menu-grid .mcard{aspect-ratio:auto;min-height:150px}
+}
+
+/* ---- mercado de pases ---- */
+.mk-wrap{display:flex;flex-direction:column;gap:12px}
+.mk-cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;align-items:start}
+@media (max-width:980px){.mk-cols{grid-template-columns:1fr}}
+.mk-cifras{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px}
+.mk-cif{background:#141d28;border:1px solid var(--line);border-radius:10px;padding:8px 14px;min-width:120px}
+.mk-cif small{display:block;color:var(--dim);font-size:10px;letter-spacing:.06em;text-transform:uppercase}
+.mk-cif b{font-size:16px}
+.mk-lista{display:flex;flex-direction:column;gap:4px;max-height:min(58vh,600px);overflow:auto}
+.mk-jug{display:flex;align-items:center;gap:8px;padding:6px 9px;border-radius:8px;
+  background:#141d28;border:1px solid var(--line);font-size:12.5px}
+.mk-jug b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.mk-pos{font-size:9.5px;font-weight:800;letter-spacing:.04em;padding:2px 5px;border-radius:5px;
+  background:#1d2836;color:var(--dim);min-width:30px;text-align:center}
+.mk-pos.GK{color:#f0c674} .mk-pos.DEF{color:#7fb3ff} .mk-pos.MID{color:#8fe3b6} .mk-pos.ATT{color:#ff9a8b}
+.mk-ovr{font-weight:800;font-variant-numeric:tabular-nums;min-width:22px;text-align:right}
+.mk-edad{color:var(--dim);font-size:11px;white-space:nowrap}
+.mk-val{font-variant-numeric:tabular-nums;color:var(--gold);white-space:nowrap;min-width:70px;text-align:right}
+.mk-prob{font-size:11px;font-weight:700;min-width:36px;text-align:right}
+.mk-prob.alta{color:var(--acc)} .mk-prob.media{color:#f0c674} .mk-prob.baja{color:#e07a6a}
+.mk-ok{font-size:10.5px;color:var(--acc);font-weight:700}
+.mk-b{padding:3px 9px;font-size:11px}
+.mk-club{display:flex;align-items:center;gap:8px;padding:6px 2px 10px;font-size:14px}
+.mk-ruta{display:flex;align-items:center;gap:5px;color:var(--dim);font-size:11px;flex:1;min-width:0}
+.mk-tabla{width:100%;font-size:12px}
+.mk-tabla td,.mk-tabla th{padding:5px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.mk-tabla u{text-decoration:none;color:var(--dim);font-size:10.5px}
+
+/* ---- vista previa del partido: global y estrellas ---- */
+.side2 .pv-ovr{display:block;font-size:19px;font-weight:800;line-height:1.1;margin-top:3px}
+.side2 .pv-est{display:block;margin-top:2px}
+.stars.pv{font-size:12px}
+/* los dos paneles de debajo de la previa */
+.dsplit{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;align-items:start}
+@media (max-width:1100px){.dsplit{grid-template-columns:1fr}}
+.gol-mini{width:100%;font-size:12px}
+.gol-mini td,.gol-mini th{padding:3px 6px;border-bottom:1px solid var(--line)}
+.gol-mini td small{display:block;color:var(--dim);font-size:10px}
+.gol-mini tr.mine{background:rgba(46,230,168,.12)}
+.gol-mini .num{text-align:right;font-variant-numeric:tabular-nums}
+
+/* dinero del club */
+.chip.dinero{background:#141d28;border:1px solid var(--line);border-radius:999px;padding:5px 13px;
+  font-weight:700;color:var(--gold);white-space:nowrap}
+.pk-tm-eur{display:block;text-decoration:none;font-size:10.5px;color:var(--gold);margin-top:2px}
+.minitab tr.salto td{text-align:center;color:var(--dim);padding:1px 0;font-size:10px;letter-spacing:.3em}
+
+/* rondas largas (32avos, 16avos): en lista, no en el cuadro */
+.br-lista{margin-top:14px}
+.br-lista h5{margin:0 0 7px;font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--dim)}
+.br-lista h5 small{color:var(--dim);opacity:.7;text-transform:none;letter-spacing:0}
+.br-listagrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:6px}
+.br-listagrid .br-tie{margin:0}
+/* la lista de rondas largas, dentro de la tarjeta de la llave */
+.wcbr + .br-lista, .wcbr.una + .br-lista{border-top:1px solid var(--line);padding-top:10px}
+.br-listagrid .wt{margin:0}
+
+/* el resultado de la ida, antes de jugar la vuelta */
+.qnext-vs .qida{display:block;font-style:normal;font-size:17px;font-weight:800;
+  color:var(--gold);line-height:1.1;font-variant-numeric:tabular-nums}
+.qnext-vs u{display:block;text-decoration:none;font-size:8.5px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--dim);margin-top:1px}
+.qida-min{text-decoration:none;color:var(--gold);font-size:9.5px;white-space:nowrap;
+  font-variant-numeric:tabular-nums;margin-left:2px}
+
+/* el global de la eliminatoria, bajo el resultado de la vuelta */
+.qglobal{display:flex;align-items:baseline;justify-content:center;gap:7px;flex-wrap:wrap;
+  margin-top:8px;padding-top:7px;border-top:1px solid rgba(255,255,255,.10)}
+.qglobal span{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);font-weight:700}
+.qglobal b{font-size:17px;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums}
+.qglobal u{text-decoration:none;font-size:10px;color:var(--dim)}
+.qglobal em{font-style:normal;font-size:10.5px;color:var(--acc)}
+.qrgol.glob{color:var(--gold);font-size:10px}
+
+/* elegir participantes a mano, liga por liga */
+.man-head{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.man-tit{flex:1;min-width:0;text-align:center}
+.man-tit b{display:block;font-size:15.5px}
+.man-tit small{color:var(--dim);font-size:11.5px}
+.man-caja{max-height:min(46vh,460px);overflow:auto;padding-right:2px}
+.man-caja .pk-tms{padding:2px}
+/* hueco de cupo todavía sin cubrir */
+.cupo.vacio{border-style:dashed;color:var(--dim);background:none}
+.cupo.vacio b{font-weight:600;font-style:italic}
+.cupo.vacio:hover{border-style:solid;color:var(--txt)}
+/* club que ya tiene cupo en otra plaza */
+.pk-tm.cogido{opacity:.3;pointer-events:none;filter:grayscale(1)}
+/* resumen cuando ya está todo elegido */
+.con-listo{display:flex;align-items:center;justify-content:space-between;gap:14px;
+  padding:4px 2px;font-size:14px}
+.con-listo b{color:var(--acc)}
+
+/* sorteo de grupos: los bombos */
+.sorteo-bombos{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.bombo h5{margin:0 0 6px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+.bombo-eq{display:flex;flex-direction:column;gap:4px}
+.bombo-t{display:flex;align-items:center;gap:7px;padding:4px 8px;border-radius:7px;
+  background:#141d28;border:1px solid var(--line);font-size:12px}
+.bombo-t b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.bombo-t small{color:var(--dim);font-variant-numeric:tabular-nums}
+
+/* sorteos: el mismo aire que el del Mundial, valga para grupos o cruces */
+.so-card .so-bar{margin-bottom:12px}
+.so-card .pots{max-height:none}
+/* un bombo largo no puede empujar los grupos fuera de la pantalla */
+.so-card .potbox{max-height:46vh;overflow:auto}
+.so-card .groups{grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+.so-card .gbox{padding:8px 10px}
+.so-card .gbox h4{font-size:10.5px;margin-bottom:4px}
+.so-card .drawline{font-size:11.5px;padding:3px 1px;gap:7px}
+.so-card .drawline .cw{flex:0 0 auto}
+.socruces{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:8px;align-content:start}
+.socruce{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:10px;
+  background:var(--bg2);border:1px solid var(--line);font-size:12.5px;min-width:0}
+.socruce .so-num{flex:0 0 auto;width:19px;height:19px;border-radius:50%;display:flex;
+  align-items:center;justify-content:center;font-size:10px;font-weight:800;color:var(--dim);
+  background:rgba(255,255,255,.06)}
+.socruce .so-eq{display:flex;align-items:center;gap:7px;flex:1;min-width:0}
+.socruce .so-eq.der{justify-content:flex-end;text-align:right}
+.socruce .so-eq b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.socruce em{font-style:normal;color:var(--dim);font-size:10px;letter-spacing:.08em;flex:0 0 auto}
+
+/* interruptor: un botón que se queda puesto (autoguardado) */
+.swbtn{display:inline-flex;align-items:center;gap:7px}
+.swbtn i{width:26px;height:15px;border-radius:9px;background:rgba(255,255,255,.14);
+  box-shadow:inset 0 0 0 1px var(--line);position:relative;transition:background .15s}
+.swbtn i:after{content:"";position:absolute;top:2px;left:2px;width:11px;height:11px;
+  border-radius:50%;background:var(--dim);transition:transform .15s,background .15s}
+.swbtn.on{color:var(--acc);border-color:var(--acc)}
+.swbtn.on i{background:rgba(46,230,168,.3);box-shadow:inset 0 0 0 1px var(--acc)}
+.swbtn.on i:after{transform:translateX(11px);background:var(--acc)}
+
+/* la banderita del país de cada jugador */
+.natflag{display:inline-block;vertical-align:-1px;margin-right:5px;border-radius:2px;
+  box-shadow:0 0 0 1px rgba(255,255,255,.14);object-fit:cover;width:auto}
+.sname .natflag{margin-right:3px;vertical-align:0}
+.bp .natflag{margin:0 2px 0 0;flex:0 0 auto}
+.mk-jug .natflag{margin:0 1px 0 0;flex:0 0 auto}
+
+/* escudo grande encima del nombre en el marcador del partido en vivo */
+.sb-crest{line-height:0;margin-bottom:9px}
+.sb-crest img,.sb-crest svg{width:72px;height:72px;object-fit:contain;
+  filter:drop-shadow(0 4px 10px rgba(0,0,0,.55))}
+.sb-team.right .sb-crest{display:flex;justify-content:flex-end}
+.mv-wrap .sb-crest img,.mv-wrap .sb-crest svg{width:54px;height:54px}
+@media (max-width:820px){ .sb-crest img,.sb-crest svg{width:52px;height:52px} }
+
+/* ---------- modo carrera: elegir entrenador o jugador ---------- */
+.wmodo h3 small{color:var(--dim);font-weight:500;margin-left:8px}
+.modo-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-top:12px}
+.modo-card{display:flex;flex-direction:column;align-items:flex-start;gap:7px;padding:20px;
+  border-radius:14px;border:1px solid var(--line);background:var(--bg2);cursor:pointer;
+  text-align:left;transition:border-color .15s,transform .15s}
+.modo-card:hover{border-color:var(--acc);transform:translateY(-2px)}
+.modo-ico{font-size:30px;line-height:1}
+.modo-card b{font-size:17px}
+.modo-card span{color:var(--dim);font-size:12.5px;line-height:1.5}
+
+/* ---------- crear futbolista ---------- */
+.crea-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-top:6px}
+.crea-campo{display:flex;flex-direction:column;gap:5px}
+.crea-campo label{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--dim)}
+.crea-campo input,.crea-campo select{width:100%}
+.crea-resumen{display:flex;align-items:center;gap:12px;margin-top:14px;padding:11px 14px;
+  border-radius:12px;background:var(--bg2);border:1px solid var(--line)}
+.crea-resumen b{display:block;font-size:15px}
+.crea-resumen small{display:block;color:var(--dim);font-size:12px}
+.crea-ovr{margin-left:auto;text-align:right}
+.crea-ovr b{font-size:26px;color:var(--acc);line-height:1}
+.ofertas{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:11px;margin-top:8px}
+.oferta{display:flex;flex-direction:column;align-items:center;gap:5px;padding:15px 11px;
+  border-radius:13px;border:1px solid var(--line);background:var(--bg2);cursor:pointer;
+  transition:border-color .15s,transform .15s}
+.oferta:hover{border-color:var(--acc);transform:translateY(-2px)}
+.oferta.on{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc) inset}
+.oferta b{font-size:13.5px;text-align:center}
+.oferta small{color:var(--dim);font-size:11px;text-align:center}
+.of-ovr{font-size:20px;font-weight:800;color:var(--acc)}
+
+/* ---------- tablero del jugador ---------- */
+.rolbox{display:flex;align-items:baseline;gap:10px;padding:9px 13px;border-radius:11px;
+  margin-bottom:11px;background:rgba(255,255,255,.04);border:1px solid var(--line)}
+.rolbox b{font-size:14px}
+.rolbox small{color:var(--dim);font-size:12px}
+.rolbox.rol-titular{border-color:var(--acc);background:rgba(46,230,168,.10)}
+.rolbox.rol-titular b{color:var(--acc)}
+.rolbox.rol-suplente{border-color:var(--acc2);background:rgba(74,163,255,.10)}
+.rolbox.rol-suplente b{color:var(--acc2)}
+.rolbox.rol-no-convocado{border-color:var(--warn);background:rgba(255,180,84,.08)}
+.rolbox.rol-no-convocado b{color:var(--warn)}
+.micarrera{width:100%;font-size:12.5px}
+.micarrera td{padding:4px 2px;border-bottom:1px solid rgba(255,255,255,.05)}
+.micarrera td.num{text-align:right;font-variant-numeric:tabular-nums}
+.micarrera.ancha th{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--dim);
+  text-align:left;padding:4px 6px}
+.micarrera.ancha th.num,.micarrera.ancha td.num{text-align:right}
+.micarrera.ancha td{padding:5px 6px}
+.micarrera .up{color:var(--acc);font-weight:700;font-size:11px}
+.micarrera .down{color:#ff9f9f;font-weight:700;font-size:11px}
+.rendbar{height:7px;border-radius:5px;background:rgba(255,255,255,.08);overflow:hidden;margin-top:9px}
+.rendbar i{display:block;height:100%;background:linear-gradient(90deg,var(--acc2),var(--acc))}
+.selbox{display:flex;align-items:center;gap:10px}
+.selbox b{display:block;font-size:14px}
+.selbox small{display:block;color:var(--dim);font-size:11.5px}
+.selbox .pill{margin-left:auto}
+.selbox .pill.ok{color:var(--acc);border-color:var(--acc)}
+.selbox .pill.no{color:var(--dim)}
+.fichaj{display:flex;gap:14px;align-items:flex-start}
+.fj-ovr{text-align:center;flex:0 0 auto}
+.fj-ovr b{display:block;font-size:34px;color:var(--acc);line-height:1}
+.fj-ovr span{font-size:9.5px;letter-spacing:.12em;color:var(--dim)}
+.fj-datos{display:flex;flex-direction:column;gap:5px;font-size:12.5px;min-width:0}
+.fj-datos div{display:flex;align-items:center;gap:6px}
+.micarrera-wrap{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px;align-items:start}
+.totales{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.tot{padding:11px;border-radius:11px;background:var(--bg2);border:1px solid var(--line)}
+.tot small{display:block;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+.tot b{display:block;font-size:20px;margin:3px 0}
+.tot span{font-size:11.5px;color:var(--dim)}
+.palmares{display:flex;flex-direction:column;gap:7px}
+.pal{display:flex;align-items:center;gap:10px;padding:8px 11px;border-radius:10px;background:var(--bg2)}
+.pal-cup{font-size:18px}
+.pal b{display:block;font-size:13px}
+.pal small{display:block;color:var(--dim);font-size:11.5px}
+.fintemp{display:flex;align-items:center;gap:16px;margin-bottom:12px}
+.ft-ovr{text-align:center}
+.ft-ovr small{display:block;font-size:10px;letter-spacing:.1em;color:var(--dim)}
+.ft-ovr b{display:block;font-size:38px;line-height:1}
+.ft-ovr .up{color:var(--acc);font-weight:800}
+.ft-ovr .down{color:#ff9f9f;font-weight:800}
+.ft-txt b{display:block;font-size:15px;margin-bottom:3px}
+.ft-txt small{display:block;color:var(--dim);font-size:12px}
+.aviso{padding:9px 12px;border-radius:10px;background:rgba(255,180,84,.10);
+  border:1px solid rgba(255,180,84,.35);font-size:13px}
+.retirado{text-align:center;padding:16px}
+.retirado h2{margin:10px 0 6px;font-size:26px}
+.retirado p{color:var(--dim);font-size:13.5px;margin:4px 0}
+
+/* la tanda de penales, pegada al marcador: 0(7) */
+b > i.pens, .wt b i.pens, .br-tie b i.pens{font-style:normal;font-size:.72em;
+  color:var(--acc2);margin-left:1px;font-weight:700;vertical-align:baseline}
+
+/* ---------- calendario del jugador en cuadrícula ---------- */
+.calgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:10px}
+.calcard{position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:14px 10px 11px;border-radius:12px;background:var(--bg2);
+  border:1px solid var(--line);text-align:center;min-width:0}
+.calcard .cc-semana{position:absolute;top:6px;left:8px;font-size:9.5px;font-weight:800;
+  letter-spacing:.06em;color:var(--dim)}
+.calcard .cc-loc{position:absolute;top:6px;right:8px;font-size:9.5px;color:var(--dim)}
+.calcard .cc-escudo{line-height:0;margin:6px 0 4px}
+.calcard .cc-escudo .cw{width:46px!important;height:46px!important}
+.calcard b{font-size:12.5px;line-height:1.25;overflow:hidden;text-overflow:ellipsis;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;max-width:100%}
+.calcard small{font-size:10.5px;color:var(--dim);line-height:1.3;max-width:100%;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.calcard .cc-ronda{font-size:9.5px;opacity:.75}
+.calcard .cc-res{margin-top:6px;font-size:15px;font-weight:800;font-variant-numeric:tabular-nums}
+.calcard .cc-res i{font-style:normal;font-size:.75em;color:var(--acc2)}
+.calcard.proximo{border-color:var(--acc);box-shadow:0 0 0 1px rgba(46,230,168,.25)}
+.calcard.gano .cc-res{color:var(--acc)}
+.calcard.empate .cc-res{color:var(--dim)}
+.calcard.perdio .cc-res{color:#ff9f9f}
+.calcard.gano{border-color:rgba(46,230,168,.35)}
+.calcard.perdio{border-color:rgba(255,159,159,.30)}
+.micarrera-wrap.uno{grid-template-columns:1fr}
+
+/* escudo del club en las tablas de la carrera */
+.micarrera .cl{display:flex;align-items:center;gap:7px;min-width:0}
+.micarrera .cl .cw{flex:0 0 auto}
+.micarrera .cl b{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.micarrera.ancha td small.hint{display:block;font-size:10px;line-height:1.25;
+  padding-left:25px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.micarrera.ancha{table-layout:auto}
+.micarrera.ancha td:first-child,.micarrera.ancha th:first-child{white-space:nowrap}
+.micarrera-wrap .pbody.tight{overflow-x:auto}
+.pal .cw{flex:0 0 auto}
+.pal .natflag{margin:0;flex:0 0 auto}
+
+/* «Mi carrera» y «Calendario» son pantallas largas: scrollea la página
+   entera, no cada panel por dentro */
+.micarrera-wrap{height:100%;overflow-y:auto;overflow-x:hidden;align-content:start;padding-right:4px}
+.micarrera-wrap > .panel{overflow:visible}
+.micarrera-wrap > .panel > .pbody{overflow:visible;flex:0 0 auto}
+
+/* los que se quedan fuera de la convocatoria */
+.bp.fuera{opacity:.45}
+.bp.fuera .nm{font-style:italic}
+
+/* el parón de selecciones al cerrar la temporada */
+.paron{display:flex;align-items:center;gap:12px;padding:11px 13px;border-radius:12px;
+  background:var(--bg2);border:1px solid var(--line);margin:10px 0}
+.paron .natflag{margin:0;flex:0 0 auto;border-radius:3px}
+.paron-txt{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+.paron-txt b{font-size:14px}
+.paron-txt small{color:var(--dim);font-size:12px}
+.paron-cup{font-size:24px}
+.campeon{color:var(--gold,#ffd166)}
+
+/* franja del play-off de ascenso */
+.z-promopo .pos-chip{background:#3d5a1d;color:#cdff9f}
+.zleg i.promopo{background:#3d5a1d}
+/* el número de partido en el calendario */
+.calcard .cc-semana{font-variant-numeric:tabular-nums}
+
+/* queda otro partido esta semana */
+.colaaviso{display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:11px;
+  margin-bottom:11px;background:rgba(255,180,84,.10);border:1px solid rgba(255,180,84,.38)}
+.colaaviso div{flex:1;min-width:0}
+.colaaviso b{display:block;font-size:13px;color:var(--warn)}
+.colaaviso small{display:block;color:var(--dim);font-size:11.5px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.colaaviso button{flex:0 0 auto}
+/* la casita del partido en casa */
+.calcard .cc-loc{display:inline-flex;color:#fff;opacity:.9}
+
+/* los cambios, en la alineación: flecha roja el que sale, verde el que entra */
+.pl .camb{display:inline-flex;align-items:center;gap:2px;font-size:10px;font-weight:700;
+  font-variant-numeric:tabular-nums;flex:0 0 auto;white-space:nowrap}
+.pl .camb i{font-style:normal;font-size:13px;line-height:1}
+.pl .camb.fuera{color:#ff6b6b}
+.pl .camb.dentro{color:#3ddc97}
+.pl.out{opacity:.5}
+.pl.in .nm{font-weight:600}
+/* el banquillo se puede recorrer sin que la ficha crezca */
+.lineup{display:flex;flex-direction:column;min-height:0}
+.lineup .plist{flex:1;min-height:0;overflow-y:auto;padding-right:3px}
+.mv-wrap .lineup .plist{max-height:none}
+
+/* pasar de ronda con las flechas a los lados del nombre */
+.rn-flecha{flex:0 0 auto;width:30px;height:30px;padding:0;border-radius:50%;
+  font-size:17px;line-height:1;display:inline-flex;align-items:center;justify-content:center}
+.rn-flecha[disabled]{opacity:.25;cursor:default}
+.rn-nombre{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:1px}
+.rn-nombre small{color:var(--dim);font-size:11px;text-transform:none;letter-spacing:0}
+.rn-camp{font-style:normal;color:var(--gold,#ffd166);margin-left:6px;font-size:12px}
+.rn-campeon{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:12px;
+  padding:9px;border-radius:11px;background:rgba(255,209,102,.10);
+  border:1px solid rgba(255,209,102,.35);font-size:15px}
+/* los cruces de la ronda ocupan todo el ancho */
+/* La ronda, en grande: un cruce por fila, A – B, y entre todos llenan
+   la pantalla. */
+.br-sep{display:none}
+.br-listagrid.ancha{height:100%;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;align-content:stretch}
+/* la ida y la vuelta van debajo del marcador: la ficha tiene que darles sitio */
+.br-listagrid.ancha .br-tie{align-self:stretch;max-height:none}
+.br-listagrid.ancha .br-tie{display:grid;grid-template-columns:1fr auto 1fr;
+  align-items:center;column-gap:14px;padding:10px 18px}
+/* Cada lado, en tres huecos fijos: escudo · nombre · marcador. Así los
+   escudos de todas las filas caen en la misma vertical y los marcadores
+   quedan siempre pegados al guion, midan lo que midan los nombres. */
+.br-listagrid.ancha .br-tie .t{display:grid;align-items:center;gap:10px;
+  font-size:14px;padding:0;min-width:0}
+.br-listagrid.ancha .br-tie .t:first-child{grid-template-columns:40px minmax(0,1fr) auto}
+.br-listagrid.ancha .br-tie .t:first-child .cw{order:1}
+.br-listagrid.ancha .br-tie .t:first-child em{order:2;text-align:left}
+.br-listagrid.ancha .br-tie .t:first-child b{order:3}
+/* el de la derecha, en espejo: marcador · nombre · escudo */
+.br-listagrid.ancha .br-tie .br-sep ~ .t{grid-template-columns:auto minmax(0,1fr) 40px}
+.br-listagrid.ancha .br-tie .br-sep ~ .t b{order:1}
+.br-listagrid.ancha .br-tie .br-sep ~ .t em{order:2;text-align:right}
+.br-listagrid.ancha .br-tie .br-sep ~ .t .cw{order:3}
+.br-listagrid.ancha .br-tie .t .cw{width:34px!important;height:34px!important;flex:0 0 auto}
+.br-listagrid.ancha .br-tie .t .cw img,.br-listagrid.ancha .br-tie .t .cw svg{
+  width:100%;height:100%;object-fit:contain}
+.br-listagrid.ancha .br-tie .t b{font-size:17px;min-width:20px}
+.br-listagrid.ancha .br-tie .br-sep{display:block;color:var(--dim);font-size:15px;opacity:.6}
+.br-listagrid.ancha .br-tie .lg{grid-column:1 / -1;text-align:center;border:0;padding-top:1px}
+@media (max-width:760px){
+  .br-listagrid.ancha{grid-template-columns:1fr}
+  .br-listagrid.ancha .br-tie .t{font-size:13.5px}
+}
+
+/* el visor del partido: cada columna con su propio deslizante */
+.lineup .plist{max-height:430px;overflow-y:auto;padding-right:3px}
+.mv-wrap .match-grid{align-items:stretch;grid-template-rows:minmax(0,1fr)}
+.mv-wrap .match-grid > .card{min-height:0;overflow:hidden}
+.mv-wrap .lineup .plist{max-height:none;flex:1;min-height:0}
+.mv-wrap .center-col{min-height:0}
+.mv-wrap .stats{flex:0 0 auto}
+.mv-wrap .feed{flex:1;min-height:0;overflow-y:auto}
+
+/* Mi carrera: que nada se pise */
+.micarrera-wrap{grid-template-columns:repeat(auto-fit,minmax(290px,1fr));align-items:start}
+/* las columnas de números se encogen a su contenido y el club se queda
+   con todo el ancho que sobra */
+.micarrera.ancha{width:100%;table-layout:auto}
+.micarrera.ancha th.num,.micarrera.ancha td.num{width:1%;white-space:nowrap;padding-left:9px}
+.micarrera.ancha th:first-child,.micarrera.ancha td:first-child{width:1%;white-space:nowrap}
+.micarrera.ancha td:nth-child(2){width:auto;white-space:normal;min-width:0}
+.micarrera.ancha td:last-child{white-space:normal}
+.totales{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.tot{min-width:0}
+.tot small{white-space:normal;line-height:1.3;overflow-wrap:anywhere}
+.tot b{font-size:19px}
+
+/* con muchas columnas, todo un poco más justo para que quepan los nombres */
+.br-listagrid.ancha.cols-3 .br-tie{padding:9px 13px;column-gap:10px}
+.br-listagrid.ancha.cols-3 .br-tie .t{font-size:14px;gap:8px}
+.br-listagrid.ancha.cols-3 .br-tie .t .cw{width:28px!important;height:28px!important}
+.br-listagrid.ancha.cols-3 .br-tie .t b{font-size:17px}
+.br-listagrid.ancha.cols-4{gap:9px}
+.br-listagrid.ancha.cols-4 .br-tie{padding:8px 11px;column-gap:8px}
+.br-listagrid.ancha.cols-4 .br-tie .t{font-size:13px;gap:7px}
+.br-listagrid.ancha.cols-4 .br-tie .t .cw{width:24px!important;height:24px!important}
+.br-listagrid.ancha.cols-4 .br-tie .t b{font-size:15px;min-width:16px}
+
+/* nombres en mayúscula y escudos grandes, todos con la misma caja */
+.br-listagrid.ancha .br-tie .t em{text-transform:uppercase;font-weight:800;
+  letter-spacing:.02em;font-size:.94em}
+.br-listagrid.ancha .br-tie .t .cw{width:40px!important;height:40px!important}
+.br-listagrid.ancha .br-tie .t .cw img,.br-listagrid.ancha .br-tie .t .cw svg{
+  width:100%;height:100%;object-fit:contain;border-radius:0}
+/* La ida y la vuelta van bajo el marcador, así que la ficha necesita sitio
+   para las dos líneas. Pero tampoco se estira sin fin cuando quedan pocos
+   cruces: la fila ocupa el hueco y la ficha se queda centrada en ella. */
+/* Las filas miden lo que mida su contenido y se reparten el hueco que
+   sobre: así los cruces de una ronda entran todos sin recortar la vuelta,
+   tengan o no resultado todavía. */
+.br-listagrid.ancha{grid-auto-rows:minmax(min-content,1fr)}
+.br-listagrid.ancha .br-tie{max-height:132px;align-self:center}
+.br-listagrid.ancha.cols-3 .br-tie .t .cw{width:34px!important;height:34px!important}
+.br-listagrid.ancha.cols-4 .br-tie .t .cw{width:34px!important;height:34px!important}
+.br-listagrid.ancha.cols-4 .br-tie .t em{font-size:.86em;letter-spacing:0}
+
+/* ida y vuelta, una debajo de la otra */
+.br-tie .lg{display:flex;flex-direction:column;align-items:center;gap:1px}
+.br-tie .lg .leg{font-style:normal;display:flex;gap:6px;align-items:baseline;
+  font-variant-numeric:tabular-nums}
+.br-tie .lg .leg u{text-decoration:none;opacity:.7;font-size:.92em;min-width:44px;text-align:right}
+.br-listagrid.ancha .br-tie .lg{margin-top:2px;font-size:11.5px}
+
+/* ---------- crear futbolista: dos columnas y un campo ---------- */
+.crea2{display:grid;grid-template-columns:minmax(260px,340px) minmax(0,1fr);gap:18px;
+  align-items:start;margin-top:10px}
+@media (max-width:820px){.crea2{grid-template-columns:1fr}}
+.crea-col{display:flex;flex-direction:column;gap:12px;min-width:0}
+.crea-col.ancha{min-height:400px}
+.crea-lab{display:block;font-size:11px;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--dim);margin-bottom:7px}
+
+/* el botón que abre el selector de país */
+.crea-pick{display:flex;align-items:center;gap:11px;width:100%;padding:11px 13px;
+  border-radius:12px;border:1px solid var(--line);background:var(--bg2);cursor:pointer;
+  text-align:left;transition:border-color .15s}
+.crea-pick:hover{border-color:var(--acc)}
+.crea-pick.puesto{border-color:var(--acc)}
+.crea-pick .natflag{margin:0;flex:0 0 auto;border-radius:3px}
+.cp-txt{flex:1;min-width:0}
+.cp-txt b{display:block;font-size:14.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cp-txt small{display:block;color:var(--dim);font-size:11.5px}
+.cp-mas{color:var(--dim);font-size:19px;flex:0 0 auto}
+
+.crea-nota{padding:10px 13px;border-radius:11px;background:rgba(46,230,168,.08);
+  border:1px solid rgba(46,230,168,.28)}
+.crea-nota b{display:block;font-size:13px;color:var(--acc)}
+.crea-nota small{display:block;color:var(--dim);font-size:11.5px;margin-top:2px}
+.crea-elegida{padding:9px 13px;border-radius:11px;background:var(--bg2);
+  border:1px solid var(--line);font-size:14px;font-weight:700}
+
+/* el campo con los puestos */
+.crea-pitch{min-height:480px;height:480px}
+.pos-slot{position:absolute;transform:translate(-50%,-50%);z-index:2;padding:0;
+  background:none;border:0;cursor:pointer;display:flex;flex-direction:column;
+  align-items:center;gap:3px;width:96px}
+.pos-slot .ps-dot{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;
+  font-weight:900;font-size:12px;color:#eaf6ef;background:rgba(10,30,20,.72);
+  border:2px solid rgba(255,255,255,.28);box-shadow:0 2px 7px rgba(0,0,0,.5);
+  transition:transform .12s,background .12s,border-color .12s}
+.pos-slot .ps-nom{font-size:10px;line-height:1.15;color:#cfe8da;text-align:center;
+  text-shadow:0 1px 3px rgba(0,0,0,.95);opacity:.85}
+.pos-slot:hover .ps-dot{transform:scale(1.12);border-color:#fff}
+.pos-slot.on .ps-dot{background:var(--acc);color:#04150f;border-color:#fff}
+.pos-slot.on .ps-nom{color:#fff;opacity:1;font-weight:700}
+
+/* Tu futbolista, en cualquier tabla de goleadores */
+tr.yo{background:rgba(255,196,64,.14)}
+tr.yo td{font-weight:700;color:#ffd77a}
+tr.yo td:first-child{box-shadow:inset 3px 0 0 #ffc440}
+.gol-mini tr.yo td small{color:#ffd77a;opacity:.75}
+
+/* La ronda de copa: cuatro columnas de escudo a escudo que llenan el panel */
+.crugrid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;
+  grid-auto-rows:minmax(58px,1fr);height:100%;align-content:stretch}
+.crugrid .cru{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;
+  justify-items:center;gap:4px;padding:6px;border:1px solid var(--line);
+  border-radius:10px;background:rgba(255,255,255,.02);min-width:0;min-height:0}
+.crugrid .cru.mine{border-color:var(--acc);background:rgba(46,230,168,.10)}
+.crugrid .cl{display:flex;align-items:center;justify-content:center;
+  width:100%;height:100%;min-width:0;opacity:.5}
+.crugrid .cl.win{opacity:1}
+.crugrid .cl .cw{width:100%!important;height:100%!important;
+  max-width:64px;max-height:64px;display:flex}
+.crugrid .cl .cw>img,.crugrid .cl .cw>svg{width:100%;height:100%;object-fit:contain}
+.crugrid .cru b{font-size:13px;font-variant-numeric:tabular-nums;line-height:1.1;
+  text-align:center;white-space:nowrap}
+.crugrid .cru b i{font-style:normal;color:var(--dim);padding:0 2px;font-size:10px}
+.crugrid .cru b u{display:block;text-decoration:none;font-size:9px;color:var(--dim);font-weight:600}
+.crugrid .cru b.bye{font-size:10px;color:var(--dim);text-transform:uppercase}
+
+/* Los goleadores del partido propio, en el resultado grande */
+.nextm .qgoles{margin-top:12px;padding-top:11px;border-top:1px solid var(--line);
+  font-size:0;gap:14px}
+.nextm .qgoles .qg{font-size:12.5px;gap:3px}
+.nextm .qgoles .qg i{font-weight:600}
+.nextm .qgoles .qg-bola{font-size:15px;opacity:.7}
+
+/* El play-off de ascenso, en Resultados */
+.tiecard.po .po-rot{display:flex;justify-content:space-between;align-items:baseline;
+  gap:8px;margin:-2px 0 5px;padding-bottom:5px;border-bottom:1px solid var(--line);
+  font-size:10.5px;letter-spacing:.9px;text-transform:uppercase;color:var(--dim);font-weight:700}
+.tiecard.po .po-rot span{letter-spacing:.3px;text-transform:none;font-weight:600;opacity:.8}
+.tiecard.po .trow b .pens{font-style:normal;font-size:10.5px;color:var(--dim);
+  font-weight:600;margin-left:2px}
+
+/* Mi club: la plantilla con lo de cada uno esta temporada */
+.miclub th{position:sticky;top:0;background:var(--bg2);z-index:1}
+.miclub td,.miclub th{padding:5px 8px}
+.miclub .pos-chip{min-width:34px;font-size:10px;letter-spacing:.4px}
+.mc-sitio{font-size:10.5px;text-transform:uppercase;letter-spacing:.6px;font-weight:700}
+.mc-sitio.tit{color:var(--acc)}
+.mc-sitio.sup{color:#9fc3ff}
+.mc-sitio.fue{color:var(--dim)}
+.tarj{display:inline-block;min-width:16px;padding:1px 4px;border-radius:3px;
+  font-style:normal;font-size:10.5px;font-weight:800;color:#12161d}
+.tarj.am{background:#f5c542}
+.tarj.rj{background:#e8544a;color:#fff}
+
+/* Ganados, empatados y perdidos: no deben pesar más que los puntos */
+.minitab td.gep{color:var(--dim);font-size:11.5px}
+
+/* Crear futbolista: tres columnas —tus datos, los tres clubes y el campo—
+   con el campo angosto y alto, para que todo entre de una vez */
+.crea2{align-items:start;grid-template-columns:minmax(250px,1fr) minmax(260px,1.1fr)}
+.crea2.tres{grid-template-columns:minmax(240px,1fr) minmax(220px,1fr) minmax(300px,1.15fr)}
+@media (max-width:1080px){.crea2.tres{grid-template-columns:minmax(230px,1fr) minmax(190px,1fr)}
+  .crea2.tres .crea-col.ancha{grid-column:1/-1}}
+@media (max-width:820px){.crea2,.crea2.tres{grid-template-columns:1fr}
+  .crea2.tres .crea-col.ancha{grid-column:auto}}
+.crea-pitch{min-height:0;width:100%;max-width:440px;margin:0 auto;height:clamp(420px,70vh,620px)}
+.crea-col.ancha{min-height:0;position:sticky;top:0}
+.ofertas-col .subh{margin-top:0}
+.ofertas.fila{display:flex;flex-direction:column;gap:9px;margin-top:6px}
+.ofertas.fila .oferta{flex-direction:row;align-items:center;gap:11px;
+  padding:10px 12px;text-align:left}
+.ofertas.fila .oferta:hover{transform:none;border-color:var(--acc)}
+.ofertas.fila .of-txt{flex:1;min-width:0;display:flex;flex-direction:column;
+  align-items:flex-start;gap:1px}
+.ofertas.fila .of-txt .stars{align-self:flex-start;font-size:11px;letter-spacing:1px}
+.ofertas.fila .of-txt b{font-size:13px;text-align:left;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap}
+.ofertas.fila .of-txt small{color:var(--dim);font-size:10.5px;text-align:left;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ofertas.fila .of-nivel{flex:0 0 auto;display:flex;flex-direction:column;
+  align-items:center;gap:0}
+.ofertas.fila .of-nivel .hint{font-size:9.5px}
+
+/* con el campo más bajo los círculos también encogen, que si no se pisan */
+@media (max-height:760px){
+  .crea-pitch .pos-slot .ps-dot{width:34px;height:34px;font-size:11px}
+  .crea-pitch .pos-slot .ps-nom{font-size:9px}
+}
+
+/* En el menú de inicio, las estrellas en lugar de la media */
+.ovr.soloestrellas{display:flex;align-items:center;margin-left:auto}
+.ovr.soloestrellas span.stars{font-size:20px;letter-spacing:2px}
+
+/* el hueco del escudo sigue al tamaño del escudo en cada formato */
+.br-listagrid.ancha.cols-3 .br-tie .t:first-child{grid-template-columns:34px minmax(0,1fr) auto}
+.br-listagrid.ancha.cols-3 .br-tie .br-sep ~ .t{grid-template-columns:auto minmax(0,1fr) 34px}
+.br-listagrid.ancha.cols-4 .br-tie .t:first-child{grid-template-columns:34px minmax(0,1fr) auto}
+.br-listagrid.ancha.cols-4 .br-tie .br-sep ~ .t{grid-template-columns:auto minmax(0,1fr) 34px}
+
+/* «Continuar partida» dentro de la pantalla de creación */
+.crea-guardada{margin-top:auto;padding-top:14px}
+.crea-guardada #wLoadBox{margin:0;padding:13px 15px}
+.crea-guardada #wLoadBox h3{font-size:13px;margin:0 0 6px}
+.crea-guardada #wLoadBox .hint{font-size:11.5px;margin:0 0 9px}
+.crea-guardada #wLoadBox .toolbar{flex-wrap:wrap;gap:7px}
+.crea-guardada #wLoadBox .toolbar button,
+.crea-guardada #wLoadBox .toolbar label{font-size:12px}
+
+/* La fuerza del club, en estrellas, en las previas del partido */
+.side-est{display:block;margin-top:3px}
+.side-est span.stars{font-size:14px;letter-spacing:1.5px}
+.fj-est span.stars{font-size:11px;letter-spacing:1px;vertical-align:-1px}
+
+/* El botón de nacionalidad en el editor de plantillas */
+.natbtn{display:inline-flex;align-items:center;gap:5px;padding:3px 7px;min-width:62px}
+.natbtn img{width:17px;height:12px;object-fit:cover;border-radius:2px;flex:0 0 auto}
+.natbtn span{font-size:10.5px;letter-spacing:.5px;font-weight:700}
+
+/* Un encabezado pegajoso se ancla al borde INTERIOR de su caja: si la caja
+   tiene relleno arriba, las filas asoman por esa franja y la tabla parece
+   cortada. En las cajas con tabla fija, ese relleno se quita. */
+.pbody.scroll,.pbody.tabla-fija{padding-top:0}
+.pbody.scroll > table th,.pbody.tabla-fija > table th{top:0}
+.mk-tabla th{background:var(--bg2);z-index:3}
+
+/* Partido rápido: el once y el banquillo, con cambios antes de jugar */
+.once{margin-top:12px}
+/* dos columnas: el once a la izquierda, el banquillo a la derecha */
+.on-cols{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}
+.on-col{display:flex;flex-direction:column;gap:5px;min-width:0}
+.on-col.suplentes{opacity:.62}
+.on-col.suplentes:hover,.on-col.suplentes:focus-within{opacity:1}
+@media (max-width:620px){.on-cols{grid-template-columns:1fr}}
+.on-tit{display:flex;align-items:baseline;justify-content:space-between;gap:8px;
+  font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--dim);
+  margin-top:4px}
+.on-tit small{text-transform:none;letter-spacing:0;font-size:10.5px;opacity:.75}
+.on-lista{display:flex;flex-direction:column;gap:4px}
+.on-j{display:flex;align-items:center;gap:7px;width:100%;padding:5px 8px;
+  border:1px solid var(--line);border-radius:8px;background:var(--bg2);
+  color:var(--txt);font-size:12px;text-align:left;cursor:pointer;
+  transition:border-color .12s,background .12s}
+.on-j:hover{border-color:var(--acc)}
+.on-j.sel{border-color:var(--acc);background:rgba(46,230,168,.14)}
+.on-j.tit .on-nom{font-weight:700}
+.on-j:not(.tit) .on-nom{font-weight:400}
+.on-pos{flex:0 0 auto;min-width:26px;font-size:9.5px;font-weight:800;letter-spacing:.4px;
+  color:var(--dim);text-align:center}
+.on-nom{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.on-ovr{flex:0 0 auto;font-weight:800;font-variant-numeric:tabular-nums}
+
+/* El cuadro del torneo de selecciones */
+.gselgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px;margin-bottom:6px}
+.gsel h4{margin:0 0 4px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+
+/* Los colores del club visten la pantalla de carrera: el primario tiñe el
+   fondo, el secundario dibuja el borde de los paneles. Muy rebajados, que
+   esto se lee mucho rato. */
+body.conclub{
+  background-image:linear-gradient(180deg,
+    var(--club-fondo, transparent) 0%,
+    var(--club-fondo2, transparent) 55%,
+    rgba(0,0,0,0) 100%);
+  background-attachment:fixed;
+  background-repeat:no-repeat;
+  background-size:100% 100%}
+body.conclub .panel,
+body.conclub .card{border-color:var(--club-borde, var(--line));border-width:2px}
+body.conclub .wtop,body.conclub .tabs.sub{border-color:var(--club-borde, var(--line));border-width:2px}
+
+/* «Volver al club» y demás botones primarios pequeños: .mini pisaba el fondo
+   de .primary pero no su color de texto, y quedaba texto oscuro sobre fondo
+   oscuro. Texto blanco y borde de acento, que se lea sobre cualquier tinte. */
+.primary.mini{
+  background:linear-gradient(180deg,#1b2633,#141d28);
+  color:#fff;border:1px solid var(--acc);font-weight:700}
+.primary.mini:hover{background:linear-gradient(180deg,#22303f,#1a242f);border-color:#7dffcd}
+
+/* La barra de scroll, con el color del club: el primario aclarado para que
+   se vea sobre el fondo oscuro y un filo del secundario. */
+body.conclub *::-webkit-scrollbar{width:11px;height:11px}
+body.conclub *::-webkit-scrollbar-track{
+  background:rgba(255,255,255,.04);border-radius:9px;margin:2px}
+body.conclub *::-webkit-scrollbar-thumb{
+  background:linear-gradient(180deg,var(--club-scroll,var(--line)),var(--club-scroll2,var(--line)));
+  border:2px solid transparent;background-clip:padding-box;border-radius:9px;
+  box-shadow:inset 0 0 0 1px var(--club-scroll-filo, transparent)}
+body.conclub *::-webkit-scrollbar-thumb:hover{
+  background:var(--club-scroll-on,var(--acc));background-clip:padding-box}
+body.conclub *::-webkit-scrollbar-corner{background:transparent}
+body.conclub{scrollbar-color:var(--club-scroll,var(--line)) rgba(255,255,255,.04)}
+
+/* Últimos resultados: el rival en una línea y la competición debajo, sin
+   partir palabras. La columna de la semana ya no existe. */
+.calrow .op{min-width:0}
+.calrow .op .o1 em{font-weight:600}
+.calrow .cmp{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+
+/* Grupos de selecciones: el que pasa de ronda, en verde (mejores terceros
+   incluidos), y el desglose de partidos plegado debajo de cada tabla. */
+.gsel tr.q-yes td{color:#9effd6}
+.gsel tr.q-yes .pos-chip{background:rgba(64,220,150,.22);color:#9effd6;
+  box-shadow:inset 0 0 0 1px rgba(64,220,150,.45)}
+.gsel .gres{margin-top:6px}
+.gsel .gres summary{font-size:11px}
+.gsel .mdblock div{font-size:11.5px}
+
+/* Los filtros de Resultados viven en la fila de pestañas, a la derecha:
+   la barra de abajo sobraba y comía una franja de pantalla. */
+#wTabs{align-items:center}
+.tabsx{display:none}
+.tabsx.on{display:flex;align-items:center;gap:8px;margin-left:auto;padding-right:4px;
+  flex-wrap:wrap;justify-content:flex-end}
+.tabsx .toolbar{margin:0;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.tabsx label{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--dim)}
+.tabsx select{padding:5px 8px;font-size:12px;max-width:190px}
+@media (max-width:900px){.tabsx.on{width:100%;margin-left:0;justify-content:flex-start}}
+
+/* Un nombre de club largo no puede empujar la tabla fuera del panel */
+.micarrera{table-layout:fixed}
+.micarrera.ancha td:nth-child(2){min-width:0}
+.micarrera .cl{display:flex;align-items:center;gap:6px;min-width:0}
+.micarrera .cl b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.micarrera td small.hint{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* el escudo de la vista previa se puede tocar */
+.pinchable{cursor:pointer;border-radius:10px;transition:background .12s}
+.pinchable:hover{background:rgba(255,255,255,.06)}
+
+/* =========================================================================
+   MÓVIL
+   En el escritorio el modo carrera ocupa la ventana exacta y cada panel se
+   mueve por dentro. En un teléfono eso deja cinco cajas de ochenta píxeles
+   con su propio scroll, que no hay forma de leer: aquí se suelta todo para
+   que la página fluya de arriba abajo como cualquier web.
+   ========================================================================= */
+@media (max-width: 760px) {
+  body.career { height: auto; overflow: visible; }
+  body.career main { overflow: visible; padding: 8px 10px; }
+  body.career #view-world.active { height: auto; min-height: 0; }
+  .wlayout { height: auto; }
+  .wmain { flex: none; overflow: visible; min-height: 0; }
+  .dash { grid-template-columns: 1fr; height: auto; overflow: visible; gap: 10px; }
+  .dcol, .dcol.r2, .dcol.r21, .dcol.r3, .dcol.rpart { grid-template-rows: auto; min-height: 0; }
+  .dcol.rpart > .panel { min-height: 0; }
+  .panel { height: auto; }
+  /* los paneles crecen con su contenido; nada de scroll dentro de scroll */
+  .pbody { overflow: visible; max-height: none; }
+  .pbody.scroll, .dsplit > .panel > .pbody { overflow: visible; }
+  /* salvo las tablas, que sí pueden desbordar a lo ancho */
+  .pbody table { max-width: 100%; }
+  .pbody > table, .groups, .br2 { overflow-x: auto; }
+
+  /* la cabecera del club, compacta */
+  .wtop { padding: 8px 10px; gap: 8px; margin-bottom: 8px; }
+  .wtop .big { font-size: 15px; }
+  .wtop .pill, .wtop button { font-size: 11.5px; }
+
+  /* pestañas en una tira que se desliza, sin partirse en dos filas */
+  #wTabs { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; }
+  #wTabs::-webkit-scrollbar { display: none; }
+  #wTabs button { flex: 0 0 auto; }
+
+  /* en la tabla no caben nueve columnas: se quedan las que se miran */
+  .minitab th.gep, .minitab td.gep, .minitab th.form, .minitab td.form { display: none; }
+  .minitab td, .minitab th { padding: 5px 4px; font-size: 12px; }
+  .minitab .tname span { font-size: 12px; }
+
+  /* dedos, no ratón */
+  button, .mini, .pill { min-height: 36px; }
+  .simbtns button { flex: 1 1 auto; min-width: 120px; }
+
+  /* El partido narrado: primero el relato, que es lo que se mira, y con
+     scroll propio. Si se le deja crecer, el minuto a minuto mide tres mil
+     pixeles y hay que perseguirlo con el dedo. */
+  .mv-wrap { height: auto; }
+  #wMatchBox { min-height: 0; }
+  .mv-wrap .match-grid { grid-template-columns: 1fr; grid-template-rows: auto; gap: 10px; }
+  .mv-wrap .match-grid > .card { overflow: auto; }
+  .mv-wrap .center-col { order: -1; max-height: 58vh; overflow: auto; }
+  .mv-wrap .match-grid > .lineup { max-height: 42vh; }
+  .mbar { flex-wrap: wrap; gap: 6px; }
+
+  /* la vista previa, sin que el nombre largo empuje el escudo */
+  .nextm .vs2 { gap: 8px; }
+  .nextm .side2 b { font-size: 13px; }
+}
+
+/* teléfonos estrechos de verdad */
+@media (max-width: 400px) {
+  body.career main { padding: 6px 8px; }
+  .minitab td, .minitab th { padding: 4px 3px; font-size: 11.5px; }
+  .panel > h3 { padding: 7px 10px; font-size: 11px; }
+}

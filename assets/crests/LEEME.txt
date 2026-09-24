@@ -1,0 +1,33 @@
+ESCUDOS
+=======
+
+Ya tienes 566 escudos reales funcionando: los PNG que dejaste en la carpeta
+"logos" se emparejaron automaticamente con los equipos y la app los usa sola.
+El mapa esta en js/data/_crestmap.js (uid de equipo -> archivo).
+
+Los 325 equipos restantes usan el escudo generado por colores. En
+LISTADO.csv tienes las 891 filas con liga, equipo, si usa escudo real o
+generado, y la ruta del archivo.
+
+COMO RELLENAR LOS HUECOS
+------------------------
+Opcion A (la mas comoda): deja el PNG dentro de la carpeta de su liga en
+"logos/" con un nombre parecido al del equipo y pidemelo: regenero el mapa
+y lo emparejo.
+
+Opcion B (manual, sin tocar nada mas): deja la imagen aqui, en
+assets/crests/, con el nombre del club en minusculas, sin acentos y con
+guiones (por ejemplo al-hilal.png). Luego abre la app -> Editar equipos y
+selecciones -> marca "Buscar escudos en assets/crests/", elige el formato y
+recarga.
+
+Opcion C (un club suelto): en el editor, campo "Escudo real", escribe la
+ruta que quieras, por ejemplo logos/mi-carpeta/equipo.png
+
+LIGAS QUE AUN NO TIENEN NINGUN ESCUDO REAL
+------------------------------------------
+Arabia Saudi, Suiza, Austria, Noruega, Dinamarca, Suecia, Polonia, Croacia,
+Serbia, Hungria, Corea del Sur, Australia, Sudafrica, Marruecos, Egipto y
+los cuatro grupos "Resto de..." (CONCACAF, AFC, CAF y OFC).
+
+Las selecciones no necesitan imagen: usan su bandera dibujada en SVG.

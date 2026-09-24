@@ -1,0 +1,10 @@
+# configuración local del editor
+.claude/
+
+# guardados de partida que se bajan a disco
+*.simufut.json
+
+# restos de Windows / macOS
+Thumbs.db
+desktop.ini
+.DS_Store

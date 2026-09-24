@@ -1,0 +1,56 @@
+/* =========================================================================
+   TORNEO FEDERAL AMATEUR — quinta categoría, el ascenso del interior
+   Cuarenta y cinco equipos a una sola vuelta. Cinco suben al Federal A y
+   de allí bajan otros cinco. No juega la Copa Argentina.
+   ========================================================================= */
+window.LEAGUES = window.LEAGUES || {};
+window.LEAGUES.federalam = {
+  id: 'federalam', name: 'Torneo Federal Amateur', country: 'Argentina', tier: 5,
+  ucl: 0, rel: 0, single: true, sinCopa: true, pool: 'latam', squadSize: 17, teams: [
+    { n: 'Achirense', s: 'ACH', c1: '#D52B1E', c2: '#FFFFFF', str: 51, p: [] },
+    { n: 'Alianza de Cutral Có', s: 'ACC', c1: '#0B4EA2', c2: '#FFD100', str: 52, p: [] },
+    { n: 'Almagro (CdU)', s: 'ALM', c1: '#1B7A3D', c2: '#FFFFFF', str: 51, p: [] },
+    { n: 'Altos Hornos Zapla', s: 'AHZ', c1: '#111111', c2: '#FFFFFF', str: 52, p: [] },
+    { n: 'Andino', s: 'AND', c1: '#8B1A1A', c2: '#FFFFFF', str: 52, p: [] },
+    { n: 'Atlético Paraná', s: 'APA', c1: '#C8102E', c2: '#FFD100', str: 51, p: [] },
+    { n: 'Atlético Uruguay', s: 'AUR', c1: '#0057B8', c2: '#FFFFFF', str: 52, p: [] },
+    { n: 'Barrio Nebel', s: 'BNE', c1: '#00843D', c2: '#FFFFFF', str: 50, p: [] },
+    { n: 'Ben Hur', s: 'BHU', c1: '#E30613', c2: '#FFD100', str: 53, p: [] },
+    { n: 'Boxing Club', s: 'BOX', c1: '#D52B1E', c2: '#FFFFFF', str: 48, p: [] },
+    { n: 'Central Argentino', s: 'CAR', c1: '#0B4EA2', c2: '#FFD100', str: 48, p: [] },
+    { n: 'Comisión de Actividades Infantiles', s: 'CAI', c1: '#1B7A3D', c2: '#FFFFFF', str: 50, p: [] },
+    { n: 'Defensores de Pronunciamiento', s: 'DPR', c1: '#111111', c2: '#FFFFFF', str: 52, p: [] },
+    { n: 'Deportivo Mandiyú', s: 'MAN', c1: '#8B1A1A', c2: '#FFFFFF', str: 53, p: [] },
+    { n: 'Desamparados', s: 'DES', c1: '#C8102E', c2: '#FFD100', str: 50, p: [] },
+    { n: 'Engranaje', s: 'ENG', c1: '#0057B8', c2: '#FFFFFF', str: 50, p: [] },
+    { n: 'Estudiantes de San Luis', s: 'ESL', c1: '#00843D', c2: '#FFFFFF', str: 52, p: [] },
+    { n: 'Faimallá', s: 'FAI', c1: '#E30613', c2: '#FFD100', str: 49, p: [] },
+    { n: 'Ferro de General Pico', s: 'FGP', c1: '#D52B1E', c2: '#FFFFFF', str: 52, p: [] },
+    { n: 'Fontana', s: 'FON', c1: '#0B4EA2', c2: '#FFD100', str: 49, p: [] },
+    { n: 'General Paz Juniors', s: 'GPJ', c1: '#1B7A3D', c2: '#FFFFFF', str: 54, p: [] },
+    { n: 'General Roca', s: 'GRO', c1: '#111111', c2: '#FFFFFF', str: 52, p: [] },
+    { n: 'Guaraní Antonio Franco', s: 'GAF', c1: '#8B1A1A', c2: '#FFFFFF', str: 52, p: [] },
+    { n: 'Jorge Gibson Brown', s: 'JGB', c1: '#C8102E', c2: '#FFD100', str: 49, p: [] },
+    { n: 'Jorge Newbery', s: 'JNE', c1: '#0057B8', c2: '#FFFFFF', str: 49, p: [] },
+    { n: 'Juventud Unida (GChu)', s: 'JUG', c1: '#00843D', c2: '#FFFFFF', str: 55, p: [] },
+    { n: 'La Amistad', s: 'AMI', c1: '#E30613', c2: '#FFD100', str: 51, p: [] },
+    { n: 'La Emilia', s: 'EMI', c1: '#D52B1E', c2: '#FFFFFF', str: 50, p: [] },
+    { n: 'Libertad de Sunchales', s: 'LSU', c1: '#0B4EA2', c2: '#FFD100', str: 50, p: [] },
+    { n: 'María Grande', s: 'MGR', c1: '#1B7A3D', c2: '#FFFFFF', str: 51, p: [] },
+    { n: 'Pacífico', s: 'PAC', c1: '#111111', c2: '#FFFFFF', str: 51, p: [] },
+    { n: 'Parque Sur', s: 'PSU', c1: '#8B1A1A', c2: '#FFFFFF', str: 54, p: [] },
+    { n: 'Policial', s: 'POL', c1: '#C8102E', c2: '#FFD100', str: 50, p: [] },
+    { n: 'Racing de Olavarría', s: 'ROL', c1: '#0057B8', c2: '#FFFFFF', str: 52, p: [] },
+    { n: 'Racing de Trelew', s: 'RTR', c1: '#00843D', c2: '#FFFFFF', str: 50, p: [] },
+    { n: 'Renato Cesarini', s: 'RCE', c1: '#E30613', c2: '#FFD100', str: 48, p: [] },
+    { n: 'Rivadavia de Lincoln', s: 'RLI', c1: '#D52B1E', c2: '#FFFFFF', str: 51, p: [] },
+    { n: 'San Jorge de Villa Elísa', s: 'SJV', c1: '#0B4EA2', c2: '#FFD100', str: 50, p: [] },
+    { n: 'San Lorenzo de Alem', s: 'SLA', c1: '#1B7A3D', c2: '#FFFFFF', str: 48, p: [] },
+    { n: 'Sportivo Guzmán', s: 'SGU', c1: '#111111', c2: '#FFFFFF', str: 47, p: [] },
+    { n: 'Talleres de Perico', s: 'TPE', c1: '#8B1A1A', c2: '#FFFFFF', str: 50, p: [] },
+    { n: 'Unión Aconquija', s: 'UAC', c1: '#C8102E', c2: '#FFD100', str: 50, p: [] },
+    { n: 'Unión de Crespo', s: 'UCR', c1: '#0057B8', c2: '#FFFFFF', str: 49, p: [] },
+    { n: 'Unión de Sunchales', s: 'USU', c1: '#00843D', c2: '#FFFFFF', str: 50, p: [] },
+    { n: 'Unión Villa Krause', s: 'UVK', c1: '#E30613', c2: '#FFD100', str: 51, p: [] },
+  ]
+};

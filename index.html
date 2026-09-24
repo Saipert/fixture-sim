@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fixture Sim</title>
+<link rel="stylesheet" href="css/styles.css?v=20260924182939">
+<link rel="stylesheet" href="css/career.css?v=20260924182939">
+<link rel="stylesheet" href="css/theme.css?v=20260924182939">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="navb" id="navBtns">
+    <button id="btnBack" title="Volver atrás" aria-label="Volver atrás">&lsaquo;</button>
+    <button id="btnMenu" title="Menú principal" aria-label="Menú principal">&#127968;</button>
+  </div>
+  <button class="brand" id="btnHome" title="Volver al menú">
+    <span class="ball">⚽</span>
+    <h1>Fixture Sim</h1>
+  </button>
+  <div class="crumb" id="crumb"></div>
+</header>
+
+<main>
+
+<!-- ==================== MENÚ ==================== -->
+<section id="view-home" class="view active">
+  <div class="menu-grid">
+    <button class="mcard" data-go="match">
+      <i class="mimg" style="background-image:url(&quot;logos/menu/partido-rapido.jpg&quot;)"></i>
+      <span class="ic">🆚</span><b>Partido rápido</b>
+      <span class="desc">Cualquier equipo o selección contra cualquiera, con narración minuto a minuto.</span>
+    </button>
+    <button class="mcard" data-go="world">
+      <i class="mimg" style="background-image:url(&quot;logos/menu/modo-carrera.jpg&quot;)"></i>
+      <span class="ic">🌐</span><b>Modo carrera</b>
+      <span class="desc">Elige un club y juega temporada tras temporada: todas las ligas del mundo, copas, continentales, ascensos y descensos.</span>
+    </button>
+    <button class="mcard" data-go="domestic">
+      <i class="mimg" style="background-image:url(&quot;logos/menu/liga-copa.jpg&quot;)"></i>
+      <span class="ic">🏟️</span><b>Ligas y copas nacionales</b>
+      <span class="desc">Cada país con sus divisiones y su copa real.</span>
+    </button>
+    <button class="mcard" data-go="contin">
+      <i class="mimg" style="background-image:url(&quot;logos/menu/continentales.jpg&quot;)"></i>
+      <span class="ic">🌍</span><b>Competiciones continentales</b>
+      <span class="desc">Champions, Libertadores, Concacaf, AFC, CAF y Mundial de Clubes.</span>
+    </button>
+    <button class="mcard" data-go="nations">
+      <i class="mimg" style="background-image:url(&quot;logos/menu/selecciones.jpg&quot;)"></i>
+      <span class="ic">🏆</span><b>Selecciones</b>
+      <span class="desc">Mundial 2026, Eurocopa, Copa América, Copa Oro, Asiática y Africana.</span>
+    </button>
+    <button class="mcard" data-go="builder">
+      <i class="mimg" style="background-image:url(&quot;logos/menu/crear-torneo.jpg&quot;)"></i>
+      <span class="ic">🧩</span><b>Crear torneo</b>
+      <span class="desc">Tú eliges equipos, grupos y formato. El cuadro se calcula solo.</span>
+    </button>
+    <button class="mcard" data-go="editor">
+      <i class="mimg" style="background-image:url(&quot;logos/menu/editar-equipo.jpg&quot;)"></i>
+      <span class="ic">✏️</span><b>Editar equipos y selecciones</b>
+      <span class="desc">Plantillas, posiciones, valoraciones, colores y escudo.</span>
+    </button>
+    <button class="mcard" data-go="squads">
+      <i class="mimg" style="background-image:url(&quot;logos/menu/plantillas.jpg&quot;)"></i>
+      <span class="ic">👥</span><b>Plantillas</b>
+      <span class="desc">Consulta cualquier equipo y busca jugadores en todo el mundo.</span>
+    </button>
+  </div>
+
+  <div class="credits">
+    <div class="cr-main">
+      <span class="cr-by">Creado por</span>
+      <b>David Saipert</b>
+    </div>
+    <div class="cr-contact">
+      <span class="cr-lbl">¿Sugerencias? Escribime:</span>
+      <a href="mailto:davidsaipert04@gmail.com" class="cr-link">
+        <span class="cr-ic">✉</span>davidsaipert04@gmail.com</a>
+      <a href="https://instagram.com/davidsaipert" target="_blank" rel="noopener" class="cr-link">
+        <span class="cr-ic">◎</span>@davidsaipert</a>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== PARTIDO ==================== -->
+<section id="view-match" class="view">
+  <div class="setup card">
+    <div class="side">
+      <span class="side-label">Local</span>
+      <button class="team-badge pick" id="badgeHome" data-side="home" title="Pulsa para elegir equipo"></button>
+      <div class="tactic"><label>Táctica</label>
+        <div class="seg" data-side="home">
+          <button data-t="def">Defensiva</button><button data-t="bal" class="on">Equilibrada</button><button data-t="atk">Ofensiva</button>
+        </div>
+      </div>
+      <div class="once" id="onceHome" data-side="home"></div>
+    </div>
+    <div class="vs-col">
+      <div class="vs">VS</div>
+      <button id="btnSwap" class="mini" title="Intercambiar">⇄</button>
+      <button id="btnRandom" class="mini" title="Al azar">🎲</button>
+      <label class="chk"><input type="checkbox" id="chkNeutral"> Campo neutral</label>
+      <label class="chk"><input type="checkbox" id="chkLive" checked> En vivo</label>
+      <button id="btnPlay" class="primary">Simular partido</button>
+    </div>
+    <div class="side">
+      <span class="side-label">Visitante</span>
+      <button class="team-badge pick" id="badgeAway" data-side="away" title="Pulsa para elegir equipo"></button>
+      <div class="tactic"><label>Táctica</label>
+        <div class="seg" data-side="away">
+          <button data-t="def">Defensiva</button><button data-t="bal" class="on">Equilibrada</button><button data-t="atk">Ofensiva</button>
+        </div>
+      </div>
+      <div class="once" id="onceAway" data-side="away"></div>
+    </div>
+  </div>
+
+  <div id="matchArea" class="hidden"></div>
+</section>
+
+<!-- ==================== MODO CARRERA ==================== -->
+<section id="view-world" class="view">
+
+  <!-- elegir entre entrenador y jugador -->
+  <div class="card wmodo" id="wModo">
+    <h3>Modo carrera <small>elige con qué botas te metes en el campo</small></h3>
+    <div class="modo-grid">
+      <button class="modo-card" data-modo="dt">
+        <span class="modo-ico">📋</span>
+        <b>Entrenador</b>
+        <span>Diriges un club temporada tras temporada: alineación, mercado, ascensos
+        y las copas de Europa. Puedes llevar también una selección.</span>
+      </button>
+      <button class="modo-card" data-modo="jugador">
+        <span class="modo-ico">👟</span>
+        <b>Jugador</b>
+        <span>Empiezas con 16 años en tu país y vives tu carrera: fichajes,
+        convocatorias, títulos y la retirada.</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="card hidden" id="wJugador"></div>
+
+  <div class="card wsel hidden" id="wStart">
+    <div class="wsel-head">
+      <div class="wsel-titles">
+        <b>Elige el club con el que quieres jugar</b>
+        <small id="wSelCrumb">Empieza por la liga</small>
+      </div>
+      <input type="search" class="pk-search" id="wSelQ" placeholder="Buscar club o liga...">
+    </div>
+    <div class="pk-tabs" id="wSelTabs"></div>
+    <div class="wsel-body" id="wSelBody"></div>
+    <div class="wsel-foot" id="wSelFoot">
+      <button class="mini" id="wSelBack" hidden>&lsaquo; Todas las ligas</button>
+      <span class="wsel-pick" id="wPick"></span>
+      <label class="chk" id="wManualBox"><input type="checkbox" id="wManual"> Sorteos manuales</label>
+      <label class="chk" id="wConSelBox"><input type="checkbox" id="wConSel"> Dirigir también una selección</label>
+      <button class="mini hidden" id="wSelNac">Elegir selección</button>
+      <button id="wOtro" class="mini hidden">Cambiar club</button>
+      <button id="wBegin" class="primary" disabled>Comenzar partida</button>
+    </div>
+  </div>
+
+  <div class="card" id="wLoadBox">
+    <h3>Continuar una partida</h3>
+    <p class="hint" id="wSaveInfo">No hay ninguna partida guardada en este navegador.</p>
+    <div class="toolbar">
+      <button id="wContinue" class="primary" disabled>Continuar partida guardada</button>
+      <button id="wForget" class="mini danger" disabled>Borrar la partida guardada</button>
+      <label class="mini" style="cursor:pointer">Abrir archivo de partida
+        <input type="file" id="wFile" accept=".json" style="display:none"></label>
+    </div>
+  </div>
+
+  <div class="card hidden" id="wDrawPanel">
+    <h3 id="wDrawTitle">Sorteo</h3>
+    <p class="hint" id="wDrawInfo"></p>
+    <div class="toolbar" style="margin-bottom:12px">
+      <button id="wDrawBall" class="primary">Sacar bola</button>
+      <button id="wDrawRest" class="mini">Completar sorteo</button>
+      <button id="wDrawOk" class="mini">Confirmar y seguir</button>
+      <span class="hint" id="wDrawLast"></span>
+    </div>
+    <div class="drawsplit">
+      <div class="drawcol pots-col">
+        <h4 class="drawhd" id="wDrawHd1">Bombos</h4>
+        <div id="wDrawPots" class="pots"></div>
+      </div>
+      <div class="drawcol groups-col">
+        <h4 class="drawhd" id="wDrawHd2">Grupos</h4>
+        <div id="wDrawGroups" class="groups"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="wPlay" class="hidden wlayout">
+    <div class="wtop" id="wHead"></div>
+    <div class="tabs sub" id="wTabs">
+      <button data-w="club" class="active">Club</button>
+      <button data-w="miclub">Mi club</button>
+      <button data-w="squad">Alineación</button>
+      <button data-w="results">Resultados</button>
+      <button data-w="calendario" class="hidden" id="wTabCal">Calendario</button>
+      <button data-w="carrera" class="hidden" id="wTabCr">Mi carrera</button>
+      <button data-w="history">Palmarés</button>
+      <button data-w="mercado" class="hidden" id="wTabMk">Mercado</button>
+      <div class="tabsx" id="wTabsExtra"></div>
+    </div>
+    <div class="wmain" id="wBody"></div>
+  </div>
+</section>
+
+<!-- ==================== NACIONALES ==================== -->
+<section id="view-domestic" class="view">
+  <div class="card toolbar">
+    <label>Continente</label><select id="domConf" style="width:auto"></select>
+    <label>País</label><select id="domCountry"></select>
+    <label>Competición</label><select id="domComp"></select>
+    <button id="btnDom" class="primary">Simular</button>
+    <span class="hint" id="domHint"></span>
+  </div>
+  <div id="domOut"></div>
+</section>
+
+<!-- ==================== CONTINENTALES ==================== -->
+<section id="view-contin" class="view">
+  <div class="card toolbar">
+    <label>Competición</label><select id="conComp"></select>
+    <button id="btnCon" class="primary">Simular</button>
+    <button id="conVerCupos" class="mini hidden">Ver clasificados</button>
+    <span class="hint" id="conHint"></span>
+  </div>
+
+  <div class="card" id="conCupos">
+    <div class="cuposhead">
+      <div>
+        <h3>Clasificados por liga</h3>
+        <p class="hint" id="conCuposNota"></p>
+      </div>
+      <div class="modos" id="conModo">
+        <button class="mini on" data-m="auto">Automático</button>
+        <button class="mini" data-m="manual">Elegir a mano</button>
+      </div>
+      <button class="mini" id="conReset">Restablecer cupos</button>
+    </div>
+    <div id="conCuposBody"></div>
+  </div>
+
+  <div id="conOut"></div>
+</section>
+
+<!-- ==================== SELECCIONES ==================== -->
+<section id="view-nations" class="view">
+  <div class="card toolbar">
+    <label>Competición</label><select id="natComp"></select>
+    <button id="btnNat" class="primary">Simular</button>
+    <span class="hint" id="natHint"></span>
+  </div>
+
+  <div class="card" id="natCupos">
+    <div class="cuposhead">
+      <div>
+        <h3>Clasificados</h3>
+        <p class="hint" id="natCuposNota"></p>
+      </div>
+      <div class="modos" id="natModo">
+        <button class="mini on" data-m="mano">Elegir a mano</button>
+        <button class="mini" data-m="quali">Simular la clasificación</button>
+      </div>
+    </div>
+    <div id="natCuposBody"></div>
+  </div>
+
+  <div id="natOut"></div>
+</section>
+
+<!-- ==================== CREAR TORNEO ==================== -->
+<section id="view-builder" class="view">
+  <div class="card">
+    <h3>1 · Elige los participantes</h3>
+    <div class="toolbar">
+      <button id="bldAddOne" class="primary">＋ Añadir equipo</button>
+      <button id="bldAddAll" class="mini">Añadir una liga entera</button>
+      <button id="bldAddTop" class="mini">Añadir los 8 mejores de una liga</button>
+      <button id="bldClear" class="mini">Vaciar</button>
+    </div>
+    <div id="bldList" class="chips"></div>
+  </div>
+  <div class="card">
+    <h3>2 · Formato</h3>
+    <div class="toolbar">
+      <label>Fase de grupos</label>
+      <select id="bldGroupSize">
+        <option value="0">Sin grupos (eliminación directa)</option>
+        <option value="3">Grupos de 3</option>
+        <option value="4" selected>Grupos de 4</option>
+        <option value="5">Grupos de 5</option>
+        <option value="6">Grupos de 6</option>
+      </select>
+      <label class="chk"><input type="checkbox" id="bldGroupDouble"> Grupos ida y vuelta</label>
+      <label class="chk"><input type="checkbox" id="bldLegs"> Eliminatorias ida y vuelta</label>
+      <label class="chk"><input type="checkbox" id="bldSeeded" checked> Bombos por nivel</label>
+    </div>
+    <div class="format-box" id="bldFormat"></div>
+    <button id="btnBld" class="primary">Jugar torneo</button>
+  </div>
+  <div id="bldOut"></div>
+</section>
+
+<!-- ==================== EDITOR ==================== -->
+<section id="view-editor" class="view">
+  <div class="card toolbar">
+    <label>Equipo</label>
+    <button class="pickbtn" id="edPick" style="max-width:320px"></button>
+    <button id="edNew" class="mini">+ Crear equipo</button>
+    <button id="edReset" class="mini">Restaurar original</button>
+    <button id="edDelete" class="mini danger">Eliminar</button>
+    <span class="hint" id="edHint"></span>
+  </div>
+  <div class="card" id="edBox"></div>
+  <div class="card">
+    <h3>Escudos reales</h3>
+    <p class="hint">Deja tus imágenes en <code>assets/crests/</code> con el nombre del equipo en minúsculas y sin
+    acentos (por ejemplo <code>real-madrid.png</code>, <code>atletico-de-madrid.png</code>). Activa la casilla y la app
+    las buscará sola; si falta alguna, usa el escudo generado. En <code>assets/crests/LISTADO.csv</code> tienes el
+    nombre de archivo exacto de los 891 clubes.</p>
+    <div class="toolbar">
+      <label class="chk"><input type="checkbox" id="edCrestFiles"> Buscar escudos en assets/crests/</label>
+      <label>Formato</label>
+      <select id="edCrestExt" style="width:auto"><option>png</option><option>webp</option><option>svg</option><option>jpg</option></select>
+      <span class="hint" id="edCrestStatus"></span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Copia de seguridad</h3>
+    <p class="hint">Tus cambios se guardan en este navegador. Exporta el texto si quieres conservarlos o pasarlos a otro equipo.</p>
+    <div class="toolbar">
+      <button id="edExport" class="mini">Exportar cambios</button>
+      <button id="edImport" class="mini">Importar cambios</button>
+      <button id="edWipe" class="mini danger">Borrar todos mis cambios</button>
+    </div>
+    <textarea id="edJSON" class="json" placeholder="Aquí aparece la copia de seguridad al exportar; pega una copia y pulsa Importar."></textarea>
+  </div>
+</section>
+
+<!-- ==================== PLANTILLAS ==================== -->
+<section id="view-squads" class="view">
+  <div class="card toolbar">
+    <label>Equipo</label>
+    <button class="pickbtn" id="sqPick" style="max-width:320px"></button>
+    <input type="search" id="sqSearch" placeholder="Buscar jugador en todo el mundo…">
+  </div>
+  <div class="card"><div id="sqBox"></div></div>
+</section>
+
+</main>
+
+
+<!-- datos -->
+<script src="js/data/_competitions.js?v=20260924182939"></script>
+<script src="js/data/_berths.js?v=20260924182939"></script>
+<script src="js/data/_zonas_ar.js?v=20260924182939"></script>
+<script src="js/data/_plantillas2627.js?v=20260924182939"></script>
+<script src="js/data/_crestmap.js?v=20260924182939"></script>
+<script src="js/data/_stadiums.js?v=20260924182939"></script>
+<script src="js/data/_logos.js?v=20260924182939"></script>
+<script src="js/data/_flagmap.js?v=20260924182939"></script>
+<script src="js/data/_nacionalidades.js?v=20260924182939"></script>
+<script src="js/data/_wc21.js?v=20260924182939"></script>
+<script src="js/data/premier.js?v=20260924182939"></script>
+<script src="js/data/laliga.js?v=20260924182939"></script>
+<script src="js/data/seriea.js?v=20260924182939"></script>
+<script src="js/data/ligue1.js?v=20260924182939"></script>
+<script src="js/data/bundesliga.js?v=20260924182939"></script>
+<script src="js/data/argentina.js?v=20260924182939"></script>
+<script src="js/data/brasileirao.js?v=20260924182939"></script>
+<script src="js/data/saudi.js?v=20260924182939"></script>
+<script src="js/data/ligamx.js?v=20260924182939"></script>
+<script src="js/data/mls.js?v=20260924182939"></script>
+<script src="js/data/div2-europa.js?v=20260924182939"></script>
+<script src="js/data/div2-sudamerica.js?v=20260924182939"></script>
+<script src="js/data/argentina3.js?v=20260924182939"></script>
+<script src="js/data/argentina-c.js?v=20260924182939"></script>
+<script src="js/data/federal-amateur.js?v=20260924182939"></script>
+<script src="js/data/federala.js?v=20260924182939"></script>
+<script src="js/data/ligas-sudamerica.js?v=20260924182939"></script>
+<script src="js/data/ligas-europa-a.js?v=20260924182939"></script>
+<script src="js/data/escocia.js?v=20260924182939"></script>
+<script src="js/data/ligas-europa-b.js?v=20260924182939"></script>
+<script src="js/data/div34-inglaterra.js?v=20260924182939"></script>
+<script src="js/data/div2-europa-b.js?v=20260924182939"></script>
+<script src="js/data/ligas-europa-c.js?v=20260924182939"></script>
+<script src="js/data/ligas-resto.js?v=20260924182939"></script>
+<script src="js/data/otros-uefa.js?v=20260924182939"></script>
+<script src="js/data/nations-uefa-conmebol.js?v=20260924182939"></script>
+<script src="js/data/nations-resto.js?v=20260924182939"></script>
+<script src="js/data/nations-fifa-a.js?v=20260924182939"></script>
+<script src="js/data/nations-fifa-b.js?v=20260924182939"></script>
+<!-- motor -->
+<script src="js/flags.js?v=20260924182939"></script>
+<script src="js/nacionalidades.js?v=20260924182939"></script>
+<script src="js/fill.js?v=20260924182939"></script>
+<script src="js/stars.js?v=20260924182939"></script>
+<script src="js/crest.js?v=20260924182939"></script>
+<script src="js/picker.js?v=20260924182939"></script>
+<script src="js/matchview.js?v=20260924182939"></script>
+<script src="js/engine.js?v=20260924182939"></script>
+<script src="js/store.js?v=20260924182939"></script>
+<script src="js/competitions.js?v=20260924182939"></script>
+<script src="js/draw.js?v=20260924182939"></script>
+<script src="js/market.js?v=20260924182939"></script>
+<script src="js/world.js?v=20260924182939"></script>
+<script src="js/carrera.js?v=20260924182939"></script>
+<script src="js/seleccarrera.js?v=20260924182939"></script>
+<script src="js/save.js?v=20260924182939"></script>
+<script src="js/runner.js?v=20260924182939"></script>
+<script src="js/sorteo.js?v=20260924182939"></script>
+<script src="js/tourview.js?v=20260924182939"></script>
+<script src="js/qualifiers.js?v=20260924182939"></script>
+<script src="js/app.js?v=20260924182939"></script>
+<script src="js/carrera-ui.js?v=20260924182939"></script>
+<script src="js/world-ui.js?v=20260924182939"></script>
+<script src="js/profile.js?v=20260924182939"></script>
+</body>
+</html>

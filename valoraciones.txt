@@ -1,0 +1,1510 @@
+﻿===========================================================
+  VALORACIONES DEL SIMULADOR
+===========================================================
+
+  Escribe el numero despues de la barra "|". Ejemplo:
+
+    Arsenal                                  | 85
+
+  - Deja en blanco lo que no quieras tocar.
+  - No cambies los nombres ni las cabeceras entre corchetes:
+    son los que sirven para volcar los datos al juego.
+  - Las lineas que empiezan por # son comentarios.
+
+
+###########################################################
+#  EUROPA (UEFA)
+###########################################################
+
+-- Inglaterra / Premier League  [premier]  (20) --
+Arsenal                                  | 87
+Aston Villa                              | 83
+Bournemouth                              | 80
+Brentford                                | 79
+Brighton                                 | 80
+Chelsea                                  | 85
+Coventry City                            | 74
+Crystal Palace                           | 78
+Everton                                  | 77
+Fulham                                   | 75
+Hull City                                | 78
+Ipswich Town                             | 76
+Leeds United                             | 76
+Liverpool                                | 86
+Manchester City                          | 88
+Manchester United                        | 83
+Newcastle United                         | 81
+Nottingham Forest                        | 77
+Sunderland                               | 79
+Tottenham Hotspur                        | 80
+
+-- Inglaterra / EFL Championship  [championship]  (24) --
+Birmingham City                          | 69
+Blackburn Rovers                         | 72
+Bolton Wanderers                         | 70
+Bristol City                             | 67
+Burnley                                  | 72
+Cardiff City                             | 68
+Charlton Athletic                        | 67
+Derby County                             | 68
+Lincoln City                             | 66
+Middlesbrough                            | 72
+Millwall                                 | 67
+Norwich City                             | 69
+Portsmouth                               | 68
+Preston North End                        | 68
+Queens Park Rangers                      | 67
+Sheffield United                         | 68
+Southampton                              | 72
+Stoke City                               | 71
+Swansea City                             | 70
+Watford                                  | 70
+West Bromwich Albion                     | 69
+West Ham United                          | 73
+Wolverhampton                            | 73
+Wrexham                                  | 66
+
+-- Inglaterra / EFL League One  [league1]  (24) --
+AFC Wimbledon                            | 62
+Barnsley                                 | 64
+Blackpool                                | 66
+Bradford City                            | 64
+Bromley                                  | 63
+Burton Albion                            | 64
+Cambridge United                         | 62
+Doncaster Rovers                         | 63
+Huddersfield Town                        | 65
+Leicester City                           | 70
+Leyton Orient                            | 63
+Luton Town                               | 68
+Mansfield Town                           | 62
+Milton Keynes Dons                       | 63
+Notts County                             | 61
+Oxford United                            | 65
+Peterborough United                      | 66
+Plymouth Argyle                          | 63
+Reading                                  | 69
+Sheffield Wednesday                      | 67
+Stevenage                                | 61
+Stockport County                         | 60
+Wigan Athletic                           | 67
+Wycombe Wanderers                        | 62
+
+-- Inglaterra / EFL League Two  [league2]  (24) --
+Accrington Stanley                       | 57
+Barnet                                   | 55
+Bristol Rovers                           | 56
+Cheltenham Town                          | 57
+Chesterfield                             | 56
+Colchester United                        | 55
+Crawley Town                             | 55
+Crewe Alexandra                          | 58
+Exeter City                              | 58
+Fleetwood Town                           | 57
+Gillingham                               | 57
+Grimsby Town                             | 58
+Newport County                           | 56
+Northampton Town                         | 58
+Oldham Athletic                          | 56
+Port Vale                                | 58
+Rochdale                                 | 56
+Rotherham United                         | 55
+Salford City                             | 54
+Shrewsbury Town                          | 55
+Swindon Town                             | 57
+Tranmere Rovers                          | 54
+Walsall                                  | 56
+York City                                | 53
+
+-- Italia / Serie A  [seriea]  (20) --
+AC Milan                                 | 83
+AS Roma                                  | 83
+Atalanta                                 | 80
+Bologna                                  | 79
+Cagliari                                 | 74
+Como                                     | 78
+Fiorentina                               | 77
+Frosinone                                | 69
+Genoa                                    | 72
+Inter de Milán                           | 85
+Juventus                                 | 82
+Lazio                                    | 79
+Lecce                                    | 71
+Monza                                    | 69
+Napoli                                   | 81
+Parma                                    | 77
+Sassuolo                                 | 75
+Torino                                   | 77
+Udinese                                  | 77
+Venezia                                  | 69
+
+-- Italia / Serie B  [serieb]  (20) --
+Arezzo                                   | 63
+Ascoli                                   | 62
+Avellino                                 | 62
+Benevento                                | 65
+Carrarese                                | 61
+Catanzaro                                | 64
+Cesena                                   | 66
+Cremonese                                | 65
+Empoli                                   | 67
+Hellas Verona                            | 70
+Juve Stabia                              | 63
+Mantova                                  | 63
+Modena                                   | 63
+Padova                                   | 62
+Palermo                                  | 71
+Pisa                                     | 65
+Sampdoria                                | 69
+Südtirol                                 | 63
+Vicenza                                  | 64
+Virtus Entella                           | 62
+
+-- España / LaLiga  [laliga]  (20) --
+Athletic Club                            | 80
+Atlético de Madrid                       | 84
+CA Osasuna                               | 77
+Celta de Vigo                            | 76
+Deportivo Alavés                         | 76
+Deportivo de La Coruña                   | 77
+Elche CF                                 | 74
+FC Barcelona                             | 89
+Getafe CF                                | 75
+Levante UD                               | 73
+Málaga CF                                | 74
+Racing de Santander                      | 73
+Rayo Vallecano                           | 76
+RCD Espanyol                             | 76
+Real Betis                               | 79
+Real Madrid                              | 89
+Real Sociedad                            | 78
+Sevilla FC                               | 75
+Valencia CF                              | 75
+Villarreal CF                            | 78
+
+-- España / LaLiga Hypermotion  [laliga2]  (22) --
+AD Ceuta                                 | 63
+Albacete                                 | 67
+Burgos CF                                | 65
+Cádiz CF                                 | 66
+CD Castellón                             | 62
+CD Eldense                               | 62
+CD Leganés                               | 67
+CD Tenerife                              | 67
+CE Sabadell                              | 63
+Córdoba CF                               | 65
+Cultural Leonesa                         | 64
+FC Andorra                               | 61
+Girona FC                                | 72
+Granada CF                               | 68
+RCD Mallorca                             | 71
+Real Oviedo                              | 68
+Real Sociedad B                          | 60
+Real Valladolid                          | 67
+SD Eibar                                 | 65
+Sporting de Gijón                        | 68
+UD Almería                               | 69
+UD Las Palmas                            | 68
+
+-- Alemania / Bundesliga  [bundesliga]  (18) --
+1. FC Köln                               | 72
+1. FC Union Berlin                       | 74
+1. FSV Mainz 05                          | 72
+Bayer Leverkusen                         | 81
+Bayern de Múnich                         | 89
+Borussia Dortmund                        | 83
+Borussia Mönchengladbach                 | 75
+Eintracht Frankfurt                      | 78
+FC Augsburg                              | 73
+FC Schalke 04                            | 76
+Hamburger SV                             | 75
+RB Leipzig                               | 79
+SC Friburgo                              | 76
+SC Paderborn 07                          | 68
+SV Elversberg                            | 72
+TSG Hoffenheim                           | 74
+VfB Stuttgart                            | 77
+Werder Bremen                            | 74
+
+-- Alemania / 2. Bundesliga  [bundesliga2]  (18) --
+1. FC Heidenheim                         | 69
+1. FC Kaiserslautern                     | 66
+1. FC Magdeburg                          | 63
+1. FC Nürnberg                           | 67
+Arminia Bielefeld                        | 65
+Dynamo Dresden                           | 64
+Eintracht Braunschweig                   | 64
+Energie Cottbus                          | 64
+FC St. Pauli                             | 66
+Greuther Fürth                           | 64
+Hannover 96                              | 68
+Hertha BSC                               | 70
+Holstein Kiel                            | 64
+Karlsruher SC                            | 63
+SV Darmstadt 98                          | 64
+VfL Bochum                               | 65
+VfL Osnabrück                            | 62
+VfL Wolfsburg                            | 72
+
+-- Francia / Ligue 1  [ligue1]  (18) --
+AJ Auxerre                               | 71
+Angers SCO                               | 68
+AS Monaco                                | 78
+ES Troyes AC                             | 67
+FC Lorient                               | 69
+Le Havre AC                              | 68
+Le Mans FC                               | 67
+LOSC Lille                               | 76
+OGC Nice                                 | 75
+Olympique de Marsella                    | 80
+Olympique Lyonnais                       | 81
+Paris FC                                 | 73
+Paris Saint-Germain                      | 89
+RC Estrasburgo                           | 74
+RC Lens                                  | 75
+Stade Brestois                           | 68
+Stade Rennais                            | 74
+Toulouse FC                              | 70
+
+-- Francia / Ligue 2  [ligue2]  (18) --
+AS Nancy-Lorraine                        | 65
+AS Saint-Étienne                         | 69
+Clermont Foot                            | 64
+Dijon FCO                                | 66
+EA Guingamp                              | 65
+FC Annecy                                | 62
+FC Metz                                  | 67
+FC Nantes                                | 68
+FC Sochaux                               | 65
+Grenoble Foot 38                         | 64
+Montpellier HSC                          | 69
+Pau FC                                   | 63
+Red Star FC                              | 62
+Rodez AF                                 | 61
+Stade de Reims                           | 68
+Stade Lavallois                          | 62
+US Boulogne                              | 62
+USL Dunkerque                            | 60
+
+-- Países Bajos / Eredivisie  [eredivisie]  (18) --
+ADO Den Haag                             | 64
+AFC Ajax                                 | 77
+AZ Alkmaar                               | 73
+Excelsior                                | 63
+FC Groningen                             | 68
+FC Twente                                | 69
+FC Utrecht                               | 67
+Feyenoord                                | 76
+Fortuna Sittard                          | 62
+Go Ahead Eagles                          | 62
+NEC Nijmegen                             | 66
+PEC Zwolle                               | 62
+PSV Eindhoven                            | 78
+SC Cambuur                               | 61
+SC Heerenveen                            | 67
+SC Telstar                               | 62
+Sparta Rotterdam                         | 64
+Willem II                                | 64
+
+-- Países Bajos / Eerste Divisie  [eredivisie2]  (16) --
+Almere City FC                           | 62
+De Graafschap                            | 61
+FC Den Bosch                             | 60
+FC Dordrecht                             | 59
+FC Eindhoven                             | 60
+FC Emmen                                 | 59
+FC Volendam                              | 59
+Helmond Sport                            | 54
+Heracles Almelo                          | 61
+MVV Maastricht                           | 57
+NAC Breda                                | 62
+RKC Waalwijk                             | 58
+Roda JC Kerkrade                         | 60
+TOP Oss                                  | 53
+Vitesse                                  | 64
+VVV-Venlo                                | 59
+
+-- Portugal / Liga Portugal  [portugal]  (18) --
+Académico de Viseu                       | 63
+Casa Pia AC                              | 64
+CD Nacional                              | 64
+CD Santa Clara                           | 67
+CF Estrela da Amadora                    | 63
+Estoril Praia                            | 68
+FC Alverca                               | 62
+FC Arouca                                | 64
+FC Famalicão                             | 65
+FC Porto                                 | 79
+Gil Vicente FC                           | 67
+Marítimo                                 | 65
+Moreirense FC                            | 64
+Rio Ave FC                               | 65
+SC Braga                                 | 74
+SL Benfica                               | 80
+Sporting CP                              | 79
+Vitória SC                               | 69
+
+-- Portugal / Liga Portugal 2  [portugal2]  (15) --
+Académica de Coimbra                     | 63
+Amarante FC                              | 56
+AVS                                      | 58
+CD Feirense                              | 59
+CD Tondela                               | 57
+FC Felgueiras                            | 54
+FC Penafiel                              | 57
+FC Vizela                                | 57
+GD Chaves                                | 59
+Leixões SC                               | 57
+Lusitânia FC                             | 53
+Portimonense SC                          | 59
+SC Farense                               | 56
+SC Torreense                             | 61
+União de Leiria                          | 58
+
+-- Bélgica / Belgian Pro League  [belgica]  (18) --
+Cercle Brugge                            | 66
+Club Brugge                              | 76
+KAA Gent                                 | 74
+KRC Genk                                 | 75
+KV Kortrijk                              | 64
+KV Mechelen                              | 65
+KVC Westerlo                             | 63
+Lommel SK                                | 62
+OH Leuven                                | 64
+RAAL La Louvière                         | 61
+Royal Antwerp FC                         | 73
+RSC Anderlecht                           | 74
+Sint-Truiden                             | 65
+SK Beveren                               | 66
+Sporting Charleroi                       | 68
+Standard de Lieja                        | 70
+SV Zulte Waregem                         | 66
+Union Saint-Gilloise                     | 71
+
+-- Turquía / Süper Lig  [turquia]  (18) --
+Alanyaspor                               | 69
+Amedspor                                 | 62
+Basaksehir                               | 71
+Besiktas                                 | 75
+Çorum FK                                 | 64
+Erzurumspor                              | 64
+Eyüpspor                                 | 65
+Fenerbahce                               | 79
+Galatasaray                              | 80
+Gaziantep FK                             | 68
+Genclerbirligi                           | 67
+Göztepe                                  | 69
+Kasimpasa                                | 69
+Kocaelispor                              | 65
+Konyaspor                                | 67
+Rizespor                                 | 67
+Samsunspor                               | 68
+Trabzonspor                              | 73
+
+-- Chequia / Chance Liga  [chequia]  (16) --
+Baník Ostrava                            | 62
+Bohemians 1905                           | 60
+Dukla Praga                              | 63
+Hradec Králové                           | 62
+Jablonec                                 | 63
+Mladá Boleslav                           | 62
+Pardubice                                | 61
+Sigma Olomouc                            | 63
+Slavia Praga                             | 72
+Slovácko                                 | 61
+Slovan Liberec                           | 64
+Sparta Praga                             | 69
+Teplice                                  | 62
+Viktoria Plzeň                           | 68
+Zbrojovka Brno                           | 61
+Zlín                                     | 61
+
+-- Grecia / Super League Grecia  [grecia]  (14) --
+AEK Atenas                               | 68
+Aris Salónica                            | 64
+Asteras Tripolis                         | 64
+Atromitos                                | 63
+Iraklis                                  | 61
+Kalamata                                 | 58
+Kifisia                                  | 59
+Levadiakos                               | 61
+OFI Creta                                | 64
+Olympiacos                               | 76
+Panathinaikos                            | 73
+Panetolikos                              | 63
+PAOK                                     | 72
+Volos NFC                                | 59
+
+-- Noruega / Eliteserien  [noruega]  (16) --
+Aalesunds FK                             | 57
+FK Bodø/Glimt                            | 72
+Fredrikstad FK                           | 61
+Hamarkameratene                          | 56
+IK Start                                 | 58
+KFUM Oslo                                | 54
+Kristiansund BK                          | 60
+Lillestrøm SK                            | 66
+Molde FK                                 | 67
+Rosenborg BK                             | 67
+Sandefjord Fotball                       | 58
+Sarpsborg 08                             | 63
+SK Brann                                 | 64
+Tromsø IL                                | 64
+Vålerenga Fotball                        | 62
+Viking FK                                | 69
+
+-- Dinamarca / Superligaen  [dinamarca]  (12) --
+AC Horsens                               | 59
+AGF Aarhus                               | 63
+Brøndby IF                               | 64
+FC Copenhague                            | 73
+FC Midtjylland                           | 69
+FC Nordsjælland                          | 67
+Lyngby BK                                | 63
+Odense Boldklub                          | 64
+Randers FC                               | 62
+Silkeborg IF                             | 60
+SønderjyskE                              | 61
+Viborg FF                                | 61
+
+-- Austria / Österreichische Bundesliga  [austria]  (12) --
+Austria Lustenau                         | 59
+FC Red Bull Salzburg                     | 75
+FK Austria Viena                         | 64
+Grazer AK                                | 62
+LASK                                     | 70
+SCR Altach                               | 61
+SK Rapid Viena                           | 67
+SK Sturm Graz                            | 68
+SV Ried                                  | 61
+TSV Hartberg                             | 58
+Wolfsberger AC                           | 63
+WSG Tirol                                | 61
+
+-- Suiza / Swiss Super League  [suiza]  (12) --
+BSC Young Boys                           | 69
+FC Aarau                                 | 58
+FC Basilea                               | 70
+FC Lausanne-Sport                        | 61
+FC Lugano                                | 64
+FC Luzern                                | 64
+FC Sion                                  | 63
+FC St. Gallen                            | 64
+FC Thun                                  | 64
+FC Zúrich                                | 63
+Grasshopper Club                         | 63
+Servette FC                              | 64
+
+-- Polonia / Ekstraklasa  [polonia]  (18) --
+Cracovia                                 | 63
+GKS Katowice                             | 62
+Górnik Zabrze                            | 64
+Jagiellonia Bialystok                    | 68
+Korona Kielce                            | 64
+Lech Poznan                              | 67
+Legia Warszawa                           | 65
+Motor Lublin                             | 58
+Piast Gliwice                            | 63
+Pogon Szczecin                           | 63
+Radomiak Radom                           | 61
+Rakow Czestochowa                        | 62
+Śląsk Wrocław                            | 66
+Widzew Lodz                              | 59
+Wieczysta Kraków                         | 57
+Wisła Kraków                             | 64
+Wisla Plock                              | 61
+Zaglebie Lubin                           | 62
+
+-- Escocia / Scottish Premiership  [escocia]  (12) --
+Aberdeen                                 | 66
+Celtic                                   | 75
+Dundee FC                                | 62
+Dundee United                            | 64
+Falkirk                                  | 59
+Heart of Midlothian                      | 68
+Hibernian                                | 64
+Kilmarnock                               | 63
+Motherwell                               | 65
+Rangers                                  | 76
+St Johnstone                             | 62
+St Mirren                                | 60
+
+-- Israel / Liga Premier de Israel  [israel]  (14) --
+Beitar Jerusalén                         | 61
+Bnei Sakhnin                             | 56
+Hapoel Beer Sheva                        | 63
+Hapoel Haifa                             | 62
+Hapoel Jerusalén                         | 60
+Hapoel Kiryat Shmona                     | 57
+Hapoel Petah Tikva                       | 56
+Hapoel Ramat Gan                         | 54
+Hapoel Tel Aviv                          | 67
+Ironi Tiberias                           | 53
+Maccabi Haifa                            | 69
+Maccabi Netanya                          | 62
+Maccabi Petah Tikva                      | 58
+Maccabi Tel Aviv                         | 68
+
+-- Ucrania / Premier League de Ucrania  [ucrania]  (16) --
+Dynamo Kyiv                              | 73
+Epicentr                                 | 54
+FC Oleksandriya                          | 64
+Karpaty Lviv                             | 63
+Kolos Kovalivka                          | 61
+Kryvbas                                  | 59
+Kudrivka                                 | 56
+LNZ Cherkasy                             | 55
+Metalist 1925                            | 60
+Obolon Kyiv                              | 57
+Polissya Zhytomyr                        | 59
+Poltava                                  | 61
+Rukh Lviv                                | 64
+Shakhtar Donetsk                         | 75
+Veres Rivne                              | 60
+Zorya Luhansk                            | 67
+
+-- Chipre / Cypriot First Division  [chipre]  (14) --
+AEK Larnaca                              | 63
+AEL Limassol                             | 62
+Anorthosis                               | 59
+APOEL                                    | 66
+APOEL Aris Limassol                      | 64
+Apollon Limassol                         | 67
+Doxa Katokopias                          | 58
+Karmiotissa                              | 56
+Krasava Ypsonas                          | 54
+Nea Salamis                              | 55
+Olympiakos Nicosia                       | 57
+Omonia Aradippou                         | 53
+Omonia Nicosia                           | 68
+Pafos FC                                 | 64
+
+-- Serbia / Superliga de Serbia  [serbia]  (14) --
+Estrella Roja de Belgrado                | 70
+FK Cukaricki                             | 63
+FK IMT Belgrado                          | 56
+FK Mladost Lucani                        | 59
+FK Novi Pazar                            | 58
+FK Radnicki Nis                          | 56
+FK Radnik Surdulica                      | 58
+FK Vojvodina                             | 62
+FK Zeleznicar Pancevo                    | 54
+FK Zemun                                 | 53
+Mačva Šabac                              | 53
+OFK Beograd                              | 61
+Partizan de Belgrado                     | 69
+Radnicki 1923                            | 60
+
+-- Suecia / Allsvenskan  [suecia]  (16) --
+AIK                                      | 66
+BK Häcken                                | 62
+Brommapojkarna                           | 63
+Degerfors IF                             | 59
+Djurgårdens IF                           | 62
+GAIS                                     | 58
+Halmstads BK                             | 61
+Hammarby IF                              | 63
+IF Elfsborg                              | 64
+IFK Göteborg                             | 67
+IK Sirius                                | 58
+Kalmar FF                                | 60
+Malmö FF                                 | 66
+Mjällby AIF                              | 64
+Örgryte IS                               | 58
+Västerås SK                              | 54
+
+-- Croacia / HNL  [croacia]  (10) --
+Dinamo Zagreb                            | 70
+Hajduk Split                             | 67
+HNK Gorica                               | 58
+HNK Rijeka                               | 64
+NK Istra 1961                            | 55
+NK Lokomotiva                            | 56
+NK Osijek                                | 63
+NK Rudeš                                 | 53
+NK Slaven Belupo                         | 59
+NK Varazdin                              | 55
+
+-- Rumanía / SuperLiga  [rumania]  (16) --
+CFR Cluj                                 | 63
+Corvinul Hunedoara                       | 52
+Csíkszereda                              | 53
+Dinamo Bucarest                          | 62
+Farul Constanța                          | 58
+FC Argeș                                 | 57
+FC Botoșani                              | 55
+FC Voluntari                             | 55
+FCSB                                     | 65
+Oțelul Galați                            | 59
+Petrolul Ploiești                        | 57
+Rapid Bucarest                           | 63
+Sepsi OSK                                | 56
+Universitatea Cluj                       | 59
+Universitatea Craiova                    | 58
+UTA Arad                                 | 55
+
+-- Hungría / NB I  [hungria]  (12) --
+Budapest Honvéd                          | 58
+Debreceni VSC                            | 62
+Ferencvárosi TC                          | 68
+Győri ETO FC                             | 57
+Kisvárda FC                              | 58
+MTK Budapest                             | 55
+Nyíregyháza Spartacus                    | 54
+Paksi FC                                 | 57
+Puskás Akadémia                          | 63
+Újpest FC                                | 64
+Vasas SC                                 | 62
+Zalaegerszegi TE                         | 57
+
+-- Rusia / Premier Liga de Rusia  [rusia]  (16) --
+Akhmat Grozny                            | 63
+Baltika                                  | 58
+CSKA Moscú                               | 73
+Dinamo Moscú                             | 71
+Fakel Voronezh                           | 57
+Krasnodar                                | 68
+Krylia Sovetov                           | 64
+Lokomotiv Moscú                          | 72
+Orenburg                                 | 58
+Pari Nizhny Novgorod                     | 57
+Rostov                                   | 63
+Rubin Kazán                              | 69
+Sochi                                    | 65
+Spartak Moscú                            | 76
+Ural Yekaterinburg                       | 60
+Zenit                                    | 76
+
+###########################################################
+#  SUDAMERICA (CONMEBOL)
+###########################################################
+
+-- Argentina / Liga Profesional Argentina  [argentina]  (30) --
+Aldosivi                                 | 63
+Argentinos Juniors                       | 71
+Atlético Tucumán                         | 67
+Banfield                                 | 65
+Barracas Central                         | 66
+Belgrano                                 | 69
+Boca Juniors                             | 76
+Central Córdoba                          | 66
+Defensa y Justicia                       | 67
+Deportivo Riestra                        | 64
+Estudiantes de La Plata                  | 73
+Estudiantes de Río Cuarto                | 62
+Gimnasia de Mendoza                      | 67
+Gimnasia La Plata                        | 68
+Huracán                                  | 69
+Independiente                            | 70
+Independiente Rivadavia                  | 68
+Instituto                                | 65
+Lanús                                    | 71
+Newell's Old Boys                        | 66
+Platense                                 | 67
+Racing Club                              | 73
+River Plate                              | 77
+Rosario Central                          | 72
+San Lorenzo                              | 70
+Sarmiento                                | 64
+Talleres                                 | 67
+Tigre                                    | 67
+Unión                                    | 67
+Vélez Sarsfield                          | 72
+
+-- Argentina / Primera Nacional  [argentina2]  (36) --
+Acassuso                                 | 57
+Agropecuario                             | 59
+All Boys                                 | 61
+Almagro                                  | 58
+Almirante Brown                          | 60
+Atlanta                                  | 59
+Atlético de Rafaela                      | 60
+Central Norte                            | 58
+Chacarita Juniors                        | 61
+Chaco For Ever                           | 57
+Ciudad Bolívar                           | 57
+Colegiales                               | 58
+Colón                                    | 64
+Defensores de Belgrano                   | 57
+Deportivo Madryn                         | 59
+Deportivo Maipú                          | 60
+Deportivo Morón                          | 62
+Estudiantes de Buenos Aires              | 61
+Ferro Carril Oeste                       | 63
+Gimnasia de Jujuy                        | 62
+Gimnasia y Tiro                          | 60
+Godoy Cruz                               | 64
+Güemes                                   | 56
+Los Andes                                | 57
+Midland                                  | 59
+Mitre                                    | 57
+Nueva Chicago                            | 61
+Patronato                                | 60
+Quilmes                                  | 63
+Racing de Córdoba                        | 58
+San Martín de San Juan                   | 60
+San Martín de Tucumán                    | 63
+San Miguel                               | 57
+San Telmo                                | 56
+Temperley                                | 59
+Tristán Suárez                           | 58
+
+-- Argentina / Primera B Metropolitana  [argentina3]  (22) --
+Argentino de Merlo                       | 53
+Argentino de Quilmes                     | 56
+Brown de Adrogué                         | 55
+CADU                                     | 54
+Club Atlético Fénix                      | 52
+Comunicaciones                           | 55
+Deportivo Armenio                        | 55
+Deportivo Laferrere                      | 53
+Deportivo Merlo                          | 56
+Excursionistas                           | 58
+Flandria                                 | 56
+Liniers                                  | 54
+Real Pilar                               | 56
+Sacachispas                              | 55
+San Martín de Burzaco                    | 55
+Sportivo Dock Sud                        | 54
+Sportivo Italiano                        | 54
+UAI Urquiza                              | 54
+Villa Dálmine                            | 57
+Villa San Carlos                         | 55
+Arsenal de Sarandi                       | 63
+Camioneros                               | 60
+
+-- Argentina / Torneo Federal A  [federala]  (33) --
+9 de Julio de Rafaela                    | 57
+Alvarado                                 | 61
+Argentino de Monte Maíz                  | 58
+Atenas de Río Cuarto                     | 57
+Bartolomé Mitre                          | 56
+Boca Unidos                              | 57
+Círculo Deportivo                        | 54
+Costa Brava                              | 54
+Crucero del Norte                        | 58
+Deportivo Rincón                         | 57
+Douglas Haig                             | 59
+El Linqueño                              | 55
+Germinal                                 | 54
+Gimnasia de Chivilcoy                    | 56
+Gimnasia de Concepción del Uruguay       | 59
+Guillermo Brown                          | 58
+Gutiérrez SC                             | 54
+Juventud Antoniana                       | 60
+Juventud Unida Universitario             | 58
+Kimberley                                | 55
+Olimpo                                   | 62
+Parque Sur                               | 58
+San Martín de Formosa                    | 58
+San Martín de Mendoza                    | 57
+Santamarina                              | 57
+Sarmiento de La Banda                    | 58
+Sarmiento de Resistencia                 | 56
+Sol de América                           | 54
+Sol de Mayo                              | 56
+Sportivo Las Parejas                     | 54
+Sportivo Belgrano                        | 57
+Sportivo Estudiantes                     | 58
+Villa Mitre                              | 60
+
+-- Bolivia / División Profesional de Bolivia  [bolivia]  (16) --
+ABB                                      | 53
+Always Ready                             | 58
+Aurora                                   | 56
+Blooming                                 | 58
+Bolívar                                  | 64
+Guabirá                                  | 55
+Gualberto Villarroel San José            | 54
+Independiente Petrolero                  | 54
+Nacional Potosí                          | 57
+Oriente Petrolero                        | 57
+Real Oruro                               | 53
+Real Tomayapo                            | 52
+San Antonio Bulo Bulo                    | 56
+The Strongest                            | 61
+Universitario de Vinto                   | 54
+Wilstermann                              | 59
+
+-- Brasil / Brasileirão Série A  [brasileirao]  (20) --
+Athletico Paranaense                     | 73
+Atlético Mineiro                         | 75
+Bahia                                    | 70
+Botafogo                                 | 75
+Chapecoense                              | 67
+Corinthians                              | 77
+Coritiba                                 | 68
+Cruzeiro                                 | 76
+Flamengo                                 | 80
+Fluminense                               | 76
+Grêmio                                   | 72
+Internacional                            | 71
+Mirassol                                 | 68
+Palmeiras                                | 80
+RB Bragantino                            | 70
+Remo                                     | 67
+Santos                                   | 72
+São Paulo                                | 75
+Vasco da Gama                            | 71
+Vitória                                  | 69
+
+-- Brasil / Brasileirão Série B  [brasileirao2]  (20) --
+América-MG                               | 67
+Athletic Club-MG                         | 63
+Atlético Goianiense                      | 64
+Avaí                                     | 65
+Botafogo-SP                              | 61
+Ceará                                    | 66
+CRB                                      | 62
+Criciúma                                 | 64
+Cuiabá                                   | 67
+Fortaleza                                | 69
+Goiás                                    | 68
+Juventude                                | 64
+Londrina                                 | 62
+Náutico                                  | 61
+Novorizontino                            | 61
+Operário Ferroviário                     | 62
+Ponte Preta                              | 64
+São Bernardo                             | 60
+Sport Recife                             | 65
+Vila Nova                                | 61
+
+-- Chile / Primera División de Chile  [chile]  (16) --
+Audax Italiano                           | 64
+Cobresal                                 | 63
+Colo-Colo                                | 70
+Coquimbo Unido                           | 66
+Deportes Concepción                      | 58
+Deportes La Serena                       | 59
+Deportes Limache                         | 59
+Everton de Viña                          | 62
+Huachipato                               | 64
+Ñublense                                 | 63
+O'Higgins                                | 65
+Palestino                                | 66
+Unión La Calera                          | 61
+Universidad Católica                     | 69
+Universidad de Chile                     | 69
+Universidad de Concepción                | 62
+
+-- Colombia / Liga BetPlay Dimayor  [colombia]  (20) --
+Águilas Doradas                          | 60
+Alianza FC                               | 61
+Alianza Petrolera                        | 61
+América de Cali                          | 68
+Atlético Bucaramanga                     | 63
+Atlético Nacional                        | 70
+Boyacá Chicó                             | 59
+Deportes Tolima                          | 67
+Deportivo Cali                           | 66
+Deportivo Pasto                          | 63
+Deportivo Pereira                        | 62
+Fortaleza CEIF                           | 59
+Independiente Medellín                   | 68
+Internacional de Bogotá                  | 64
+Jaguares de Córdoba                      | 59
+Junior de Barranquilla                   | 68
+Llaneros                                 | 58
+Millonarios                              | 69
+Once Caldas                              | 65
+Santa Fe                                 | 69
+
+-- Ecuador / LigaPro Ecuador  [ecuador]  (16) --
+Aucas                                    | 64
+Barcelona SC                             | 68
+Delfín                                   | 64
+Deportivo Cuenca                         | 63
+Emelec                                   | 65
+Guayaquil City                           | 62
+Independiente del Valle                  | 70
+LDU Quito                                | 71
+Leones del Norte                         | 58
+Libertad FC                              | 59
+Macará                                   | 63
+Manta FC                                 | 59
+Mushuc Runa                              | 60
+Orense SC                                | 59
+Técnico Universitario                    | 58
+Universidad Católica de Quito            | 63
+
+-- Paraguay / División Profesional de Paraguay  [paraguay]  (14) --
+2 de Mayo                                | 58
+Atlético Tembetary                       | 54
+Cerro Porteño                            | 68
+General Caballero                        | 57
+Guaraní                                  | 64
+Libertad                                 | 68
+Nacional de Asunción                     | 64
+Olimpia                                  | 70
+Recoleta                                 | 59
+Rubio Ñu                                 | 56
+Sportivo Ameliano                        | 56
+Sportivo Luqueño                         | 60
+Sportivo San Lorenzo                     | 55
+Sportivo Trinidense                      | 58
+
+-- Perú / Liga 1 de Perú  [peru]  (18) --
+ADT de Tarma                             | 53
+Alianza Atlético                         | 56
+Alianza Lima                             | 63
+Atlético Grau                            | 51
+Cienciano                                | 62
+Comerciantes Unidos                      | 50
+Cusco FC                                 | 60
+Deportivo Garcilaso                      | 58
+Deportivo Moquegua                       | 51
+Juan Pablo II                            | 50
+Los Chankas                              | 52
+Melgar                                   | 61
+Sport Boys                               | 57
+Sport Huancayo                           | 56
+Sporting Cristal                         | 64
+Universitario                            | 64
+UTC                                      | 57
+UTC Cajamarca                            | 55
+
+-- Uruguay / Primera División de Uruguay  [uruguay]  (16) --
+Albion FC                                | 57
+Boston River                             | 58
+Central Español                          | 59
+Cerro                                    | 58
+Cerro Largo                              | 60
+Danubio                                  | 61
+Defensor Sporting                        | 63
+Deportivo Maldonado                      | 58
+Juventud de Las Piedras                  | 58
+Liverpool FC                             | 62
+Montevideo City Torque                   | 62
+Montevideo Wanderers                     | 61
+Nacional                                 | 70
+Peñarol                                  | 71
+Progreso                                 | 57
+Racing de Montevideo                     | 61
+
+-- Venezuela / Liga FUTVE  [venezuela]  (16) --
+Academia Puerto Cabello                  | 56
+Carabobo FC                              | 58
+Caracas FC                               | 61
+Deportivo Anzoátegui                     | 53
+Deportivo La Guaira                      | 57
+Deportivo Táchira                        | 60
+Estudiantes de Mérida                    | 57
+Metropolitanos FC                        | 56
+Mineros de Guayana                       | 54
+Monagas SC                               | 56
+Portuguesa FC                            | 55
+Rayo Zuliano                             | 53
+Trujillanos FC                           | 53
+UCV FC                                   | 59
+Yaracuyanos FC                           | 53
+Zamora FC                                | 56
+
+###########################################################
+#  NORTEAMERICA Y CARIBE (CONCACAF)
+###########################################################
+
+-- Estados Unidos / Major League Soccer  [mls]  (30) --
+Atlanta United                           | 68
+Austin FC                                | 64
+CF Montréal                              | 64
+Charlotte FC                             | 64
+Chicago Fire                             | 67
+Colorado Rapids                          | 65
+Columbus Crew                            | 63
+D.C. United                              | 66
+FC Cincinnati                            | 64
+FC Dallas                                | 65
+Houston Dynamo                           | 64
+Inter Miami                              | 71
+LA Galaxy                                | 69
+Los Angeles FC                           | 70
+Minnesota United                         | 63
+Nashville SC                             | 66
+New England Revolution                   | 65
+New York City FC                         | 68
+New York Red Bulls                       | 67
+Orlando City                             | 67
+Philadelphia Union                       | 66
+Portland Timbers                         | 69
+Real Salt Lake                           | 64
+San Diego FC                             | 63
+San Jose Earthquakes                     | 64
+Seattle Sounders                         | 70
+Sporting Kansas City                     | 66
+St. Louis City                           | 63
+Toronto FC                               | 65
+Vancouver Whitecaps                      | 67
+
+-- México / Liga MX  [ligamx]  (18) --
+Atlante                                  | 63
+Atlas                                    | 65
+Atlético de San Luis                     | 63
+Club América                             | 73
+Cruz Azul                                | 72
+FC Juárez                                | 62
+Guadalajara                              | 68
+León                                     | 67
+Monterrey                                | 73
+Necaxa                                   | 66
+Pachuca                                  | 69
+Puebla                                   | 64
+Pumas UNAM                               | 68
+Querétaro                                | 64
+Santos Laguna                            | 66
+Tigres UANL                              | 72
+Tijuana                                  | 65
+Toluca                                   | 71
+
+-- Resto de CONCACAF / Resto de CONCACAF  [otrosconcacaf]  (16) --
+Alianza FC El Salvador                   | 53
+Antigua GFC                              | 52
+CA Independiente de La Chorrera          | 50
+Cavalry FC                               | 50
+CD Marathón                              | 52
+CD Olimpia                               | 58
+Comunicaciones FC                        | 57
+CS Cartaginés                            | 57
+CS Herediano                             | 59
+CSD Municipal                            | 54
+Deportivo Saprissa                       | 62
+FC Motagua                               | 57
+LD Alajuelense                           | 61
+Real España                              | 55
+Tauro FC                                 | 52
+Xelajú MC                                | 54
+
+###########################################################
+#  ASIA (AFC)
+###########################################################
+
+-- Arabia Saudita / Saudi Pro League  [saudi]  (18) --
+Abha Club                                | 57
+Al-Ahli                                  | 70
+Al-Ettifaq                               | 64
+Al-Faisaly                               | 61
+Al-Fateh                                 | 59
+Al-Fayha                                 | 58
+Al-Hazem                                 | 57
+Al-Hilal                                 | 71
+Al-Ittihad                               | 69
+Al-Khaleej                               | 61
+Al-Kholood                               | 60
+Al-Nassr                                 | 70
+Al-Qadsiah                               | 66
+Al-Riyadh                                | 64
+Al-Shabab                                | 64
+Al-Taawoun                               | 62
+Diriyah Club                             | 58
+NEOM SC                                  | 65
+
+-- Australia / A-League Men  [australia]  (10) --
+Adelaide United                          | 62
+Brisbane Roar                            | 62
+Central Coast Mariners                   | 62
+Macarthur FC                             | 62
+Melbourne City                           | 64
+Melbourne Victory                        | 64
+Newcastle Jets                           | 62
+Perth Glory                              | 62
+Sydney FC                                | 62
+Western Sydney Wanderers                 | 62
+
+-- China / Chinese Super League  [china]  (18) --
+Beijing Guoan                            | 62
+Changchun Yatai                          | 56
+Chengdu Rongcheng                        | 54
+Dalian Yingbo                            | 54
+Guangzhou R&F                            | 59
+Henan FC                                 | 53
+Kunshan FC                               | 52
+Meizhou Hakka                            | 53
+Qingdao Hainiu                           | 51
+Qingdao West Coast                       | 49
+Shandong Taishan                         | 58
+Shanghai Port                            | 60
+Shanghai Shenhua                         | 61
+Sichuan Jiuniu                           | 49
+Tianjin Jinmen Tiger                     | 57
+Wuhan Three Towns                        | 55
+Yunnan Yukun                             | 52
+Zhejiang FC                              | 54
+
+-- Corea del Sur / K League 1  [corea]  (12) --
+Bucheon FC 1995                          | 53
+Daejeon Hana Citizen                     | 56
+FC Anyang                                | 52
+FC Seoul                                 | 58
+Gangwon FC                               | 55
+Gimcheon Sangmu                          | 54
+Gwangju FC                               | 56
+Incheon United                           | 56
+Jeju SK                                  | 55
+Jeonbuk Hyundai Motors                   | 61
+Pohang Steelers                          | 60
+Ulsan HD                                 | 63
+
+-- Japón / J1 League  [japon]  (20) --
+Albirex Niigata                          | 59
+Avispa Fukuoka                           | 57
+Cerezo Osaka                             | 61
+Fagiano Okayama                          | 54
+FC Tokyo                                 | 59
+Gamba Osaka                              | 63
+Kashima Antlers                          | 65
+Kashiwa Reysol                           | 62
+Kawasaki Frontale                        | 61
+Kyoto Sanga                              | 58
+Machida Zelvia                           | 56
+Nagoya Grampus                           | 59
+Sanfrecce Hiroshima                      | 60
+Shimizu S-Pulse                          | 57
+Shonan Bellmare                          | 55
+Tokyo Verdy                              | 54
+Urawa Red Diamonds                       | 62
+Vissel Kobe                              | 62
+Yokohama F. Marinos                      | 60
+Yokohama FC                              | 59
+
+-- Resto de AFC / Resto de AFC  [otrosafc]  (16) --
+Al Ain FC                                | 62
+Al Duhail                                | 57
+Al Quwa Al Jawiya                        | 53
+Al Sadd                                  | 58
+Al Wasl                                  | 57
+Al-Arabi                                 | 56
+Buriram United                           | 54
+Esteghlal                                | 55
+Johor Darul Ta'zim                       | 54
+Nasaf Qarshi                             | 52
+Pakhtakor Tashkent                       | 54
+Persepolis                               | 57
+Sepahan                                  | 56
+Shabab Al Ahli                           | 54
+Sharjah FC                               | 53
+Tractor SC                               | 54
+
+###########################################################
+#  AFRICA (CAF)
+###########################################################
+
+-- Egipto / Egyptian Premier League  [egipto]  (20) --
+Abu Qir Semad                            | 53
+Al Ahly                                  | 67
+Al Ittihad Alexandria                    | 55
+Al Masry                                 | 56
+Al Mokawloon Al Arab                     | 54
+Asyut Petroleum                          | 53
+Ceramica Cleopatra                       | 58
+El Gouna                                 | 52
+El Qanah FC                              | 52
+ENPPI                                    | 54
+Ghazl El Mahalla                         | 53
+Modern Sport                             | 53
+National Bank of Egypt                   | 55
+Petrojet                                 | 54
+Pyramids FC                              | 64
+Smouha                                   | 55
+Tala'ea El Gaish                         | 55
+Wadi Degla                               | 51
+Zamalek                                  | 63
+ZED FC                                   | 49
+
+-- Marruecos / Botola Pro  [marruecos]  (16) --
+COD Meknès                               | 52
+Difaâ El Jadida                          | 54
+FAR Rabat                                | 57
+FUS Rabat                                | 56
+Hassania Agadir                          | 52
+Ittihad Tanger                           | 53
+Kawkab Marrakech                         | 53
+MA Tétouan                               | 52
+Maghreb de Fès                           | 56
+Raja Casablanca                          | 62
+Renaissance Zemamra                      | 53
+RS Berkane                               | 59
+Union Touarga                            | 54
+US Amal Tiznit                           | 50
+Widad Témara                             | 51
+Wydad Casablanca                         | 64
+
+-- Resto de CAF / Resto de CAF  [otroscaf]  (16) --
+Asante Kotoko                            | 54
+Canon Yaoundé                            | 52
+Club Africain                            | 54
+Coton Sport                              | 53
+CR Belouizdad                            | 54
+CS Sfaxien                               | 55
+Enyimba FC                               | 52
+ES Sétif                                 | 59
+Espérance de Túnez                       | 63
+Étoile du Sahel                          | 57
+Hearts of Oak                            | 54
+MC Alger                                 | 57
+Petro de Luanda                          | 54
+Rivers United                            | 48
+Simba SC                                 | 53
+TP Mazembe                               | 58
+
+-- Sudáfrica / Betway Premiership  [sudafrica]  (16) --
+AmaZulu FC                               | 52
+Chippa United                            | 49
+Durban City                              | 48
+Golden Arrows                            | 53
+Kaizer Chiefs                            | 58
+Kruger United                            | 46
+Mamelodi Sundowns                        | 63
+Marumo Gallants                          | 47
+Milford FC                               | 48
+Orlando Pirates                          | 57
+Polokwane City                           | 48
+Richards Bay FC                          | 51
+Sekhukhune United                        | 50
+Siwelele FC                              | 48
+Stellenbosch FC                          | 53
+TS Galaxy                                | 51
+
+###########################################################
+#  OCEANIA (OFC)
+###########################################################
+
+-- Oceanía / Resto de OFC  [otrosofc]  (8) --
+AS Pirae                                 | 42
+Auckland City FC                         | 54
+Bay Olympic                              | 37
+Birkenhead United                        | 44
+Christchurch United                      | 42
+Hienghène Sport                          | 42
+Solomon Warriors                         | 40
+Wellington Olympic                       | 39
+
+###########################################################
+#  SELECCIONES NACIONALES  (211)
+###########################################################
+
+-- Selecciones EUROPA (UEFA)  [__nations__/UEFA]  (55) --
+Albania                                  | 69
+Alemania                                 | 84
+Andorra                                  | 58
+Armenia                                  | 68
+Austria                                  | 76
+Azerbaiyán                               | 63
+Bélgica                                  | 80
+Bielorrusia                              | 62
+Bosnia-Herzegovina                       | 70
+Bulgaria                                 | 66
+Chequia                                  | 73
+Chipre                                   | 64
+Croacia                                  | 81
+Dinamarca                                | 77
+Escocia                                  | 75
+Eslovaquia                               | 71
+Eslovenia                                | 69
+España                                   | 87
+Estonia                                  | 59
+Finlandia                                | 67
+Francia                                  | 88
+Gales                                    | 70
+Georgia                                  | 68
+Gibraltar                                | 53
+Grecia                                   | 71
+Hungría                                  | 69
+Inglaterra                               | 87
+Irlanda                                  | 68
+Irlanda del Norte                        | 65
+Islandia                                 | 67
+Islas Feroe                              | 63
+Israel                                   | 67
+Italia                                   | 81
+Kazajistán                               | 63
+Kosovo                                   | 67
+Letonia                                  | 62
+Liechtenstein                            | 53
+Lituania                                 | 61
+Luxemburgo                               | 64
+Macedonia del Norte                      | 68
+Malta                                    | 56
+Moldavia                                 | 57
+Montenegro                               | 68
+Noruega                                  | 78
+Países Bajos                             | 84
+Polonia                                  | 75
+Portugal                                 | 85
+Rumanía                                  | 68
+Rusia                                    | 71
+San Marino                               | 49
+Serbia                                   | 75
+Suecia                                   | 77
+Suiza                                    | 79
+Turquía                                  | 76
+Ucrania                                  | 74
+
+-- Selecciones SUDAMERICA (CONMEBOL)  [__nations__/CONMEBOL]  (10) --
+Argentina                                | 87
+Bolivia                                  | 68
+Brasil                                   | 86
+Chile                                    | 73
+Colombia                                 | 80
+Ecuador                                  | 77
+Paraguay                                 | 75
+Perú                                     | 72
+Uruguay                                  | 79
+Venezuela                                | 72
+
+-- Selecciones NORTEAMERICA Y CARIBE (CONCACAF)  [__nations__/CONCACAF]  (35) --
+Anguila                                  | 37
+Antigua y Barbuda                        | 46
+Aruba                                    | 39
+Bahamas                                  | 38
+Barbados                                 | 41
+Belice                                   | 48
+Bermudas                                 | 49
+Canadá                                   | 74
+Costa Rica                               | 70
+Cuba                                     | 56
+Curazao                                  | 65
+Dominica                                 | 43
+El Salvador                              | 61
+Estados Unidos                           | 79
+Granada                                  | 47
+Guatemala                                | 62
+Guyana                                   | 45
+Haití                                    | 67
+Honduras                                 | 68
+Islas Caimán                             | 36
+Islas Turcas y Caicos                    | 35
+Islas Vírgenes Británicas                | 32
+Islas Vírgenes de EE.UU.                 | 33
+Jamaica                                  | 68
+México                                   | 76
+Montserrat                               | 52
+Nicaragua                                | 59
+Panamá                                   | 67
+Puerto Rico                              | 54
+República Dominicana                     | 58
+San Cristóbal y Nieves                   | 53
+San Vicente y las Granadinas             | 54
+Santa Lucía                              | 52
+Surinam                                  | 64
+Trinidad y Tobago                        | 64
+
+-- Selecciones ASIA (AFC)  [__nations__/AFC]  (46) --
+Afganistán                               | 48
+Arabia Saudita                           | 69
+Australia                                | 70
+Bangladés                                | 46
+Baréin                                   | 57
+Brunéi                                   | 40
+Bután                                    | 41
+Camboya                                  | 45
+Catar                                    | 68
+China                                    | 62
+Corea del Norte                          | 57
+Corea del Sur                            | 73
+Emiratos Árabes Unidos                   | 64
+Filipinas                                | 58
+Guam                                     | 47
+Hong Kong                                | 48
+India                                    | 51
+Indonesia                                | 55
+Irak                                     | 67
+Irán                                     | 69
+Japón                                    | 75
+Jordania                                 | 62
+Kirguistán                               | 56
+Kuwait                                   | 58
+Laos                                     | 51
+Líbano                                   | 60
+Macao                                    | 46
+Malasia                                  | 57
+Maldivas                                 | 53
+Mongolia                                 | 52
+Myanmar                                  | 52
+Nepal                                    | 49
+Omán                                     | 59
+Pakistán                                 | 53
+Palestina                                | 57
+Singapur                                 | 55
+Siria                                    | 63
+Sri Lanka                                | 47
+Tailandia                                | 56
+Taipéi Chino                             | 50
+Tayikistán                               | 54
+Timor Oriental                           | 45
+Turkmenistán                             | 53
+Uzbekistán                               | 64
+Vietnam                                  | 58
+Yemen                                    | 53
+
+-- Selecciones AFRICA (CAF)  [__nations__/CAF]  (54) --
+Angola                                   | 2.5
+Argelia                                  | 3.5
+Benín                                    | 2.5
+Botsuana                                 | 1.5
+Burkina Faso                             | 3
+Burundi                                  | 2
+Cabo Verde                               | 3
+Camerún                                  | 3.5
+Chad                                     | 1.5
+Comoras                                  | 2
+Congo                                    | 2.5
+Costa de Marfil                          | 3.5
+Egipto                                   | 3.5
+Eritrea                                  | 1.5
+Esuatini                                 | 1
+Etiopía                                  | 2
+Gabón                                    | 3
+Gambia                                   | 2.5
+Ghana                                    | 3.5
+Guinea                                   | 3
+Guinea Ecuatorial                        | 2.5
+Guinea-Bisáu                             | 2
+Kenia                                    | 2
+Lesoto                                   | 1.5
+Liberia                                  | 1.5
+Libia                                    | 2
+Madagascar                               | 1.5
+Malaui                                   | 2
+Malí                                     | 3
+Marruecos                                | 4
+Mauricio                                 | 1
+Mauritania                               | 2
+Mozambique                               | 2.5
+Namibia                                  | 2
+Níger                                    | 2
+Nigeria                                  | 4
+RD Congo                                 | 3
+República Centroafricana                 | 2.5
+Ruanda                                   | 2
+Santo Tomé y Príncipe                    | 1
+Senegal                                  | 4
+Seychelles                               | 1
+Sierra Leona                             | 2.5
+Somalia                                  | 1
+Sudáfrica                                | 3
+Sudán                                    | 2.5
+Sudán del Sur                            | 1.5
+Tanzania                                 | 2
+Togo                                     | 2.5
+Túnez                                    | 3
+Uganda                                   | 2.5
+Yibuti                                   | 1.5
+Zambia                                   | 2.5
+Zimbabue                                 | 2.5
+
+-- Selecciones OCEANIA (OFC)  [__nations__/OFC]  (11) --
+Fiyi                                     | 1.5
+Islas Cook                               | 1
+Islas Salomón                            | 1.5
+Nueva Caledonia                          | 2
+Nueva Zelanda                            | 3
+Papúa Nueva Guinea                       | 1.5
+Samoa                                    | 1
+Samoa Americana                          | 1
+Tahití                                   | 1.5
+Tonga                                    | 1
+Vanuatu                                  | 1
+
+###########################################################
+#  TOTAL: 1114 clubes en 63 ligas + 211 selecciones
+###########################################################
