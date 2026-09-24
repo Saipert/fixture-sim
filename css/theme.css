@@ -1511,8 +1511,13 @@ body.conclub{scrollbar-color:var(--club-scroll,var(--line)) rgba(255,255,255,.04
   body.career #view-world.active { height: auto; min-height: 0; }
   .wlayout { height: auto; }
   .wmain { flex: none; overflow: visible; min-height: 0; }
-  .dash { grid-template-columns: 1fr; height: auto; overflow: visible; gap: 10px; }
-  .dcol, .dcol.r2, .dcol.r21, .dcol.r3, .dcol.rpart { grid-template-rows: auto; min-height: 0; }
+  /* En el telefono manda el partido: la previa arriba del todo y las
+     estadisticas debajo. Las columnas se deshacen para poder reordenar los
+     paneles sueltos, que en escritorio van repartidos en tres columnas. */
+  .dash { display: flex; flex-direction: column; height: auto; overflow: visible; gap: 10px; }
+  .dcol, .dcol.r2, .dcol.r21, .dcol.r3, .dcol.rpart { display: contents; }
+  .dash > .dcol.rpart > .panel:first-child { order: -1; }
+  .dash > .panel, .dash > .dsplit { order: 0; }
   .dcol.rpart > .panel { min-height: 0; }
   .panel { height: auto; }
   /* los paneles crecen con su contenido; nada de scroll dentro de scroll */
@@ -1527,11 +1532,16 @@ body.conclub{scrollbar-color:var(--club-scroll,var(--line)) rgba(255,255,255,.04
   .wtop .big { font-size: 15px; }
   .wtop .pill, .wtop button { font-size: 11.5px; }
 
-  /* pestañas en una tira que se desliza, sin partirse en dos filas */
-  #wTabs { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch;
-    scrollbar-width: none; }
-  #wTabs::-webkit-scrollbar { display: none; }
+  /* Las pestañas caben en dos filas y se ven todas. Antes iban en una tira
+     que se deslizaba, pero los filtros de Resultados viven en esa misma
+     tira: había que arrastrar hasta la derecha para elegir competición. */
+  #wTabs { flex-wrap: wrap; overflow: visible; }
   #wTabs button { flex: 0 0 auto; }
+  /* y los filtros, en su propia fila y uno debajo de otro */
+  #wTabsExtra.on { flex: 1 0 100%; order: 2; margin-top: 6px; display: block; }
+  #wTabsExtra .toolbar { flex-direction: column; align-items: stretch; gap: 4px; }
+  #wTabsExtra .toolbar label { margin-top: 4px; }
+  #wTabsExtra .toolbar select { width: 100%; min-width: 0; max-width: none; }
 
   /* en la tabla no caben nueve columnas: se quedan las que se miran */
   .minitab th.gep, .minitab td.gep, .minitab th.form, .minitab td.form { display: none; }
@@ -1556,6 +1566,30 @@ body.conclub{scrollbar-color:var(--club-scroll,var(--line)) rgba(255,255,255,.04
   /* la vista previa, sin que el nombre largo empuje el escudo */
   .nextm .vs2 { gap: 8px; }
   .nextm .side2 b { font-size: 13px; }
+
+  /* Con un partido en pantalla, la cabecera del club sobra: ocupaba media
+     pantalla y empujaba TU resultado por debajo del borde. Vuelve sola al
+     pulsar «Volver al club». */
+  /* «Volver al club» sólo existe mientras hay un partido en pantalla; la
+     vista de Resultados comparte contenedor con el partido, así que hay que
+     anclarse a ese botón o se quedaría sin pestañas. */
+  .wlayout:has(#bBack) .wtop { display: none; }
+  .wlayout:has(#bBack) #wTabs { display: none; }
+
+  /* Tu partido es el titular: grande y destacado. Los demás de la jornada
+     van debajo, en letra pequeña, que son el acompañamiento. */
+  .mv-wrap .nextm { background: rgba(61, 157, 255, .07); border-radius: 12px;
+    padding: 12px 6px; margin-bottom: 4px; }
+  .mv-wrap .nextm .vs2 { gap: 6px; margin: 6px 0; }
+  .mv-wrap .nextm .mid { font-size: 30px; }
+  .mv-wrap .nextm .side2 b { font-size: 14px; }
+  .mv-wrap .nextm .side2 .cw { width: 56px !important; height: 56px !important; }
+  .mv-wrap .nextm .side2 .cw img { width: 100% !important; height: 100% !important; }
+  .mv-wrap .subh { margin-top: 12px; }
+  .mv-wrap .fx .scline .cw { width: 24px !important; height: 24px !important; }
+  .mv-wrap .fx .scline .cw img { width: 100% !important; height: 100% !important; }
+  .mv-wrap .fx .scline { font-size: 12px; padding: 4px 6px; }
+  .mv-wrap .fx .sc-gols { font-size: 10.5px; }
 }
 
 /* teléfonos estrechos de verdad */
