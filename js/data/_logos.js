@@ -64,7 +64,19 @@ window.LEAGUE_LOGO = {
  "suecia": "logos/ligas/sweden_allsvenskan_128x128.football-logos.cc.png",
  "suiza": "logos/ligas/switzerland_swiss-football-league_128x128.football-logos.cc.png",
  "turquia": "logos/ligas/turkey_super-lig.png",
- "ucrania": "logos/ligas/ukraine-premier-league.png"
+ "ucrania": "logos/ligas/ukraine-premier-league.png",
+turquia2: 'logos/ligas/turkey 1st lig.png',
+belgica2: 'logos/ligas/challenger-pro-league.bc8a2f5a.png',
+bulgaria: 'logos/ligas/parva-liga.e0ebbfcd.png',
+azerbaiyan: 'logos/ligas/azerbaijan-premier-league.ab198d4c.png',
+kazajistan: 'logos/ligas/kazakhstan-premier-league.708f25e1.png',
+bosnia: 'logos/ligas/premijer-league-bosnia.png',
+eslovaquia: 'logos/ligas/slovak-first-football-league.9e47f62c.png',
+eslovenia: 'logos/ligas/slovenian-prvaliga.339a95cd.png',
+georgia: 'logos/ligas/erovnuli-liga.45f49ebc.png',
+albania: 'logos/ligas/albanian league.png',
+armenia: 'logos/ligas/armenian-premier-league.8ce3b659.png',
+irlanda: 'logos/ligas/league-of-ireland-premier-division.f65d65a6.png'
 };
 window.COMP_LOGO = {
  "afccl": "logos/torneos/tournaments_afc-champions-league-elite_128x128.football-logos.cc.png",
@@ -76,5 +88,4 @@ window.COMP_LOGO = {
  "wc2026": "logos/torneos/tournaments_fifa-world-cup-2026_128x128.football-logos.cc.png",
  "ucl": "logos/torneos/tournaments_uefa-champions-league_128x128.football-logos.cc.png",
  "uel": "logos/torneos/tournaments_uefa-europa-league_128x128.football-logos.cc.png",
- "supercup": "logos/torneos/tournaments_uefa-super-cup_128x128.football-logos.cc.png"
-};
+ "supercup": "logos/torneos/tournaments_uefa-super-cup_128x128.football-logos.cc.png"};

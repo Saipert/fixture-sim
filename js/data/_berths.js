@@ -179,6 +179,9 @@ window.BERTHS = {
 /* «po» = el último cupo se juega en un play-off entre los cuatro mejores
    que no ascendieron directo (semifinales cruzadas y final). */
 window.PROMOTIONS = [
+  /* las dos segundas divisiones nuevas */
+  { tier1: 'turquia', tier2: 'turquia2', n: 3, po: true },
+  { tier1: 'belgica', tier2: 'belgica2', n: 2, po: true },
   { tier1: 'premier', tier2: 'championship', n: 3, po: true },
   { tier1: 'championship', tier2: 'league1', n: 3, po: true },
   { tier1: 'league1', tier2: 'league2', n: 4, po: true },

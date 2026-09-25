@@ -109,6 +109,25 @@
     return l.length ? l[l.length - 1] : null;
   }
   /* un club al azar de cada división, de abajo arriba */
+  /* Los clubes de «Resto de UEFA» llevan apuntado su país. Si el jugador es
+     de un país sin liga propia, su primera oferta tiene que ser de su
+     tierra: nadie de Andorra empieza fichado por un club de Malta. Hay al
+     menos un club de cada país de la UEFA. */
+  function mismoPais(club, fifa) {
+    var mapa = global.CLUB_COUNTRY || {};
+    var suyo = mapa[club && club.n];
+    if (!suyo || !global.Nac) return false;
+    var a = String(suyo).toLowerCase();
+    var b = String(Nac.nombre(fifa) || '').toLowerCase();
+    if (!b) return false;
+    return a === b || a.indexOf(b) === 0 || b.indexOf(a) === 0;
+  }
+  /* los de su país delante; entre iguales manda el azar del barajado */
+  function primeroLosSuyos(lista, fifa) {
+    return lista.sort(function (x, y) {
+      return (mismoPais(y, fifa) ? 1 : 0) - (mismoPais(x, fifa) ? 1 : 0);
+    });
+  }
   function ofertasInicio(fifa) {
     var esc = escalonesDe(fifa);
     if (esc) {
@@ -130,7 +149,7 @@
     var out = [], usados = {};
     ligas.slice().reverse().forEach(function (lid) {
       if (out.length >= 3) return;
-      var pool = Comp.shuffle(LG()[lid].teams.slice());
+      var pool = primeroLosSuyos(Comp.shuffle(LG()[lid].teams.slice()), fifa);
       for (var i = 0; i < pool.length; i++) {
         if (usados[pool[i].n]) continue;
         usados[pool[i].n] = 1;
@@ -140,7 +159,7 @@
     });
     /* si no había tres divisiones se completa con la de más abajo */
     var lid0 = ligas[ligas.length - 1];
-    var resto = Comp.shuffle(LG()[lid0].teams.slice());
+    var resto = primeroLosSuyos(Comp.shuffle(LG()[lid0].teams.slice()), fifa);
     for (var k = 0; out.length < 3 && k < resto.length; k++) {
       if (usados[resto[k].n]) continue;
       usados[resto[k].n] = 1;

@@ -23,7 +23,7 @@ window.COUNTRIES = [
   { id: 'por', name: 'Portugal', flag: '🇵🇹', conf: 'UEFA', leagues: ['portugal', 'portugal2'], cup: 'Taça de Portugal', supercup: 'Supertaça' },
   { id: 'sco', name: 'Escocia', flag: '🏴󠁧󠁢󠁳󠁣󠁴󠁿', conf: 'UEFA', leagues: ['escocia'], cup: 'Scottish Cup', cup2: 'Scottish League Cup' },
   { id: 'ned', name: 'Países Bajos', flag: '🇳🇱', conf: 'UEFA', leagues: ['eredivisie', 'eredivisie2'], cup: 'KNVB Beker', supercup: 'Johan Cruyff Schaal' },
-  { id: 'tur', name: 'Turquía', flag: '🇹🇷', conf: 'UEFA', leagues: ['turquia'], cup: 'Copa de Turquía' },
+  { id: 'tur', name: 'Turquía', flag: '🇹🇷', conf: 'UEFA', leagues: ['turquia', 'turquia2'], cup: 'Copa de Turquía' },
   { id: 'gre', name: 'Grecia', flag: '🇬🇷', conf: 'UEFA', leagues: ['grecia'], cup: 'Copa de Grecia' },
   { id: 'ukr', name: 'Ucrania', flag: '🇺🇦', conf: 'UEFA', leagues: ['ucrania'], cup: 'Copa de Ucrania' },
   { id: 'rus', name: 'Rusia', flag: '🇷🇺', conf: 'UEFA', leagues: ['rusia'], cup: 'Copa de Rusia' },
@@ -35,7 +35,7 @@ window.COUNTRIES = [
   { id: 'hun', name: 'Hungría', flag: '🇭🇺', conf: 'UEFA', leagues: ['hungria'], cup: 'Copa de Hungría' },
   { id: 'srb', name: 'Serbia', flag: '🇷🇸', conf: 'UEFA', leagues: ['serbia'], cup: 'Copa de Serbia' },
   { id: 'aut', name: 'Austria', flag: '🇦🇹', conf: 'UEFA', leagues: ['austria'], cup: 'Copa de Austria' },
-  { id: 'bel', name: 'Bélgica', flag: '🇧🇪', conf: 'UEFA', leagues: ['belgica'], cup: 'Copa de Bélgica' },
+  { id: 'bel', name: 'Bélgica', flag: '🇧🇪', conf: 'UEFA', leagues: ['belgica', 'belgica2'], cup: 'Copa de Bélgica' },
   { id: 'sui', name: 'Suiza', flag: '🇨🇭', conf: 'UEFA', leagues: ['suiza'], cup: 'Copa de Suiza' },
 
   { id: "cze", name: "Chequia", flag: "🇨🇿", conf: 'UEFA', leagues: ["chequia"], cup: "Copa de Chequia" },
@@ -73,6 +73,17 @@ window.COUNTRIES = [
   { id: 'egy', name: 'Egipto', flag: '🇪🇬', conf: 'CAF', leagues: ['egipto'], cup: 'Copa de Egipto' },
   { id: 'rsa', name: 'Sudáfrica', flag: '🇿🇦', conf: 'CAF', leagues: ['sudafrica'], cup: 'Nedbank Cup' },
   { id: 'cfx', name: 'Resto de CAF', flag: '🌍', conf: 'CAF', leagues: ['otroscaf'], cup: 'Copa CAF Regional' },
+
+  { id: 'bul', name: 'Bulgaria', flag: '🇧🇬', conf: 'UEFA', leagues: ['bulgaria'], cup: 'Copa de Bulgaria' },
+  { id: 'aze', name: 'Azerbaiyán', flag: '🇦🇿', conf: 'UEFA', leagues: ['azerbaiyan'], cup: 'Copa de Azerbaiyán' },
+  { id: 'kaz', name: 'Kazajistán', flag: '🇰🇿', conf: 'UEFA', leagues: ['kazajistan'], cup: 'Copa de Kazajistán' },
+  { id: 'bih', name: 'Bosnia-Herzegovina', flag: '🇧🇦', conf: 'UEFA', leagues: ['bosnia'], cup: 'Copa de Bosnia' },
+  { id: 'svk', name: 'Eslovaquia', flag: '🇸🇰', conf: 'UEFA', leagues: ['eslovaquia'], cup: 'Copa de Eslovaquia' },
+  { id: 'svn', name: 'Eslovenia', flag: '🇸🇮', conf: 'UEFA', leagues: ['eslovenia'], cup: 'Copa de Eslovenia' },
+  { id: 'geo', name: 'Georgia', flag: '🇬🇪', conf: 'UEFA', leagues: ['georgia'], cup: 'Copa de Georgia' },
+  { id: 'alb', name: 'Albania', flag: '🇦🇱', conf: 'UEFA', leagues: ['albania'], cup: 'Copa de Albania' },
+  { id: 'arm', name: 'Armenia', flag: '🇦🇲', conf: 'UEFA', leagues: ['armenia'], cup: 'Copa de Armenia' },
+  { id: 'irl', name: 'Irlanda', flag: '🇮🇪', conf: 'UEFA', leagues: ['irlanda'], cup: 'FAI Cup' },
 
   /* ---------------- OFC ---------------- */
   { id: 'ofx', name: 'Oceanía', flag: '🌏', conf: 'OFC', leagues: ['otrosofc'], cup: 'Copa de Oceanía de Clubes' }

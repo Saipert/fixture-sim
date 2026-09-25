@@ -56,6 +56,11 @@ window.COUNTRY_FLAG_FILE = {
   sco: 'gb-sct', ned: 'nl', tur: 'tr', gre: 'gr', ukr: 'ua', rus: 'ru',
   nor: 'no', den: 'dk', swe: 'se', pol: 'pl', cro: 'hr', hun: 'hu',
   srb: 'rs', aut: 'at', bel: 'be', sui: 'ch',
+  /* los que faltaban: sin esto el juego no sabe de qué país es su liga y
+     la carrera de jugador los mandaba a «Resto de UEFA» */
+  cze: 'cz', rou: 'ro', isr: 'il', cyp: 'cy', bul: 'bg', aze: 'az',
+  kaz: 'kz', bih: 'ba', svk: 'sk', svn: 'si', geo: 'ge', alb: 'al',
+  arm: 'am', irl: 'ie',
   arg: 'ar', bra: 'br', uru: 'uy', chi: 'cl', col: 'co', ecu: 'ec',
   per: 'pe', par: 'py', bol: 'bo', ven: 've',
   mex: 'mx', usa: 'us',
