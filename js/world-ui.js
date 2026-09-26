@@ -231,7 +231,12 @@
       /* cada modo tiene su propia partida guardada */
       refreshSaveInfo();
       $('#wModo').classList.add('hidden');
+      /* Cada modo esconde el panel del otro. Si no, al pasar por «Jugador»
+         y volver a entrar como «Entrenador», la ficha de creación se queda
+         puesta y empuja el selector de clubes mil cuatrocientos píxeles
+         hacia abajo: en el teléfono parecía que no estaban las ligas. */
       if (modo === 'jugador') {
+        $('#wStart').classList.add('hidden');
         CarreraUI.abreCreacion(function (datos) {
           World.create({ manualDraw: false });
           if (window.Carrera) {
@@ -242,6 +247,7 @@
           }
         });
       } else {
+        $('#wJugador').classList.add('hidden');
         $('#wStart').classList.remove('hidden');
         $('#wLoadBox').classList.remove('hidden');
       }
