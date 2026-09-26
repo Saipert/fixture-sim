@@ -38,7 +38,15 @@ window.LEAGUES.federalam = {
     { n: 'Libertad de Sunchales', s: 'LSU', c1: '#0B4EA2', c2: '#FFD100', str: 50, p: [] },
     { n: 'María Grande', s: 'MGR', c1: '#1B7A3D', c2: '#FFFFFF', str: 51, p: [] },
     { n: 'Pacífico', s: 'PAC', c1: '#111111', c2: '#FFFFFF', str: 51, p: [] },
-    { n: 'Parque Sur', s: 'PSU', c1: '#8B1A1A', c2: '#FFFFFF', str: 54, p: [] },
+    { n: 'Parque Sur', s: 'PSU', c1: '#8B1A1A', c2: '#FFFFFF', str: 53, fijo: true, p: [
+      ['Alan Heindenreich', 'GK', 52, 18], ['Ignacio Rondoni', 'LB', 54, 28], ['Joaquin Lopez', 'CB', 54, 28],
+      ['Jorge Lopez', 'CB', 53, 36], ['Damian Perujo', 'RB', 54, 32], ['Maximiliano Suarez', 'CM', 54, 33],
+      ['Felipe Acosta', 'CM', 51, 18], ['Thiago Guardia', 'AM', 54, 20], ['Enzo Luquez', 'LW', 53, 20],
+      ['Juan Cruz Guardia', 'ST', 55, 28], ['Leonel Mondragon', 'RW', 54, 27], ['Franco Delese', 'GK', 50, 29],
+      ['Alexis Chesini', 'RB', 51, 27], ['Facundo Martinez', 'CB', 52, 28], ['Franco Dellagiustina', 'LB', 49, 18],
+      ['Leonel Lopez', 'RB', 50, 30], ['Agustin Benitez', 'CM', 51, 26], ['Nicolas Ayala', 'CM', 51, 28],
+      ['Jonathan Besserer', 'ST', 52, 22]
+     ] },
     { n: 'Policial', s: 'POL', c1: '#C8102E', c2: '#FFD100', str: 50, p: [] },
     { n: 'Racing de Olavarría', s: 'ROL', c1: '#0057B8', c2: '#FFFFFF', str: 52, p: [] },
     { n: 'Racing de Trelew', s: 'RTR', c1: '#00843D', c2: '#FFFFFF', str: 50, p: [] },

@@ -316,6 +316,9 @@
       var lg = LEAGUES[id];
       if (!lg.pool) return;                       // sólo ligas que lo pidan
       lg.teams.forEach(function (t) {
+        /* «fijo» es un plantel puesto a mano: ni se rellena ni se reordena,
+           que el once es el que eligió quien lo cargó */
+        if (t.fijo) return;
         if (t.p && t.p.length >= (lg.squadSize || 17) && !t.str) return;
         completeTeam(t, t.pool || lg.pool, lg.squadSize || 17);
       });
