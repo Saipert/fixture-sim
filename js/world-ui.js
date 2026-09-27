@@ -1068,6 +1068,12 @@
      tal cual). Cuatro fichajes y cuatro ventas como mucho.
      ===================================================================== */
   var mkSel = null;       /* el club del que estamos mirando jugadores */
+  /* La oferta que se está preparando: a quién y por cuánto, en tanto por
+     ciento de lo que pide su club. Pagar de más convence; regatear se paga
+     caro, porque la probabilidad cae al cubo. */
+  var mkOferta = null;
+  var OFERTA_MIN = 50, OFERTA_MAX = 200;
+  function mkImporte(pide, pct) { return Math.round(pide * pct / 100); }
 
   function mkEstado() {
     var st = World.state;
@@ -1169,12 +1175,48 @@
         var noSale = Market.puedeSalir(mkSel, p);
         var motivo = freno || noSale || (precio > (st.caja || 0) ? 'no te alcanza la caja' : '') ||
           (fichados[p[0]] ? 'ya lo fichaste' : '');
-        return chipJug(p, '<span class="mk-val">' + Market.dinero(precio) + '</span>' +
+        var fila = chipJug(p, '<span class="mk-val">' + Market.dinero(precio) + '</span>' +
           '<span class="mk-prob ' + (pr >= 45 ? 'alta' : pr >= 18 ? 'media' : 'baja') + '">' + pr + '%</span>' +
           (fichados[p[0]] ? '<span class="mk-ok">fichado</span>'
             : '<button class="mini mk-b" data-fichar="' + esc(p[0]) + '"' +
               (motivo ? ' disabled title="' + esc(motivo) + '"' : '') + '>Ofertar</button>'));
+        if (!mkOferta || mkOferta.nombre !== p[0]) return fila;
+        return fila + mkPanelOferta(p, precio);
       }).join('');
+  }
+
+  /* El regateo: cuánto se ofrece y qué posibilidades da. El tope lo pone la
+     caja, que de nada sirve prometer lo que no se tiene. */
+  function mkPanelOferta(p, pide) {
+    var st = mkEstado();
+    var caja = st.caja || 0;
+    var topePct = Math.min(OFERTA_MAX, Math.floor(caja * 100 / Math.max(1, pide)));
+    if (topePct < OFERTA_MIN) topePct = OFERTA_MIN;
+    var pct = Math.min(mkOferta.pct, topePct);
+    var importe = mkImporte(pide, pct);
+    var pr = Math.round(Market.opciones(p, mkSel, me, importe) * 100);
+    return '<div class="mk-oferta" data-pide="' + pide + '" data-jug="' + esc(p[0]) + '">' +
+      '<div class="mk-of-fila">' +
+      '<input type="range" id="mkRango" min="' + OFERTA_MIN + '" max="' + topePct +
+        '" step="5" value="' + pct + '">' +
+      '<span class="mk-of-cifra" id="mkCifra">' + Market.dinero(importe) + '</span>' +
+      '<span class="mk-prob ' + (pr >= 45 ? 'alta' : pr >= 18 ? 'media' : 'baja') +
+        '" id="mkProb">' + pr + '%</span>' +
+      '</div>' +
+      '<div class="mk-of-pie">' +
+      '<span class="hint" id="mkNota">' + esc(mkNotaOferta(pct)) + '</span>' +
+      '<button class="mini primary" id="mkConfirmar">Ofertar</button>' +
+      '<button class="mini" id="mkCancelar">Cancelar</button>' +
+      '</div></div>';
+  }
+  function mkNotaOferta(pct) {
+    if (pct >= 160) return 'Muy por encima de lo que piden: difícil que digan que no.';
+    if (pct >= 125) return 'Bastante por encima de lo que piden.';
+    if (pct >= 105) return 'Algo por encima de lo que piden.';
+    if (pct >= 98) return 'Justo lo que piden.';
+    if (pct >= 85) return 'Un poco por debajo: se lo van a pensar.';
+    if (pct >= 70) return 'Bastante por debajo de lo que piden.';
+    return 'Casi una limosna: se van a reír de la oferta.';
   }
 
   /* ---- acciones ---- */
@@ -1210,13 +1252,14 @@
     toast('Te haces cargo de ' + me.n + '.');
   }
 
-  function mkFichar(nombre) {
+  function mkFichar(nombre, importe) {
     var st = mkEstado();
     if (!mkSel || mkPuedeFichar()) return;
     var p = mkSel.p.filter(function (x) { return x[0] === nombre; })[0];
     if (!p) return;
-    var precio = Market.pedido(p, mkSel);
+    var precio = importe != null ? importe : Market.pedido(p, mkSel);
     if (precio > (st.caja || 0)) return;
+    mkOferta = null;
     var pr = Market.opciones(p, mkSel, me, precio);
     if (Math.random() > pr) {
       st.fichajes.push({ n: p[0], ovr: p[2], precio: 0, fallo: true, de: mkSel.n });
@@ -3543,6 +3586,34 @@
         onPick: function (t) { if (t && t !== me) dirigeOtroClub(t); }
       });
     };
+    var rango = $('#mkRango');
+    if (rango) {
+      var caja2 = rango.parentNode.parentNode;
+      var pide = +caja2.getAttribute('data-pide');
+      var quien = caja2.getAttribute('data-jug');
+      var jug = mkSel && mkSel.p.filter(function (x) { return x[0] === quien; })[0];
+      /* se refresca a mano y no repintando: si se repinta, el dedo pierde
+         el deslizador a mitad de arrastre */
+      rango.oninput = function () {
+        var pct = +this.value;
+        mkOferta = { nombre: quien, pct: pct };
+        var imp = mkImporte(pide, pct);
+        if ($('#mkCifra')) $('#mkCifra').textContent = Market.dinero(imp);
+        if ($('#mkNota')) $('#mkNota').textContent = mkNotaOferta(pct);
+        var pr = jug ? Math.round(Market.opciones(jug, mkSel, me, imp) * 100) : 0;
+        var e = $('#mkProb');
+        if (e) {
+          e.textContent = pr + '%';
+          e.className = 'mk-prob ' + (pr >= 45 ? 'alta' : pr >= 18 ? 'media' : 'baja');
+        }
+      };
+      if ($('#mkConfirmar')) $('#mkConfirmar').onclick = function () {
+        mkFichar(quien, mkImporte(pide, +rango.value));
+      };
+      if ($('#mkCancelar')) $('#mkCancelar').onclick = function () {
+        mkOferta = null; renderBody();
+      };
+    }
     if ($('#mkBuscar')) $('#mkBuscar').onclick = function () {
       Picker.team({
         title: 'Elige el club del que quieres fichar', nations: false,
@@ -3568,7 +3639,8 @@
         var v = n.getAttribute('data-vender');
         if (v) { mkVender(v); return; }
         var fch = n.getAttribute('data-fichar');
-        if (fch) mkFichar(fch);
+        /* no se ficha de golpe: primero se decide cuánto se ofrece */
+        if (fch) { mkOferta = { nombre: fch, pct: 100 }; renderBody(); }
       });
     }
 

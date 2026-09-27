@@ -1602,3 +1602,23 @@ body.conclub{scrollbar-color:var(--club-scroll,var(--line)) rgba(255,255,255,.04
 /* el renglón pequeño de las cifras del mercado */
 .mk-cif .mk-sub { display:block; font-style:normal; font-size:10.5px; color:var(--dim);
   margin-top:2px; letter-spacing:.2px; }
+
+/* =========================================================================
+   REGATEO EN EL MERCADO
+   El panel que se abre bajo el jugador al que se le quiere hacer una oferta.
+   ========================================================================= */
+.mk-oferta { margin: -2px 0 8px; padding: 9px 11px; border-radius: 10px;
+  background: rgba(61,157,255,.08); border: 1px solid var(--line); }
+.mk-of-fila { display: flex; align-items: center; gap: 10px; }
+.mk-of-fila input[type=range] { flex: 1; min-width: 0; accent-color: var(--acc2); }
+.mk-of-cifra { font-weight: 800; font-size: 13.5px; min-width: 78px; text-align: right;
+  font-variant-numeric: tabular-nums; }
+.mk-of-pie { display: flex; align-items: center; gap: 8px; margin-top: 7px; flex-wrap: wrap; }
+.mk-of-pie .hint { flex: 1; min-width: 150px; font-size: 11.5px; }
+@media (max-width: 760px) {
+  .mk-of-fila { flex-wrap: wrap; }
+  .mk-of-fila input[type=range] { flex: 1 0 100%; }
+  .mk-of-cifra { min-width: 0; text-align: left; }
+  .mk-of-pie .hint { flex: 1 0 100%; }
+  .mk-of-pie button { flex: 1; }
+}
