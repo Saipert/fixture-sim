@@ -48,18 +48,30 @@ window.CONT_COMPS = {
     id: 'sudamericana', name: 'Copa Sudamericana', conf: 'CONMEBOL', level: 2,
     groups: 8, size: 4, qualify: 1, bestExtra: 0, playoffWith: 'libertadores'
   },
+  /* Las tres de Europa tienen la misma forma: 32 equipos, ocho grupos de
+     cuatro. Lo que cambia es a dónde va cada puesto.
+
+       Champions   1º y 2º a octavos; 3º a la repesca de la Europa League
+       Europa      1º a octavos; 2º a la repesca contra los 3º de Champions;
+                   3º a la repesca de la Conference
+       Conference  1º a octavos; 2º a la repesca contra los 3º de Europa
+
+     Así los octavos de la Europa y de la Conference salen de ocho primeros
+     de grupo más ocho supervivientes de su repesca. */
   ucl: {
     id: 'ucl', name: 'UEFA Champions League', conf: 'UEFA', level: 1,
     groups: 8, size: 4, qualify: 2, bestExtra: 0,
     prelim: true, playoff: true, feeds: 'uel'
   },
-  /* 48 equipos: pasan los dos primeros de cada grupo y se les suman los
-     ocho terceros de la Champions: dieciseisavos de 32.
-     Su clasificación tiene dos rondas, primera y play-off. */
   uel: {
     id: 'uel', name: 'UEFA Europa League', conf: 'UEFA', level: 2,
-    groups: 12, size: 4, qualify: 2, bestExtra: 0,
-    prelim: true, prelimSize: 24, playoff: true, takesThirdsFrom: 'ucl'
+    groups: 8, size: 4, qualify: 1, bestExtra: 0,
+    playoff: true, repescaDe: 'ucl', feeds: 'conference'
+  },
+  conference: {
+    id: 'conference', name: 'UEFA Conference League', conf: 'UEFA', level: 3,
+    groups: 8, size: 4, qualify: 1, bestExtra: 0,
+    playoff: true, repescaDe: 'uel'
   },
   concachampions: {
     id: 'concachampions', name: 'CONCACAF Champions Cup', conf: 'CONCACAF', level: 1,
@@ -119,38 +131,50 @@ window.BERTHS = {
 
      El campeón de cada copa nacional entra en los grupos de la Europa League
      en los siete países grandes; en el resto, en su play-off.              */
-  eng: { conf: 'UEFA', top: 4, po: 0, pre: 0, second: 3, secondPo: 0, cup: 'second' },
-  esp: { conf: 'UEFA', top: 4, po: 0, pre: 0, second: 3, secondPo: 0, cup: 'second' },
-  ita: { conf: 'UEFA', top: 4, po: 0, pre: 0, second: 3, secondPo: 0, cup: 'second' },
-  ger: { conf: 'UEFA', top: 3, po: 0, pre: 0, second: 3, secondPo: 0, cup: 'second' },
-  fra: { conf: 'UEFA', top: 2, po: 0, pre: 0, second: 3, secondPo: 0, cup: 'second' },
-  por: { conf: 'UEFA', top: 2, po: 0, pre: 0, second: 2, secondPo: 0, cup: 'second' },
-  ned: { conf: 'UEFA', top: 1, po: 1, pre: 0, second: 2, secondPo: 0, cup: 'second' },
-  tur: { conf: 'UEFA', top: 1, po: 1, pre: 0, second: 1, secondPo: 1, cup: 'secondPo' },
-  bel: { conf: 'UEFA', top: 1, po: 0, pre: 1, second: 1, secondPo: 1, cup: 'secondPo' },
-  rus: { conf: 'UEFA', top: 1, po: 0, pre: 1, second: 1, secondPo: 1, cup: 'secondPo' },
+  /* --- los nueve con plaza directa en los grupos de Champions --- */
+  eng: { conf: 'UEFA', top: 4, po: 0, pre: 0, second: 2, secondPo: 0, third: 1, thirdPo: 0, cup: 'second' },
+  esp: { conf: 'UEFA', top: 3, po: 0, pre: 0, second: 2, secondPo: 0, third: 1, thirdPo: 0, cup: 'second' },
+  ita: { conf: 'UEFA', top: 3, po: 0, pre: 0, second: 2, secondPo: 0, third: 1, thirdPo: 0, cup: 'second' },
+  ger: { conf: 'UEFA', top: 3, po: 0, pre: 0, second: 2, secondPo: 0, third: 1, thirdPo: 0, cup: 'second' },
+  fra: { conf: 'UEFA', top: 2, po: 1, pre: 0, second: 2, secondPo: 0, third: 0, thirdPo: 1, cup: 'second' },
+  por: { conf: 'UEFA', top: 1, po: 1, pre: 0, second: 1, secondPo: 0, third: 0, thirdPo: 1, cup: 'second' },
+  ned: { conf: 'UEFA', top: 1, po: 1, pre: 0, second: 1, secondPo: 0, third: 0, thirdPo: 1, cup: 'second' },
+  tur: { conf: 'UEFA', top: 1, po: 1, pre: 0, second: 1, secondPo: 0, third: 0, thirdPo: 1, cup: 'second' },
+  bel: { conf: 'UEFA', top: 1, po: 1, pre: 0, second: 1, secondPo: 0, third: 0, thirdPo: 1, cup: 'second' },
 
-  gre: { conf: 'UEFA', top: 0, po: 1, pre: 0, second: 0, secondPo: 2, cup: 'secondPo' },
-  aut: { conf: 'UEFA', top: 0, po: 1, pre: 0, second: 0, secondPo: 2, cup: 'secondPo' },
-  sco: { conf: 'UEFA', top: 0, po: 1, pre: 0, second: 0, secondPo: 2, cup: 'secondPo' },
-  sui: { conf: 'UEFA', top: 0, po: 1, pre: 0, second: 0, secondPo: 2, cup: 'secondPo' },
+  /* --- entran por el play-off de Champions --- */
+  gre: { conf: 'UEFA', top: 0, po: 1, pre: 0, second: 0, secondPo: 0, third: 0, thirdPo: 2, cup: 'thirdPo' },
+  sco: { conf: 'UEFA', top: 0, po: 1, pre: 0, second: 0, secondPo: 0, third: 0, thirdPo: 2, cup: 'thirdPo' },
 
-  cze: { conf: 'UEFA', top: 0, po: 0, pre: 1, second: 0, secondPo: 2, cup: 'secondPo' },
-  nor: { conf: 'UEFA', top: 0, po: 0, pre: 1, second: 0, secondPo: 2, cup: 'secondPo' },
-  den: { conf: 'UEFA', top: 0, po: 0, pre: 1, second: 0, secondPo: 2, cup: 'secondPo' },
-  pol: { conf: 'UEFA', top: 0, po: 0, pre: 1, second: 0, secondPo: 2, cup: 'secondPo' },
-  isr: { conf: 'UEFA', top: 0, po: 0, pre: 1, second: 0, secondPo: 2, cup: 'secondPo' },
-  ukr: { conf: 'UEFA', top: 0, po: 0, pre: 1, second: 0, secondPo: 2, cup: 'secondPo' },
-  srb: { conf: 'UEFA', top: 0, po: 0, pre: 1, second: 0, secondPo: 2, cup: 'secondPo' },
-  cyp: { conf: 'UEFA', top: 0, po: 0, pre: 1, second: 0, secondPo: 2, cup: 'secondPo' },
-
-  swe: { conf: 'UEFA', top: 0, po: 0, pre: 1, second: 0, secondPo: 2, cup: 'secondPo' },
-  cro: { conf: 'UEFA', top: 0, po: 0, pre: 1, second: 0, secondPo: 2, cup: 'secondPo' },
-  rou: { conf: 'UEFA', top: 0, po: 0, pre: 1, second: 0, secondPo: 2, cup: 'secondPo' },
-  hun: { conf: 'UEFA', top: 0, po: 0, pre: 1, second: 0, secondPo: 2, cup: 'secondPo' },
+  /* --- empiezan en la previa de Champions --- */
+  rus: { conf: 'UEFA', top: 0, po: 0, pre: 1, second: 0, secondPo: 0, third: 0, thirdPo: 1, cup: 'thirdPo' },
+  ukr: { conf: 'UEFA', top: 0, po: 0, pre: 1, second: 0, secondPo: 0, third: 0, thirdPo: 1, cup: 'thirdPo' },
+  sui: { conf: 'UEFA', top: 0, po: 0, pre: 1, second: 0, secondPo: 0, third: 0, thirdPo: 1, cup: 'thirdPo' },
+  cze: { conf: 'UEFA', top: 0, po: 0, pre: 1, second: 0, secondPo: 0, third: 0, thirdPo: 1, cup: 'thirdPo' },
+  nor: { conf: 'UEFA', top: 0, po: 0, pre: 1, second: 0, secondPo: 0, third: 0, thirdPo: 1, cup: 'thirdPo' },
+  den: { conf: 'UEFA', top: 0, po: 0, pre: 1, second: 0, secondPo: 0, third: 0, thirdPo: 1, cup: 'thirdPo' },
+  swe: { conf: 'UEFA', top: 0, po: 0, pre: 1, second: 0, secondPo: 0, third: 0, thirdPo: 1, cup: 'thirdPo' },
+  aut: { conf: 'UEFA', top: 0, po: 0, pre: 1, second: 0, secondPo: 0, third: 0, thirdPo: 1, cup: 'thirdPo' },
+  pol: { conf: 'UEFA', top: 0, po: 0, pre: 1, second: 0, secondPo: 0, third: 0, thirdPo: 1, cup: 'thirdPo' },
+  srb: { conf: 'UEFA', top: 0, po: 0, pre: 1, second: 0, secondPo: 0, third: 0, thirdPo: 1, cup: 'thirdPo' },
+  cyp: { conf: 'UEFA', top: 0, po: 0, pre: 1, second: 0, secondPo: 0, third: 0, thirdPo: 1, cup: 'thirdPo' },
+  isr: { conf: 'UEFA', top: 0, po: 0, pre: 1, second: 0, secondPo: 0, third: 0, thirdPo: 1, cup: 'thirdPo' },
+  cro: { conf: 'UEFA', top: 0, po: 0, pre: 1, second: 0, secondPo: 0, third: 0, thirdPo: 1, cup: 'thirdPo' },
+  hun: { conf: 'UEFA', top: 0, po: 0, pre: 1, second: 0, secondPo: 0, third: 0, thirdPo: 1, cup: 'thirdPo' },
+  rou: { conf: 'UEFA', top: 0, po: 0, pre: 1, second: 0, secondPo: 0, third: 0, thirdPo: 1, cup: 'thirdPo' },
+  alb: { conf: 'UEFA', top: 0, po: 0, pre: 1, second: 0, secondPo: 0, third: 0, thirdPo: 1, cup: 'thirdPo' },
+  arm: { conf: 'UEFA', top: 0, po: 0, pre: 1, second: 0, secondPo: 0, third: 0, thirdPo: 1, cup: 'thirdPo' },
+  aze: { conf: 'UEFA', top: 0, po: 0, pre: 1, second: 0, secondPo: 0, third: 0, thirdPo: 1, cup: 'thirdPo' },
+  kaz: { conf: 'UEFA', top: 0, po: 0, pre: 1, second: 0, secondPo: 0, third: 0, thirdPo: 1, cup: 'thirdPo' },
+  bih: { conf: 'UEFA', top: 0, po: 0, pre: 1, second: 0, secondPo: 0, third: 0, thirdPo: 1, cup: 'thirdPo' },
+  bul: { conf: 'UEFA', top: 0, po: 0, pre: 1, second: 0, secondPo: 0, third: 0, thirdPo: 1, cup: 'thirdPo' },
+  svk: { conf: 'UEFA', top: 0, po: 0, pre: 1, second: 0, secondPo: 0, third: 0, thirdPo: 1, cup: 'thirdPo' },
+  svn: { conf: 'UEFA', top: 0, po: 0, pre: 1, second: 0, secondPo: 0, third: 0, thirdPo: 1, cup: 'thirdPo' },
+  geo: { conf: 'UEFA', top: 0, po: 0, pre: 1, second: 0, secondPo: 0, third: 0, thirdPo: 1, cup: 'thirdPo' },
+  irl: { conf: 'UEFA', top: 0, po: 0, pre: 1, second: 0, secondPo: 0, third: 0, thirdPo: 1, cup: 'thirdPo' },
 
   /* los campeones de las ligas que no están cargadas enteras */
-  uex: { conf: 'UEFA', top: 0, po: 0, pre: 2, second: 0, secondPo: 7, cup: 'secondPo' },
+  uex: { conf: 'UEFA', top: 0, po: 0, pre: 1, second: 0, secondPo: 3, third: 0, thirdPo: 6, cup: 'secondPo' },
 
   /* ---------------- CONCACAF ---------------- */
   mex: { conf: 'CONCACAF', top: 4, pre: 0, second: 0, cup: 'top' },

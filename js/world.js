@@ -226,7 +226,7 @@
   }
 
   /* las puertas de entrada, de la mejor a la peor */
-  var PUERTAS = ['top', 'po', 'pre', 'second', 'secondPo'];
+  var PUERTAS = ['top', 'po', 'pre', 'second', 'secondPo', 'third', 'thirdPo'];
 
   function allocate(countryId, orderedTeams, cupChampion) {
     var b = global.BERTHS[countryId];
@@ -261,7 +261,7 @@
     }
 
     var res = {
-      top: [], po: [], pre: [], second: [], secondPo: [],
+      top: [], po: [], pre: [], second: [], secondPo: [], third: [], thirdPo: [],
       cupTeam: cupTeam, cupTo: b.cup, freed: freed, conf: b.conf,
       entra: null, entraEn: null
     };
@@ -294,7 +294,7 @@
 
   var CONF_MAP = {
     CONMEBOL: { top: 'libertadores', second: 'sudamericana' },
-    UEFA: { top: 'ucl', second: 'uel' },
+    UEFA: { top: 'ucl', second: 'uel', third: 'conference' },
     CONCACAF: { top: 'concachampions' },
     AFC: { top: 'afccl' },
     CAF: { top: 'cafcl' }
@@ -321,11 +321,42 @@
       alloc.second.forEach(function (t) { q[map.second].groups.push(t); });
       alloc.secondPo.forEach(function (t) { q[map.second].playoff.push(t); });
     }
+    if (map.third) {
+      alloc.third.forEach(function (t) { q[map.third].groups.push(t); });
+      alloc.thirdPo.forEach(function (t) { q[map.third].playoff.push(t); });
+    }
+  }
+
+  /* Los tres campeones de Europa entran directos a los grupos de la
+     Champions del año siguiente, y con eso liberan su plaza de liga: al
+     quitarlos de la tabla, el que venía detrás hereda el cupo. */
+  var CAMPEONES_INICIALES = ['Paris Saint-Germain', 'Aston Villa', 'AS Roma'];
+  function campeonesDeEuropa() {
+    var out = [];
+    ['ucl', 'uel', 'conference'].forEach(function (id) {
+      var c = state.conts && state.conts[id];
+      if (c && c.champion) { c.champion.__deComp = id; out.push(c.champion); }
+    });
+    return out;
+  }
+  /* la primera temporada todavía no hay campeones: se usan los de verdad */
+  function campeonesDeSalida() {
+    var out = [];
+    CAMPEONES_INICIALES.forEach(function (nombre) {
+      Object.keys(global.LEAGUES).forEach(function (lid) {
+        if (lid === '__nations__') return;
+        (global.LEAGUES[lid].teams || []).forEach(function (t) {
+          if (t.n === nombre && out.indexOf(t) < 0) out.push(t);
+        });
+      });
+    });
+    return out;
   }
 
   /* temporada 1: no hay clasificaciones previas, se usa la valoración */
   function seedQualification() {
     var q = emptyQual();
+
     (global.COUNTRIES || []).forEach(function (c) {
       if (!global.BERTHS[c.id] || !c.have || !c.have.length) return;
       var teams = global.LEAGUES[c.have[0]].teams.slice()
@@ -334,6 +365,7 @@
       var alloc = allocate(c.id, teams, cupChamp);
       if (alloc) applyAllocation(q, alloc);
     });
+    campeonesVigentes(q, campeonesDeSalida());
     return q;
   }
 
@@ -362,16 +394,19 @@
     /* Los dos campeones europeos tienen su plaza en los grupos de la
        Champions. El que ya se había clasificado por liga libera su cupo, y
        el hueco se lo queda el mejor equipo libre de su país. */
-    campeonesVigentes(q);
+    campeonesVigentes(q, campeonesDeEuropa());
     return q;
   }
 
-  function campeonesVigentes(q) {
+  var NOMBRE_COMP = { ucl: 'la Champions', uel: 'la Europa League',
+    conference: 'la Conference League' };
+  /* «lista» son los campeones que traen plaza. En la primera temporada
+     todavía no hay ninguno jugado, así que se usan los de la vida real. */
+  function campeonesVigentes(q, lista) {
     if (!q.ucl) return;
-    var C = state.conts || {};
-    [['ucl', 'la Champions'], ['uel', 'la Europa League']].forEach(function (par) {
-      var camp = C[par[0]] && C[par[0]].champion;
+    (lista || []).forEach(function (camp) {
       if (!camp) return;
+      var deDonde = NOMBRE_COMP[camp.__deComp] || 'Europa';
       var dentro = q.ucl.groups.indexOf(camp) >= 0;
       if (!dentro) {
         /* si venía por una puerta de atrás, sube a los grupos */
@@ -379,13 +414,28 @@
           var i = (q.ucl[k] || []).indexOf(camp);
           if (i >= 0) q.ucl[k].splice(i, 1);
         });
-        ['groups', 'playoff'].forEach(function (k) {
-          var i = (q.uel[k] || []).indexOf(camp);
-          if (i >= 0) q.uel[k].splice(i, 1);
+        /* Sale de donde estuviera, y ese hueco no se pierde: se lo queda el
+           mejor de su país que se había quedado fuera. Si no, la Europa
+           League empezaría con treinta y uno. */
+        var dejaHueco = null;
+        ['uel', 'conference'].forEach(function (id) {
+          ['groups', 'playoff'].forEach(function (k) {
+            var i = (q[id] && q[id][k] || []).indexOf(camp);
+            if (i >= 0) { q[id][k].splice(i, 1); dejaHueco = { id: id, k: k }; }
+          });
         });
         q.ucl.groups.push(camp);
-        q.notes.push('🏆 ' + camp.n + ', campeón de ' + par[1] +
+        q.notes.push('🏆 ' + camp.n + ', campeón de ' + deDonde +
           ', entra directo a los grupos de la Champions.');
+        if (dejaHueco) {
+          var releva = siguienteLibre(q, camp);
+          if (releva) {
+            q[dejaHueco.id][dejaHueco.k].push(releva);
+            q.notes.push('   ↳ su plaza en ' +
+              (global.CONT_COMPS[dejaHueco.id] || {}).name + ' se la queda ' +
+              releva.n + '.');
+          }
+        }
         return;
       }
       /* Ya estaba dentro por liga, así que su plaza de campeón queda libre:
@@ -394,7 +444,7 @@
       var extra = siguienteLibre(q, camp);
       if (extra) {
         q.ucl.groups.push(extra);
-        q.notes.push('🏆 ' + camp.n + ', campeón de ' + par[1] +
+        q.notes.push('🏆 ' + camp.n + ', campeón de ' + deDonde +
           ', ya estaba clasificado por liga: libera cupo y entra ' + extra.n +
           ' a los grupos de la Champions.');
       }
@@ -406,7 +456,7 @@
     var lg = state.leagues[camp.leagueId];
     if (!lg) return null;
     var ocupados = {};
-    ['ucl', 'uel'].forEach(function (id) {
+    ['ucl', 'uel', 'conference'].forEach(function (id) {
       ['groups', 'playoff', 'prelim'].forEach(function (k) {
         (q[id] && q[id][k] || []).forEach(function (t) { ocupados[t.n] = 1; });
       });
@@ -466,7 +516,7 @@
 
   function buildContinentals() {
     state.conts = {};
-    ['libertadores', 'sudamericana', 'ucl', 'uel', 'concachampions', 'afccl', 'cafcl'].forEach(function (id) {
+    ['libertadores', 'sudamericana', 'ucl', 'uel', 'conference', 'concachampions', 'afccl', 'cafcl'].forEach(function (id) {
       if (!global.CONT_COMPS[id]) return;
       state.conts[id] = newCont(id);
       parteLaBolsa(state.conts[id]);
@@ -818,7 +868,10 @@
 
     /* 2 · play-off (ida y vuelta): el último paso antes de los grupos */
     if (W.playoff && (w === W.playoff[0] || w === W.playoff[1])) {
-      ['ucl', 'uel'].forEach(function (id) {
+      /* El orden importa: la Champions resuelve antes que la Europa, y la
+         Europa antes que la Conference, porque los que caen en una llenan
+         la bolsa de la siguiente. */
+      ['ucl', 'uel', 'conference'].forEach(function (id) {
         var c = C[id]; if (!c || !c.cfg.playoff) return;
         if (w === W.playoff[0]) {
           c.playoffTies = makeTies(shuffle(c.playoffPool));
@@ -855,7 +908,7 @@
         });
         c.prelimTies = [];
       });
-      ['libertadores', 'sudamericana', 'ucl', 'uel', 'concachampions', 'afccl', 'cafcl'].forEach(function (id) {
+      ['libertadores', 'sudamericana', 'ucl', 'uel', 'conference', 'concachampions', 'afccl', 'cafcl'].forEach(function (id) {
         var c = C[id]; if (!c || c.groups) return;      /* ya sorteada al empezar */
         sorteaGrupos(c, rep);
       });
@@ -1014,7 +1067,8 @@
       return { seeded: seeded, unseeded: others };
     }
 
-    var lib = C.libertadores, sud = C.sudamericana, ucl = C.ucl, uel = C.uel;
+    var lib = C.libertadores, sud = C.sudamericana;
+    var ucl = C.ucl, uel = C.uel, conference = C.conference;
 
     /* CONMEBOL */
     if (lib && lib.groups) {
@@ -1055,21 +1109,18 @@
       }
     }
 
-    /* UEFA */
+    /* UEFA: tres competiciones encadenadas. La Champions va directa a
+       octavos con sus dieciséis clasificados; la Europa y la Conference
+       pasan antes por una repesca donde sus segundos reciben a los que
+       caen del torneo de arriba. */
     if (ucl && ucl.groups) {
       var uq = qualifiers(ucl);
       var up = potsOf(uq.first, uq.second);
       startKO2(rep, ucl, up.seeded.concat(up.unseeded), up);
-      if (uel && uel.groups) {
-        /* 12 grupos: pasan los dos primeros y caen los ocho terceros de la
-           Champions, que completan unos dieciseisavos de 32 */
-        var eq = qualifiers(uel);
-        var resto = eq.second.slice();
-        if (uel.cfg.takesThirdsFrom) resto = resto.concat(uq.thirds);
-        else if (uel.cfg.bestExtra) resto = byRank(eq.second).slice(0, uel.cfg.bestExtra);
-        var ep = potsOf(eq.first, resto);
-        startKO2(rep, uel, ep.seeded.concat(ep.unseeded), ep);
-      }
+      var eq = (uel && uel.groups) ? qualifiers(uel) : null;
+      if (eq) repescaUEFA(uel, eq, uq.thirds, rep);
+      var cq = (conference && conference.groups) ? qualifiers(conference) : null;
+      if (cq) repescaUEFA(conference, cq, eq ? eq.thirds : [], rep);
     }
 
     /* resto */
@@ -1130,6 +1181,31 @@
     });
     c.pendingRound = null;
     c.drawState = null;
+  }
+
+  /* La repesca de octavos de la Europa y de la Conference: los segundos de
+     sus grupos reciben a los terceros del torneo de arriba, uno contra uno.
+     Los ocho que sobrevivan se sortean después contra los ocho primeros de
+     grupo, que se ahorraron la ronda. */
+  function repescaUEFA(c, q, deArriba, rep) {
+    if (!c) return;
+    var casa = shuffle((q.second || []).map(function (r) { return r.t; }));
+    var fuera = shuffle((deArriba || []).map(function (r) { return r.t; }));
+    var ties = [], n = Math.min(casa.length, fuera.length);
+    for (var i = 0; i < n; i++) {
+      /* el que viene de arriba cierra la serie en casa */
+      ties.push({ a: casa[i], b: fuera[i], leg1: null, leg2: null,
+        agg: null, pens: null, w: null });
+    }
+    var sobran = casa.slice(n).concat(fuera.slice(n));
+    makeTies(sobran).forEach(function (t) { ties.push(t); });
+    c.groupWinners = (q.first || []).map(function (r) { return r.t; });
+    c.playoffWinners = [];
+    c.phase = 'eliminatorias';
+    if (!ties.length) return;
+    c.koRounds.push({ name: 'Repesca de octavos', slot: 0, ties: ties,
+      done: false, isPlayoff: true });
+    if (rep) rep.notes.push(c.name + ': repesca de octavos, ' + ties.length + ' cruces.');
   }
 
   function advanceKO(c, round, winners, rep) {
