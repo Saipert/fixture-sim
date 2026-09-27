@@ -1072,6 +1072,11 @@
      ciento de lo que pide su club. Pagar de más convence; regatear se paga
      caro, porque la probabilidad cae al cubo. */
   var mkOferta = null;
+  /* Cómo acabó la última oferta. Se queda en pantalla hasta que se cierra,
+     para que quede claro si la aceptaron o no en vez de un aviso que pasa
+     volando. Mientras está puesto no se puede ofertar otra vez: se va de
+     una en una. */
+  var mkResultado = null;
   var OFERTA_MIN = 50, OFERTA_MAX = 200;
   function mkImporte(pide, pct) { return Math.round(pide * pct / 100); }
 
@@ -1180,6 +1185,7 @@
           (fichados[p[0]] ? '<span class="mk-ok">fichado</span>'
             : '<button class="mini mk-b" data-fichar="' + esc(p[0]) + '"' +
               (motivo ? ' disabled title="' + esc(motivo) + '"' : '') + '>Ofertar</button>'));
+        if (mkResultado && mkResultado.nombre === p[0]) return fila + mkPanelResultado();
         if (!mkOferta || mkOferta.nombre !== p[0]) return fila;
         return fila + mkPanelOferta(p, precio);
       }).join('');
@@ -1207,6 +1213,20 @@
       '<span class="hint" id="mkNota">' + esc(mkNotaOferta(pct)) + '</span>' +
       '<button class="mini primary" id="mkConfirmar">Ofertar</button>' +
       '<button class="mini" id="mkCancelar">Cancelar</button>' +
+      '</div></div>';
+  }
+  /* El desenlace de la oferta, en su sitio y sin prisa. */
+  function mkPanelResultado() {
+    var r = mkResultado;
+    return '<div class="mk-oferta ' + (r.ok ? 'si' : 'no') + '">' +
+      '<div class="mk-of-pie">' +
+      '<span class="mk-res">' + (r.ok ? '✓ Aceptada' : '✗ Rechazada') + '</span>' +
+      '<span class="hint">' + (r.ok
+        ? 'Fichado por ' + esc(Market.dinero(r.precio)) + '.'
+        : esc(r.club) + ' no suelta a ' + esc(r.nombre) + ' por ' +
+          esc(Market.dinero(r.precio)) + '.') +
+      ' Te ' + (r.quedan === 1 ? 'queda 1 oferta' : 'quedan ' + r.quedan + ' ofertas') + '.</span>' +
+      '<button class="mini primary" id="mkCerrarRes">Entendido</button>' +
       '</div></div>';
   }
   function mkNotaOferta(pct) {
@@ -1263,9 +1283,9 @@
     var pr = Market.opciones(p, mkSel, me, precio);
     if (Math.random() > pr) {
       st.fichajes.push({ n: p[0], ovr: p[2], precio: 0, fallo: true, de: mkSel.n });
+      mkResultado = { nombre: p[0], ok: false, precio: precio,
+        quedan: Market.FICHAJES_MAX - st.fichajes.length, club: mkSel.n };
       renderBody();
-      toast('«' + p[0] + '» rechazó la oferta. Te queda ' +
-        (Market.FICHAJES_MAX - st.fichajes.length) + ' intento(s).');
       return;
     }
     Market.quita(mkSel, p);
@@ -1274,8 +1294,9 @@
     st.fichajes.push({ n: p[0], ovr: p[2], precio: precio, de: mkSel.n, j: p });
     me.ovr = Engine.overall(me);
     mkSel.ovr = Engine.overall(mkSel);
+    mkResultado = { nombre: p[0], ok: true, precio: precio,
+      quedan: Market.FICHAJES_MAX - st.fichajes.length, club: mkSel.n };
     renderBody();
-    toast('¡Fichado ' + p[0] + ' por ' + Market.dinero(precio) + '!');
   }
 
   /* ---- resumen al cerrar ---- */
@@ -3608,16 +3629,21 @@
         }
       };
       if ($('#mkConfirmar')) $('#mkConfirmar').onclick = function () {
+        if (this.disabled) return;
+        this.disabled = true;                 /* una oferta por pulsación */
         mkFichar(quien, mkImporte(pide, +rango.value));
       };
       if ($('#mkCancelar')) $('#mkCancelar').onclick = function () {
         mkOferta = null; renderBody();
       };
     }
+    if ($('#mkCerrarRes')) $('#mkCerrarRes').onclick = function () {
+      mkResultado = null; renderBody();
+    };
     if ($('#mkBuscar')) $('#mkBuscar').onclick = function () {
       Picker.team({
         title: 'Elige el club del que quieres fichar', nations: false,
-        onPick: function (t) { if (t !== me) { mkSel = t; renderBody(); } }
+        onPick: function (t) { if (t !== me) { mkSel = t; mkOferta = null; mkResultado = null; renderBody(); } }
       });
     };
     /* Un solo oyente para todo el cuerpo. bindBody() corre en cada
@@ -3639,8 +3665,9 @@
         var v = n.getAttribute('data-vender');
         if (v) { mkVender(v); return; }
         var fch = n.getAttribute('data-fichar');
-        /* no se ficha de golpe: primero se decide cuánto se ofrece */
-        if (fch) { mkOferta = { nombre: fch, pct: 100 }; renderBody(); }
+        /* no se ficha de golpe: primero se decide cuánto se ofrece, y de
+           una en una: con un resultado en pantalla no se abre otra */
+        if (fch && !mkResultado) { mkOferta = { nombre: fch, pct: 100 }; renderBody(); }
       });
     }
 

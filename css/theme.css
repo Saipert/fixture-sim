@@ -1622,3 +1622,8 @@ body.conclub{scrollbar-color:var(--club-scroll,var(--line)) rgba(255,255,255,.04
   .mk-of-pie .hint { flex: 1 0 100%; }
   .mk-of-pie button { flex: 1; }
 }
+.mk-oferta.si { background: rgba(61,255,180,.10); border-color: rgba(61,255,180,.35); }
+.mk-oferta.no { background: rgba(255,110,110,.09); border-color: rgba(255,110,110,.32); }
+.mk-res { font-weight: 800; font-size: 13px; white-space: nowrap; }
+.mk-oferta.si .mk-res { color: var(--acc); }
+.mk-oferta.no .mk-res { color: var(--red); }
