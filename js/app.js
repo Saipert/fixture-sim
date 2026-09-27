@@ -983,8 +983,8 @@
   /* Si faltan equipos para cuadrar los grupos (en la vista suelta no están
      los campeones vigentes), se completa con los mejores libres. */
   function cfgReal(k) {
-    var mapa = { ucl: 'ucl', uel: 'uel', lib: 'libertadores', sud: 'sudamericana',
-      ccc: 'concachampions', acl: 'afccl', cafcl: 'cafcl' };
+    var mapa = { ucl: 'ucl', uel: 'uel', conf: 'conference', lib: 'libertadores',
+      sud: 'sudamericana', ccc: 'concachampions', acl: 'afccl', cafcl: 'cafcl' };
     return (window.CONT_COMPS || {})[mapa[k.id]] || null;
   }
   /* si la competición parte su clasificación en dos, cuántos juegan la primera */
@@ -1018,8 +1018,8 @@
 
   /* el tamaño que debería tener la fase de grupos, según el formato real */
   function cupoGrupos(k) {
-    var mapa = { ucl: 'ucl', uel: 'uel', lib: 'libertadores', sud: 'sudamericana',
-      ccc: 'concachampions', acl: 'afccl', cafcl: 'cafcl' };
+    var mapa = { ucl: 'ucl', uel: 'uel', conf: 'conference', lib: 'libertadores',
+      sud: 'sudamericana', ccc: 'concachampions', acl: 'afccl', cafcl: 'cafcl' };
     var c = (window.CONT_COMPS || {})[mapa[k.id]];
     return c && c.groups ? c.groups * c.size : 0;
   }

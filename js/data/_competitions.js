@@ -95,6 +95,7 @@ window.COUNTRIES = [
 window.CONTINENTAL = [
   { id: 'ucl', name: 'UEFA Champions League', conf: 'UEFA', size: 32, maxPerCountry: 4, groupSize: 4 },
   { id: 'uel', name: 'UEFA Europa League', conf: 'UEFA', size: 32, maxPerCountry: 3, groupSize: 4, skipTop: 32 },
+  { id: 'conf', name: 'UEFA Conference League', conf: 'UEFA', size: 32, maxPerCountry: 3, groupSize: 4, skipTop: 64 },
   { id: 'lib', name: 'Copa Libertadores', conf: 'CONMEBOL', size: 32, maxPerCountry: 6, groupSize: 4 },
   { id: 'sud', name: 'Copa Sudamericana', conf: 'CONMEBOL', size: 32, maxPerCountry: 6, groupSize: 4, skipTop: 32 },
   { id: 'ccc', name: 'CONCACAF Champions Cup', conf: 'CONCACAF', size: 16, maxPerCountry: 6, groupSize: 0 },
