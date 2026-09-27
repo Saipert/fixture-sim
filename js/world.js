@@ -70,11 +70,16 @@
   function isDetail(a, b) {
     return !!(state.detailTeam && (a === state.detailTeam || b === state.detailTeam));
   }
-  /* si el partido es del equipo seguido y se quiere ver, se simula con narracion */
+  /* Los partidos del equipo seguido se juegan SIEMPRE con relato completo,
+     se vayan a mirar o no. Antes dependía de si se había pulsado «Ver el
+     partido» antes de simular la semana: si llegabas a él desde la cola
+     tras una simulación rápida, te encontrabas la narración vacía y las
+     estadísticas a cero hasta el pitido final. Son uno o dos partidos por
+     semana, así que el relato no se nota en el reloj. */
   function simOpts(a, b, extra) {
     var o = extra || {};
     var d = isDetail(a, b);
-    o.quick = !(d && state.detailVisual);
+    o.quick = !d;
     if (!o.neutral) taquillaDe(a, b);
     return o;
   }
