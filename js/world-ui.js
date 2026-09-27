@@ -1097,11 +1097,20 @@
 
     var c = Market.cuenta(me);
     var est = Market.estadio(me);
+    /* El cupo se gasta con cada OFERTA, la acepten o no; pero poner el
+       total bajo la palabra «fichajes» hacía creer que habías fichado a
+       gente que en realidad te dijo que no. */
+    var rechazos = st.fichajes.filter(function (x) { return x.fallo; }).length;
+    var fichados = st.fichajes.length - rechazos;
     var cabecera = '<div class="panel mk-cab"><div class="pbody">' +
       '<div class="mk-cifras">' +
       '<div class="mk-cif"><small>Caja</small><b>' + Market.dinero(st.caja || 0) + '</b></div>' +
-      '<div class="mk-cif"><small>Fichajes</small><b>' + st.fichajes.length + ' / ' + Market.FICHAJES_MAX + '</b></div>' +
-      '<div class="mk-cif"><small>Ventas</small><b>' + st.ventas.length + ' / ' + Market.VENTAS_MAX + '</b></div>' +
+      '<div class="mk-cif"><small>Fichajes</small><b>' + fichados +
+        '</b><i class="mk-sub">' + st.fichajes.length + ' de ' + Market.FICHAJES_MAX + ' ofertas' +
+        (rechazos ? ' · ' + rechazos + ' rechazada' + (rechazos === 1 ? '' : 's') : '') +
+        '</i></div>' +
+      '<div class="mk-cif"><small>Ventas</small><b>' + st.ventas.length +
+        '</b><i class="mk-sub">de ' + Market.VENTAS_MAX + '</i></div>' +
       '<div class="mk-cif"><small>Plantilla</small><b>' + c.total + ' / ' + Market.MAX_PLANTILLA + '</b></div>' +
       '<div class="mk-cif"><small>' + esc(est.est || 'Estadio') + '</small><b>' +
         est.cap.toLocaleString('es') + ' plazas</b></div>' +
@@ -3540,7 +3549,12 @@
         onPick: function (t) { if (t !== me) { mkSel = t; renderBody(); } }
       });
     };
-    if ($('#wBody')) {
+    /* Un solo oyente para todo el cuerpo. bindBody() corre en cada
+       repintado, así que sin este cerrojo se iban apilando: al cabo de unos
+       cuantos, un clic en «Vender» o «Ofertar» disparaba la acción varias
+       veces y el cupo del mercado se gastaba de dos en dos. */
+    if ($('#wBody') && !$('#wBody').dataset.atado) {
+      $('#wBody').dataset.atado = '1';
       $('#wBody').addEventListener('click', function (e) {
         var pf = e.target;
         while (pf && pf !== this && !pf.getAttribute('data-perfil')) pf = pf.parentNode;

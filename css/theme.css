@@ -1598,3 +1598,7 @@ body.conclub{scrollbar-color:var(--club-scroll,var(--line)) rgba(255,255,255,.04
   .minitab td, .minitab th { padding: 4px 3px; font-size: 11.5px; }
   .panel > h3 { padding: 7px 10px; font-size: 11px; }
 }
+
+/* el renglón pequeño de las cifras del mercado */
+.mk-cif .mk-sub { display:block; font-style:normal; font-size:10.5px; color:var(--dim);
+  margin-top:2px; letter-spacing:.2px; }
