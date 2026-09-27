@@ -88,4 +88,5 @@ window.COMP_LOGO = {
  "wc2026": "logos/torneos/tournaments_fifa-world-cup-2026_128x128.football-logos.cc.png",
  "ucl": "logos/torneos/tournaments_uefa-champions-league_128x128.football-logos.cc.png",
  "uel": "logos/torneos/tournaments_uefa-europa-league_128x128.football-logos.cc.png",
+ "conference": "logos/torneos/uefa-conference-league.png",
  "supercup": "logos/torneos/tournaments_uefa-super-cup_128x128.football-logos.cc.png"};
