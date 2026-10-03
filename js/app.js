@@ -547,9 +547,19 @@
   /* El Mundial de Clubes no lo juegan los ocho mejores del mundo: lo juegan
      los campeones de cada continente. Dos de Europa y dos de Sudamérica,
      uno del resto, que es como cuadra la fase de grupos. */
-  function entrantsCWC() {
-    /* dentro de la función: se usa antes de que corra el cuerpo del módulo */
-    var CUPOS_CWC = { UEFA: 2, CONMEBOL: 2, CONCACAF: 1, AFC: 1, CAF: 1, OFC: 1 };
+  /* El Mundial de Clubes, en sus dos formatos. El de 32 reparte las plazas
+     como el de verdad —doce para Europa, seis para Sudamérica, cuatro para
+     África, Asia y Concacaf, una para Oceanía y la del anfitrión, que sale
+     de Concacaf— con tope de dos por país. El viejo de ocho era uno o dos
+     por confederación y nunca dos del mismo país. */
+  function entrantsCWC(k) {
+    /* la tabla va dentro: esto se usa antes de que corra el cuerpo del
+       módulo, y fuera llegaba sin asignar y tumbaba la carga entera */
+    var CUPOS_CWC = {
+      8:  { tope: 1, plazas: { UEFA: 2, CONMEBOL: 2, CONCACAF: 1, AFC: 1, CAF: 1, OFC: 1 } },
+      32: { tope: 2, plazas: { UEFA: 12, CONMEBOL: 6, CONCACAF: 5, AFC: 4, CAF: 4, OFC: 1 } }
+    };
+    var cfg = CUPOS_CWC[(k && k.size) || 8] || CUPOS_CWC[8];
     var porConf = {};
     COUNTRIES.forEach(function (c) {
       c.have.forEach(function (lid) {
@@ -557,15 +567,14 @@
       });
     });
     var out = [];
-    Object.keys(CUPOS_CWC).forEach(function (conf) {
+    Object.keys(cfg.plazas).forEach(function (conf) {
       var lista = (porConf[conf] || []).slice().sort(function (a, b) { return b.ovr - a.ovr; });
-      /* uno por país: no van dos del mismo sitio */
       var paises = {}, tomados = [];
       lista.forEach(function (t) {
-        if (tomados.length >= CUPOS_CWC[conf]) return;
+        if (tomados.length >= cfg.plazas[conf]) return;
         var p = Draw.countryOf(t);
-        if (paises[p]) return;
-        paises[p] = 1; tomados.push(t);
+        if ((paises[p] || 0) >= cfg.tope) return;
+        paises[p] = (paises[p] || 0) + 1; tomados.push(t);
       });
       out = out.concat(tomados);
     });
@@ -573,7 +582,7 @@
   }
 
   function entrantsFor(k) {
-    if (k.porConf) return entrantsCWC();
+    if (k.porConf) return entrantsCWC(k);
     var pool = [];
     COUNTRIES.forEach(function (c) {
       if (k.conf && c.conf !== k.conf) return;
@@ -593,24 +602,29 @@
   var PUERTAS_COMP = {
     ucl:   { grupos: 'top',    po: 'po', pre: 'pre' },
     uel:   { grupos: 'second', po: 'secondPo' },
+    conf:  { grupos: 'third',  po: 'thirdPo' },
     lib:   { grupos: 'top',    pre: 'pre' },
     sud:   { grupos: 'second' },
     ccc:   { grupos: 'top' },
     acl:   { grupos: 'top' },
     cafcl: { grupos: 'top' }
   };
-  var ORDEN_PUERTAS = ['top', 'po', 'pre', 'second', 'secondPo'];
+  var ORDEN_PUERTAS = ['top', 'po', 'pre', 'second', 'secondPo', 'third', 'thirdPo'];
   /* la Champions guarda dos sitios: para su campeón y para el de la Europa
      League. El resto de competiciones llena los grupos sólo con cupos. */
   var CAMPEONES_COMP = {
-    ucl: ['Campeón de la Champions', 'Campeón de la Europa League']
+    ucl: ['Campeón de la Champions', 'Campeón de la Europa League',
+      'Campeón de la Conference League']
   };
   /* Los que caen de la Champions y siguen en la Europa League. Al simularla
      sola no hay Champions que los produzca, así que se eligen aquí. */
   var CAIDOS_COMP = {
     uel: [
-      { fase: 'grupos', n: 7, name: 'Eliminados en el play-off de la Champions', rango: [8, 44], de: 'la Champions' },
-      { fase: 'po',     n: 8, name: 'Eliminados en la previa de la Champions',   rango: [30, 90], de: 'la Champions' }
+      { fase: 'grupos', n: 10, name: 'Eliminados en el play-off de la Champions', rango: [8, 44], de: 'la Champions' },
+      { fase: 'po',     n: 13, name: 'Eliminados en la previa de la Champions',   rango: [30, 90], de: 'la Champions' }
+    ],
+    conf: [
+      { fase: 'grupos', n: 8, name: 'Eliminados en el play-off de la Europa League', rango: [40, 110], de: 'la Europa League' }
     ],
     sud: [
       { fase: 'grupos', n: 4, name: 'Eliminados en la previa de la Libertadores', rango: [10, 46], de: 'la Libertadores' },
@@ -955,11 +969,27 @@
   $('#conReset').onclick = function () { conPorDefecto(); conPintaCupos(); conHint(); };
 
   $('#conComp').innerHTML = CONT.map(function (k, i) { return '<option value="' + i + '">' + esc(k.name) + '</option>'; }).join('');
+  /* el Mundial de Clubes se juega en dos formatos: el selector sólo sale
+     en las competiciones que admiten más de uno */
+  function conPintaFormato() {
+    var fs = conComp && conComp.formatos, sel = $('#conFmt'), lbl = $('#conFmtLbl');
+    if (!fs) { sel.classList.add('hidden'); lbl.classList.add('hidden'); return; }
+    sel.classList.remove('hidden'); lbl.classList.remove('hidden');
+    sel.innerHTML = fs.map(function (n) {
+      return '<option value="' + n + '"' + (n === conComp.size ? ' selected' : '') +
+        '>' + n + ' equipos</option>';
+    }).join('');
+  }
+  $('#conFmt').onchange = function () {
+    if (conComp) conComp.size = +this.value;
+    conCambio();
+  };
   function conCambio() {
     conComp = CONT[+$('#conComp').value];
     if (!conComp) return;
     conPaso = 0;
     conAbierto = true;
+    conPintaFormato();
     conCupos = cuposDe(conComp);
     conPorDefecto();
     conPintaCupos();

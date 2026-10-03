@@ -102,7 +102,8 @@ window.CONTINENTAL = [
   { id: 'acl', name: 'AFC Champions League Elite', conf: 'AFC', size: 16, maxPerCountry: 4, groupSize: 4 },
   { id: 'cafcl', name: 'CAF Champions League', conf: 'CAF', size: 16, maxPerCountry: 4, groupSize: 4 },
   { id: 'ofccl', name: 'OFC Champions League', conf: 'OFC', size: 8, maxPerCountry: 8, groupSize: 0 },
-  { id: 'cwc', name: 'Mundial de Clubes', conf: null, size: 8, maxPerCountry: 1, groupSize: 4, porConf: true }
+  { id: 'cwc', name: 'Mundial de Clubes', conf: null, size: 32, maxPerCountry: 2, groupSize: 4,
+    porConf: true, formatos: [32, 8] }
 ];
 
 /* Competiciones de selecciones */
