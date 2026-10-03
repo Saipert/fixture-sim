@@ -537,6 +537,23 @@
   var CONT = (window.CONTINENTAL || []).filter(function (k) {
     return entrantsFor(k).length >= 4;
   });
+  /* Las temporadas completas. Declaradas aquí arriba a propósito: la lista
+     del desplegable se arma al cargar el módulo, y más abajo llegaban sin
+     asignar y tumbaban la carga entera. */
+  var PACKS = [
+    { id: 'tmpUEFA', name: 'Temporada completa · UEFA', temporada: true,
+      pack: ['ucl', 'uel', 'conf'], supercopas: ['uefa'] },
+    { id: 'tmpCONMEBOL', name: 'Temporada completa · CONMEBOL', temporada: true,
+      pack: ['lib', 'sud'], supercopas: ['conmebol'] },
+    { id: 'tmpMundo', name: 'Temporada completa · Mundial', temporada: true,
+      pack: ['ucl', 'uel', 'conf', 'lib', 'sud', 'ccc', 'acl', 'cafcl', 'ofccl'],
+      supercopas: ['uefa', 'conmebol'], cwc: true }
+  ];
+  var SUPERCOPAS = {
+    uefa: { nombre: 'Supercopa de UEFA', de: ['ucl', 'uel'], legs: 1 },
+    conmebol: { nombre: 'Recopa Sudamericana', de: ['lib', 'sud'], legs: 2 }
+  };
+  var packEstado = null;
   /* la confederación de un club */
   function confDe(t) {
     var m = (window.Nac && Nac.confDeLiga) ? Nac.confDeLiga(t.leagueId) : null;
@@ -1013,7 +1030,13 @@
   };
   $('#conReset').onclick = function () { conPorDefecto(); conPintaCupos(); conHint(); };
 
-  $('#conComp').innerHTML = CONT.map(function (k, i) { return '<option value="' + i + '">' + esc(k.name) + '</option>'; }).join('');
+  /* las competiciones sueltas y, al final, las temporadas completas */
+  var CONLISTA = CONT.concat(PACKS.filter(function (k) {
+    return k.pack.every(function (id) { return CONT.some(function (x) { return x.id === id; }); });
+  }));
+  $('#conComp').innerHTML = CONLISTA.map(function (k, i) {
+    return '<option value="' + i + '">' + esc((k.temporada ? '★ ' : '') + k.name) + '</option>';
+  }).join('');
   /* el Mundial de Clubes se juega en dos formatos: el selector sólo sale
      en las competiciones que admiten más de uno */
   function conPintaFormato() {
@@ -1030,10 +1053,25 @@
     conCambio();
   };
   function conCambio() {
-    conComp = CONT[+$('#conComp').value];
+    conComp = CONLISTA[+$('#conComp').value];
     if (!conComp) return;
     conPaso = 0;
     conAbierto = true;
+    /* una temporada completa no se elige a mano: cada competición reparte
+       sus cupos por su cuenta según le toca */
+    if (conComp.temporada) {
+      conCupos = null; conSel = {};
+      $('#conFmt').classList.add('hidden'); $('#conFmtLbl').classList.add('hidden');
+      $('#conCupos').classList.add('hidden');
+      $('#conVerCupos').classList.add('hidden');
+      $('#conHint').textContent = conComp.pack.map(nombreDe).join(' · ') +
+        (conComp.supercopas || []).map(function (x) { return ' · ' + SUPERCOPAS[x].nombre; }).join('') +
+        (conComp.cwc ? ' · Mundial de Clubes de 8' : '') +
+        ' · una detrás de otra, guardando los campeones';
+      $('#btnCon').disabled = false;
+      $('#conOut').innerHTML = '';
+      return;
+    }
     conPintaFormato();
     conCupos = cuposDe(conComp);
     conPorDefecto();
@@ -1062,13 +1100,15 @@
 
   /* Una fase de clasificación: se juega a ida y vuelta, una sola ronda, y
      al acabar se sigue con la siguiente. */
-  function rondaClasi(box, nombre, equipos, alAcabar) {
-    montaCuadro(box, equipos, {
+  function rondaClasi(box, nombre, equipos, alAcabar, extra) {
+    var cfg = {
       name: nombre, legs: 2, unaRonda: true, nombrePrimera: nombre,
       tras: function (R) {
         R.alTerminar = function (fin) { alAcabar(fin.ganadores || [], fin.perdedores || []); };
       }
-    }, { title: nombre, soloRonda: true });
+    };
+    Object.keys(extra || {}).forEach(function (k) { cfg[k] = extra[k]; });
+    montaCuadro(box, equipos, cfg, { title: nombre, soloRonda: true });
   }
 
   /* Si faltan equipos para cuadrar los grupos (en la vista suelta no están
@@ -1297,15 +1337,19 @@
   }
 
 
+  /* a quién avisar cuando la competición termine y se sepa el campeón */
+  var conAlAcabar = null;
   function conJuegaGrupos(box, campo) {
     campo = sinRepetidos(campo);
     campo = completaCupo(campo);
+    var avisa = conAlAcabar; conAlAcabar = null;
     montaConSorteo(box, campo, {
       name: conComp.name, groupSize: conComp.groupSize,
       extraKO: conEquipos('ko'), nombrePrimera: 'Play-off de octavos',
       porConf: !!conComp.porConf, tercerPuesto: !!conComp.porConf,
       neutral: true, legs: conComp.porConf ? 1 : 2,
-      groupDouble: !conComp.porConf   /* a ida y vuelta salvo en el Mundial de Clubes */
+      groupDouble: !conComp.porConf,  /* a ida y vuelta salvo en el Mundial de Clubes */
+      tras: avisa ? function (R) { R.alTerminar = function (fin) { avisa(fin.champion || null); }; } : null
     }, { title: conComp.name + ' · eliminatorias' });
   }
 
@@ -1321,7 +1365,9 @@
     conTapaCupos(!$('#conCupos').classList.contains('hidden'));
   };
 
-  $('#btnCon').onclick = function () {
+  /* Simula la competición que esté puesta. Vale para el botón y para las
+     temporadas completas, que la llaman una vez por competición. */
+  function conArranca() {
     var box = $('#conOut');
     conTapaCupos(true);
     var grupos = conEquipos('grupos');
@@ -1357,6 +1403,131 @@
     if (pre.length >= 2) {
       rondaClasi(box, conComp.name + ' · ' + nombrePre, pre, function (ganan) { juegaPlayoff(ganan); });
     } else juegaPlayoff(pre);
+  }
+  /* =====================================================================
+     TEMPORADA COMPLETA
+     Una competición detrás de otra, guardando el campeón de cada una. Al
+     final se juegan la Supercopa y la Recopa entre esos campeones, y en la
+     mundial el Mundial de Clubes de ocho con los ocho campeones
+     continentales, que son justo los cupos del formato corto.
+     ===================================================================== */
+
+
+  function conPrepara(id) {
+    conComp = CONT.filter(function (x) { return x.id === id; })[0];
+    if (!conComp) return false;
+    conCupos = cuposDe(conComp);
+    if (conCupos) conPorDefecto(); else conSel = {};
+    return true;
+  }
+  function nombreDe(id) {
+    var k = CONT.filter(function (x) { return x.id === id; })[0];
+    return k ? k.name : id;
+  }
+
+  /* el marcador de la temporada: lo ganado hasta ahora y lo que falta */
+  function packPanel(siguiente, texto) {
+    var p = packEstado, box = $('#conOut');
+    var filas = p.orden.map(function (id) {
+      var t = p.campeones[id];
+      return '<div class="cu-pais' + (t ? '' : ' falta') + '"><div class="cu-pais-h">' +
+        '<span><b>' + esc(p.titulos[id] || nombreDe(id)) + '</b></span></div>' +
+        '<div class="cu-esc">' + (t
+          ? '<span class="cupo-esc" title="' + esc(t.n) + '">' + Crest.html(t, 30) + '</span>'
+          : '<span class="cupo-esc vacio-esc">+</span>') + '</div>' +
+        '<div class="cu-sub hint">' + esc(t ? t.n : 'por jugar') + '</div></div>';
+    }).join('');
+    var caja = document.createElement('div');
+    caja.className = 'card';
+    caja.innerHTML = '<div class="cuposhead"><div><h3>' + esc(p.k.name) + '</h3>' +
+      '<p class="hint">' + esc(texto || '') + '</p></div>' +
+      (siguiente ? '<button class="primary" id="packNext">' + esc(siguiente) + '</button>' : '') +
+      '</div><div class="cu-grid">' + filas + '</div>';
+    box.insertBefore(caja, box.firstChild);
+    if ($('#packNext')) $('#packNext').onclick = function () { packSigue(); };
+    caja.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function packSigue() {
+    var p = packEstado; if (!p) return;
+    var box = $('#conOut');
+    box.innerHTML = '';
+    /* 1 · las competiciones, una por una */
+    if (p.paso < p.k.pack.length) {
+      var id = p.k.pack[p.paso++];
+      if (!conPrepara(id)) { packSigue(); return; }
+      conAlAcabar = function (camp) {
+        p.campeones[id] = camp;
+        packPanel(p.paso < p.k.pack.length
+          ? 'Jugar ' + nombreDe(p.k.pack[p.paso])
+          : (p.extras.length ? 'Jugar ' + p.titulos[p.extras[0]] : 'Ver la temporada'),
+          'Campeón de ' + nombreDe(id) + ': ' + (camp ? camp.n : '—'));
+      };
+      conArranca();
+      return;
+    }
+    /* 2 · las supercopas entre campeones */
+    if (p.extras.length) {
+      var ex = p.extras.shift(), sc = SUPERCOPAS[ex];
+      var a = p.campeones[sc.de[0]], b = p.campeones[sc.de[1]];
+      var resto = function (camp) {
+        p.campeones[ex] = camp;
+        packPanel(p.extras.length ? 'Jugar ' + p.titulos[p.extras[0]]
+          : (p.k.cwc ? 'Jugar el Mundial de Clubes' : 'Ver la temporada'),
+          sc.nombre + ': ' + (camp ? camp.n : '—'));
+      };
+      if (!a || !b) { resto(null); return; }
+      rondaClasi(box, sc.nombre, [a, b], function (ganan) { resto(ganan[0] || null); },
+        { legs: sc.legs, neutral: sc.legs === 1 });
+      return;
+    }
+    /* 3 · y el Mundial de Clubes con los ocho campeones continentales */
+    if (p.k.cwc && !p.campeones.cwc) {
+      /* Ocho, no nueve: Europa gana tres competiciones pero al Mundial de
+         Clubes corto sólo van dos por zona, que son sus cupos de verdad.
+         El campeón de la Conference se queda fuera, como en la realidad. */
+      var plazas = cuposCWC({ size: 8 }).plazas, puestos = {}, ocho = [];
+      p.k.pack.forEach(function (id2) {
+        var t = p.campeones[id2]; if (!t) return;
+        var k2 = CONT.filter(function (x) { return x.id === id2; })[0];
+        var z = (k2 && k2.conf) || confDe(t);
+        if ((puestos[z] || 0) >= (plazas[z] || 0)) return;
+        puestos[z] = (puestos[z] || 0) + 1; ocho.push(t);
+      });
+      ocho = sinRepetidos(ocho);
+      /* si alguna zona se quedó sin campeón, el cuadro tiene que seguir
+         cuadrando: se recorta al múltiplo de cuatro más cercano */
+      while (ocho.length % 4) ocho.pop();
+      if (ocho.length < 4) { packPanel(null, 'No hay campeones suficientes para el Mundial de Clubes.'); return; }
+      montaConSorteo(box, ocho, {
+        name: 'Mundial de Clubes', groupSize: 4, porConf: true, tercerPuesto: true,
+        neutral: true, legs: 1, groupDouble: false,
+        tras: function (R) {
+          R.alTerminar = function (fin) {
+            p.campeones.cwc = fin.champion || null;
+            packPanel(null, 'Campeón del mundo: ' + (fin.champion ? fin.champion.n : '—'));
+          };
+        }
+      }, { title: 'Mundial de Clubes · eliminatorias' });
+      return;
+    }
+    packPanel(null, 'Temporada terminada.');
+  }
+
+  function packArranca(k) {
+    var titulos = {};
+    k.pack.forEach(function (id) { titulos[id] = nombreDe(id); });
+    (k.supercopas || []).forEach(function (x) { titulos[x] = SUPERCOPAS[x].nombre; });
+    if (k.cwc) titulos.cwc = 'Mundial de Clubes';
+    packEstado = { k: k, paso: 0, campeones: {}, titulos: titulos,
+      extras: (k.supercopas || []).slice(),
+      orden: k.pack.concat(k.supercopas || []).concat(k.cwc ? ['cwc'] : []) };
+    packSigue();
+  }
+  $('#btnCon').onclick = function () {
+    packEstado = null;
+    if (conComp && conComp.temporada) { packArranca(conComp); return; }
+    conArranca();
   };
 
   /* =====================================================================

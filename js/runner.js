@@ -144,6 +144,8 @@
         R.champion = R.cur[0] || null;
         R.label = 'Torneo terminado';
         R.pending = []; R.idx = 0;
+        /* para que quien lo haya montado pueda encadenar lo siguiente */
+        if (R.alTerminar) R.alTerminar(R);
         return;
       }
       var pairs = [], i;
