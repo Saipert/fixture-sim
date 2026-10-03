@@ -742,16 +742,97 @@
   }
   var FASE_NOMBRE = { grupos: 'Fase de grupos', po: 'Play-off', pre: 'Ronda previa',
     ko: 'Dieciseisavos' };
+  /* ---------- los cupos de una temporada entera ----------
+     Todas las competiciones a la vez y país por país. Cada club ocupa una
+     sola plaza en toda la temporada: antes cada torneo repartía por su
+     cuenta y el mismo equipo salía en la Champions y en la Europa League. */
+  function compPack(id) { return CONT.filter(function (x) { return x.id === id; })[0]; }
+  function cuposTemporada(k) {
+    var comps = k.pack.filter(function (id) { return PUERTAS_COMP[id]; });
+    if (!comps.length) return null;
+    /* de cada puerta de BERTHS, a qué competición y fase va */
+    var destino = {};
+    comps.forEach(function (id) {
+      var mapa = PUERTAS_COMP[id];
+      Object.keys(mapa).forEach(function (f) { destino[mapa[f]] = { comp: id, fase: f }; });
+    });
+    var out = [];
+    COUNTRIES.forEach(function (c) {
+      var b = (window.BERTHS || {})[c.id];
+      if (!b || !c.have.length) return;
+      var antes = 0;
+      ORDEN_PUERTAS.forEach(function (puerta) {
+        var n = b[puerta] || 0;
+        var d = destino[puerta];
+        if (n && d && compPack(d.comp) && compPack(d.comp).conf === b.conf) {
+          out.push({ cid: c.id, comp: d.comp, name: c.name, flag: c.flag, have: c.have,
+            lid: c.have[0], plazas: n, desde: antes, fase: d.fase });
+        }
+        antes += n;
+      });
+    });
+    /* y lo que no sale de una liga: campeones vigentes y los que caen */
+    comps.forEach(function (id) {
+      if (CAMPEONES_COMP[id]) {
+        out.push({ cid: '__camp_' + id, comp: id, name: 'Campeones vigentes', flag: '🏆',
+          have: null, lid: null, plazas: CAMPEONES_COMP[id].length, desde: 0,
+          fase: 'grupos', campeones: CAMPEONES_COMP[id] });
+      }
+      (CAIDOS_COMP[id] || []).forEach(function (x, i) {
+        out.push({ cid: '__caidos' + i + '_' + id, comp: id, name: x.name, flag: '🪂',
+          have: null, lid: null, plazas: x.n, desde: 0, fase: x.fase, caidos: x });
+      });
+    });
+    return out.length ? out : null;
+  }
+
+  /* El panel de una temporada: una caja por país con sus plazas de todas
+     las competiciones seguidas, que es como lo pidió quien lo usa. */
+  function pintaTemporada() {
+    var porPais = {}, orden = [];
+    conCupos.forEach(function (q) {
+      if (!porPais[q.cid]) { porPais[q.cid] = []; orden.push(q.cid); }
+      porPais[q.cid].push(q);
+    });
+    return '<div class="cu-grid">' + orden.map(function (cid) {
+      var filas = porPais[cid], cab = filas[0];
+      var total = filas.reduce(function (s2, q) { return s2 + q.plazas; }, 0);
+      var cuerpo = filas.map(function (q) {
+        var sel = conSel[claveQ(q)] || [];
+        var slots = sel.map(function (t, i) {
+          return '<button class="cupo cupo-esc" data-k="' + esc(claveQ(q)) + '" data-i="' + i +
+            '" title="' + esc(t.n + ' · ' + (compPack(q.comp) ? compPack(q.comp).name : q.comp) +
+              ' · ' + (FASE_NOMBRE[q.fase] || q.fase)) + '">' +
+            '<span class="cupo-cr">' + Crest.html(t, 26) + '</span></button>';
+        }).join('');
+        var vacias = Math.max(0, q.plazas - sel.filter(Boolean).length), faltan = '';
+        for (var v = 0; v < vacias; v++) faltan += '<span class="cupo-esc vacio-esc">+</span>';
+        return '<div class="cu-linea"><span class="cu-comp">' +
+          esc(COMP_CORTO[q.comp] || q.comp) + '<i>' + esc(FASE_CORTA[q.fase] || q.fase) + '</i></span>' +
+          '<span class="cu-esc">' + slots + faltan + '</span></div>';
+      }).join('');
+      return '<div class="cu-pais"><div class="cu-pais-h"><span>' + esc(cab.flag || '') +
+        ' <b>' + esc(cab.name) + '</b></span><span class="hint">' + total + '</span></div>' +
+        cuerpo + '</div>';
+    }).join('') + '</div>';
+  }
+  var COMP_CORTO = { ucl: 'Champions', uel: 'Europa', conf: 'Conference',
+    lib: 'Libertadores', sud: 'Sudamericana', ccc: 'Concacaf', acl: 'AFC', cafcl: 'CAF' };
+  var FASE_CORTA = { grupos: 'grupos', po: 'play-off', pre: 'previa', ko: 'dieciseisavos' };
 
   /* selección actual: país -> array de equipos, uno por plaza */
   var conSel = null, conCupos = null, conComp = null;
+  /* La clave de una plaza. Lleva la competición porque en una temporada
+     completa el mismo país tiene plazas de «grupos» en tres torneos a la
+     vez, y sin ella se pisaban unas a otras. */
+  function claveQ(q) { return q.cid + '|' + (q.comp || '') + '|' + q.fase; }
   var conModo = 'auto', conPaso = 0, conAbierto = true;
 
   /* ¿están todos los cupos cubiertos? */
   function conCompleto() {
     if (!conCupos) return true;
     return conCupos.every(function (q) {
-      return ((conSel[q.cid + '|' + q.fase] || []).filter(Boolean)).length >= q.plazas;
+      return ((conSel[claveQ(q)] || []).filter(Boolean)).length >= q.plazas;
     });
   }
 
@@ -761,7 +842,7 @@
     (conCupos || []).forEach(function (q) {
       if (q.campeones || q.caidos || q.zona) return;
       var orden = LG[q.lid].teams.slice().sort(function (a, b) { return b.ovr - a.ovr; });
-      conSel[q.cid + '|' + q.fase] = orden.slice(q.desde, q.desde + q.plazas);
+      conSel[claveQ(q)] = orden.slice(q.desde, q.desde + q.plazas);
     });
     /* 2 · y después los que llegan de fuera, sin repetir a nadie */
     /* las zonas del Mundial de Clubes: los mejores de cada confederación
@@ -781,7 +862,7 @@
         if ((paises[pa] || 0) >= (q.tope || 1)) return;
         paises[pa] = (paises[pa] || 0) + 1; tomados.push(t);
       });
-      conSel[q.cid + '|' + q.fase] = tomados;
+      conSel[claveQ(q)] = tomados;
     });
     (conCupos || []).forEach(function (q) {
       if (!q.campeones && !q.caidos) return;
@@ -791,22 +872,28 @@
       });
       if (q.campeones) {
         var lista = [];
+        var kk = q.comp ? compPack(q.comp) : conComp;
         q.campeones.forEach(function () {
-          var t = campeonAlAzar(conComp.conf, puestos.concat(lista));
+          var t = campeonAlAzar((kk || conComp).conf, puestos.concat(lista));
           if (t) lista.push(t);
         });
-        conSel[q.cid + '|' + q.fase] = lista;
+        conSel[claveQ(q)] = lista;
       } else {
-        conSel[q.cid + '|' + q.fase] = sorteaZona(conComp.conf, q.plazas, q.caidos.rango, puestos);
+        var kc = q.comp ? compPack(q.comp) : conComp;
+        conSel[claveQ(q)] = sorteaZona((kc || conComp).conf, q.plazas, q.caidos.rango, puestos);
       }
     });
   }
+  /* en una temporada completa, la competición que se está jugando ahora:
+     los cupos son de todas a la vez y hay que quedarse con los suyos */
+  var packComp = null;
   function conEquipos(fase) {
     if (!conCupos) return fase ? [] : entrantsFor(conComp);
     var out = [];
     conCupos.forEach(function (q) {
+      if (packComp && q.comp && q.comp !== packComp) return;
       if (fase && q.fase !== fase) return;
-      (conSel[q.cid + '|' + q.fase] || []).forEach(function (t) { if (t) out.push(t); });
+      (conSel[claveQ(q)] || []).forEach(function (t) { if (t) out.push(t); });
     });
     return out;
   }
@@ -824,7 +911,7 @@
     /* elegidos todos, el panel estorba: se recoge y deja un resumen */
     if (conModo === 'manual' && conCompleto() && !conAbierto) {
       var n = 0;
-      conCupos.forEach(function (q) { n += (conSel[q.cid + '|' + q.fase] || []).length; });
+      conCupos.forEach(function (q) { n += (conSel[claveQ(q)] || []).length; });
       $('#conCuposNota').textContent = 'Todos los cupos elegidos.';
       $('#conCuposBody').innerHTML = '<div class="con-listo">' +
         '<b>✔ ' + n + ' equipos elegidos</b>' +
@@ -835,6 +922,12 @@
       return;
     }
     if (conModo === 'manual') { conPintaManual(); return; }
+    if (conComp && conComp.temporada) {
+      $('#conCuposNota').textContent = 'Todas las competiciones de la temporada, país por país. ' +
+        'Ningún club ocupa dos plazas. Pulsa cualquier escudo para cambiarlo.';
+      $('#conCuposBody').innerHTML = pintaTemporada();
+      return;
+    }
     $('#conCuposNota').textContent = 'Los cupos son los de la temporada actual. Pulsa cualquier club para cambiarlo por otro de su país.';
     var fases = {};
     conCupos.forEach(function (q) { (fases[q.fase] = fases[q.fase] || []).push(q); });
@@ -844,7 +937,7 @@
       var plazas = 0, hechas = 0;
       fases[f2].forEach(function (q) {
         plazas += q.plazas;
-        hechas += Math.min(q.plazas, (conSel[q.cid + '|' + q.fase] || []).filter(Boolean).length);
+        hechas += Math.min(q.plazas, (conSel[claveQ(q)] || []).filter(Boolean).length);
       });
       var ok = hechas >= plazas;
       return '<div class="cu-fase' + (ok ? '' : ' falta') + '"><div class="cu-fase-h"><span>' +
@@ -861,11 +954,11 @@
   /* cada país en su caja y cada plaza, un escudo: el nombre sale al pasar el ratón */
   function pintaFase(lista) {
     return '<div class="cu-grid">' + lista.map(function (q) {
-      var sel = conSel[q.cid + '|' + q.fase] || [];
+      var sel = conSel[claveQ(q)] || [];
       var slots = sel.map(function (t, i) {
         var pos = q.campeones ? 'Campeón' : q.caidos ? 'Cae de otra competición'
           : q.zona ? q.name : (q.desde + i + 1) + 'º';
-        return '<button class="cupo cupo-esc" data-c="' + esc(q.cid) + '" data-f="' + esc(q.fase) +
+        return '<button class="cupo cupo-esc" data-k="' + esc(claveQ(q)) +
           '" data-i="' + i + '" title="' + esc(pos + ' · ' + t.n + ' (' + t.ovr + ')') + '">' +
           '<span class="cupo-cr">' + Crest.html(t, 30) + '</span>' +
           '<small>' + (q.campeones ? '🏆' : q.caidos ? '🪂' : q.zona ? (i + 1) + 'º'
@@ -890,7 +983,7 @@
     if (conPaso >= total) conPaso = total - 1;
     if (conPaso < 0) conPaso = 0;
     var q = conCupos[conPaso];
-    var clave = q.cid + '|' + q.fase;
+    var clave = claveQ(q);
     var elegidos = conSel[clave] || (conSel[clave] = []);
     var faltan = q.plazas - elegidos.length;
 
@@ -917,8 +1010,8 @@
       var celdas = [];
       for (var c2 = 0; c2 < q.plazas; c2++) {
         var t2 = elegidos[c2];
-        celdas.push('<button class="cupo' + (t2 ? '' : ' vacio') + '" data-c="' + esc(q.cid) +
-          '" data-f="' + esc(q.fase) + '" data-i="' + c2 + '">' +
+        celdas.push('<button class="cupo' + (t2 ? '' : ' vacio') + '" data-k="' + esc(claveQ(q)) +
+          '" data-i="' + c2 + '">' +
           '<span class="cupo-n">' + (q.campeones ? '🏆' : q.zona ? '🌐' : '🪂') + '</span>' +
           (t2 ? '<span class="cupo-cr">' + Crest.html(t2, 22) + '</span><b>' + esc(t2.n) + '</b>' +
             '<small>' + t2.ovr + '</small>'
@@ -957,7 +1050,7 @@
     var lista = LG[q.lid].teams.slice().sort(function (a, b) { return b.ovr - a.ovr; });
     var t = lista[idx];
     if (!t) return;
-    var clave = q.cid + '|' + q.fase;
+    var clave = claveQ(q);
     var sel = conSel[clave] || (conSel[clave] = []);
     var i = sel.indexOf(t);
     if (i >= 0) sel.splice(i, 1);
@@ -986,33 +1079,33 @@
 
   function conVacia() {
     conSel = {};
-    (conCupos || []).forEach(function (q) { conSel[q.cid + '|' + q.fase] = []; });
+    (conCupos || []).forEach(function (q) { conSel[claveQ(q)] = []; });
   }
 
   $('#conCuposBody').onclick = function (e) {
     var n = e.target;
-    while (n && n !== this && !n.getAttribute('data-c') && !n.getAttribute('data-man')) n = n.parentNode;
+    while (n && n !== this && !n.getAttribute('data-k') && !n.getAttribute('data-man')) n = n.parentNode;
     if (!n || n === this) return;
     var man = n.getAttribute('data-man');
     if (man != null) { conManualClick(+man); return; }
-    var cid = n.getAttribute('data-c'), i = +n.getAttribute('data-i');
-    var fase = n.getAttribute('data-f');
-    var q = conCupos.filter(function (x) { return x.cid === cid && x.fase === fase; })[0];
+    var clave0 = n.getAttribute('data-k'), i = +n.getAttribute('data-i');
+    var q = conCupos.filter(function (x) { return claveQ(x) === clave0; })[0];
     if (!q) return;
     Picker.team({
       title: q.campeones ? q.campeones[i] : (q.caidos || q.zona) ? q.name
         : ('Plaza ' + (q.desde + i + 1) + 'ª de ' + q.name),
       nations: false,
       filterLeague: function (x) {
-        return q.have ? q.have.indexOf(x.id) >= 0
-          : (!conComp.conf || x.conf === conComp.conf);
+        var kq = q.comp ? compPack(q.comp) : conComp;
+        var cf = kq ? kq.conf : conComp.conf;
+        return q.have ? q.have.indexOf(x.id) >= 0 : (!cf || x.conf === cf);
       },
       filterTeam: (function () {
-        var cogidos = yaElegidos({ clave: cid + '|' + fase, i: i });
+        var cogidos = yaElegidos({ clave: clave0, i: i });
         return function (t) { return !cogidos[t.leagueId + '|' + t.n]; };
       })(),
       onPick: function (t) {
-        var clave = cid + '|' + fase;
+        var clave = clave0;
         var antes = (conSel[clave] || [])[i] || null;
         /* si ya estaba en otra plaza, se intercambian */
         Object.keys(conSel).forEach(function (c2) {
@@ -1060,10 +1153,13 @@
     /* una temporada completa no se elige a mano: cada competición reparte
        sus cupos por su cuenta según le toca */
     if (conComp.temporada) {
-      conCupos = null; conSel = {};
+      conCupos = cuposTemporada(conComp);
+      if (conCupos) conPorDefecto(); else conSel = {};
       $('#conFmt').classList.add('hidden'); $('#conFmtLbl').classList.add('hidden');
-      $('#conCupos').classList.add('hidden');
+      $('#conCupos').classList.toggle('hidden', !conCupos);
       $('#conVerCupos').classList.add('hidden');
+      conModo = 'auto';
+      if (conCupos) conPintaCupos();
       $('#conHint').textContent = conComp.pack.map(nombreDe).join(' · ') +
         (conComp.supercopas || []).map(function (x) { return ' · ' + SUPERCOPAS[x].nombre; }).join('') +
         (conComp.cwc ? ' · Mundial de Clubes de 8' : '') +
@@ -1164,6 +1260,11 @@
     if (!falta) return campo;
     var dentro = {};
     campo.forEach(function (t) { dentro[t.leagueId + '|' + t.n] = 1; });
+    /* ni a los que ya juegan otra competición de la misma temporada */
+    if (packComp) {
+      var ocupados = yaElegidos();
+      Object.keys(ocupados).forEach(function (k2) { dentro[k2] = 1; });
+    }
     var libres = [];
     COUNTRIES.forEach(function (c) {
       if (k.conf && c.conf !== k.conf) return;
@@ -1414,10 +1515,12 @@
 
 
   function conPrepara(id) {
-    conComp = CONT.filter(function (x) { return x.id === id; })[0];
+    conComp = compPack(id);
     if (!conComp) return false;
-    conCupos = cuposDe(conComp);
-    if (conCupos) conPorDefecto(); else conSel = {};
+    packComp = id;
+    /* los cupos ya están repartidos para toda la temporada: aquí sólo se
+       cambia de competición, no se vuelve a sortear nada */
+    if (!conCupos) { conCupos = cuposDe(conComp); if (conCupos) conPorDefecto(); else conSel = {}; }
     return true;
   }
   function nombreDe(id) {
@@ -1527,6 +1630,7 @@
   $('#btnCon').onclick = function () {
     packEstado = null;
     if (conComp && conComp.temporada) { packArranca(conComp); return; }
+    packComp = null;
     conArranca();
   };
 

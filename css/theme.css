@@ -1851,3 +1851,20 @@ body.conclub{scrollbar-color:var(--club-scroll,var(--line)) rgba(255,255,255,.04
 .cr-ic{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px}
 .cr-ic svg{width:100%;height:auto;display:block}
 .cr-link{display:inline-flex;align-items:center;gap:7px}
+
+/* =========================================================================
+   LOS CUPOS DE UNA TEMPORADA ENTERA
+   Una caja por país y dentro una línea por competición, para ver de un
+   vistazo a dónde va cada club y que ninguno salga dos veces.
+   ========================================================================= */
+.cu-linea{display:flex;align-items:center;gap:8px;padding:3px 0;
+  border-top:1px solid rgba(255,255,255,.05)}
+.cu-linea:first-of-type{border-top:0}
+.cu-comp{flex:0 0 96px;min-width:0;display:flex;flex-direction:column;line-height:1.15;
+  font-size:10.5px;letter-spacing:.03em;color:var(--txt)}
+.cu-comp i{font-style:normal;font-size:9.5px;color:var(--dim);letter-spacing:.05em;
+  text-transform:uppercase}
+.cu-linea .cu-esc{display:flex;flex-wrap:wrap;gap:4px;flex:1;min-width:0}
+@media (max-width:760px){
+  .cu-comp{flex:0 0 78px;font-size:10px}
+}
