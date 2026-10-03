@@ -3100,7 +3100,7 @@
       }).join('');
       function fila(x) {
         var cid = x.v.indexOf('C:') === 0 ? x.v.slice(2) : '';
-        var logo = x.v.indexOf('K:') === 0 ? torneoLogoImg(x.v.slice(2), 18) : '';
+        var logo = x.v.indexOf('K:') === 0 ? torneoLogoImg(x.v.slice(2), 24) : '';
         var on = (x.v === pScope) || (!cid && pConf === rConf && x.v === rScope);
         return '<button class="nc-row' + (on ? ' on' : '') + '" data-s="' + esc(x.v) + '">' +
           '<span>' + (cid ? flagImg(cid, 12) : logo) + esc(x.t) + '</span>' +
@@ -3166,8 +3166,8 @@
     /* el botón también lleva el logo: así se ve qué se está mirando sin
        tener que leer. Si la competición no tiene, queda la bandera */
     var kComp = rComp ? rComp.charAt(0) : '', iComp = rComp ? rComp.slice(2) : '';
-    var logo0 = kComp === 'L' ? compLogoImg(window.LEAGUE_LOGO, iComp, 20)
-      : (kComp === 'K' || kComp === 'U') ? torneoLogoImg(iComp, 20) : '';
+    var logo0 = kComp === 'L' ? compLogoImg(window.LEAGUE_LOGO, iComp, 28)
+      : (kComp === 'K' || kComp === 'U') ? torneoLogoImg(iComp, 28) : '';
     resBar = '<div class="toolbar" style="gap:8px">' +
       '<button class="navcomp" id="rNav" aria-haspopup="true">' + (logo0 || (cid0 ? flagImg(cid0, 12) : '')) +
       '<span class="nc-t"><small>' + esc(CONF_LABEL[rConf] || '') + '</small>' +
@@ -3225,7 +3225,7 @@
 
     if (k === 'L') {
       var lg = st.leagues[id];
-      title.innerHTML = cabConLogo(ligaLogoImg(id, 22), esc(lname(id))) +
+      title.innerHTML = cabConLogo(ligaLogoImg(id, 34), esc(lname(id))) +
         '<small>Jornada ' + lg.played + ' de ' + lg.rounds.length + '</small>';
       if (rView === 'gol') body.innerHTML = X.scorersHTML(Comp.topScorers(lg.scorers, 40));
       else if (rView === 'res') {
@@ -3245,7 +3245,7 @@
           body.innerHTML = bracketHTML(vis.rondas, vis.campeon) +
             (vis.campeon ? '<p class="hint" style="margin-top:10px">Ascendió <b>' +
               esc(vis.campeon.n) + '</b> a ' + esc(vis.sube || po.sube || '') + '.</p>' : '');
-          title.innerHTML = tituloConRondas(cabConLogo(ligaLogoImg(id, 22), esc(lname(id))) +
+          title.innerHTML = tituloConRondas(cabConLogo(ligaLogoImg(id, 34), esc(lname(id))) +
             ' <i class="rn-camp">Play-off de ascenso ' + (po.year || '') + '</i>');
         }
       } else body.innerHTML = zonedTable(id, { form: true });
@@ -3269,12 +3269,12 @@
       }
       body.innerHTML = bracketHTML(rondasCup, campCup, proxCup);
       title.innerHTML = tituloConRondas(
-        cabConLogo(torneoLogoImg(id, 22) || flagImg(id, 16), esc(cup.name)) +
+        cabConLogo(torneoLogoImg(id, 34) || flagImg(id, 20), esc(cup.name)) +
         (campCup ? ' <i class="rn-camp">🏆 ' + esc(campCup.n) + '</i>' : ''));
       return;
     }
     var c = st.conts[id];
-    var cabC = cabConLogo(torneoLogoImg(id, 26), esc(c.name)) + '<small>Fase: ' + esc(c.phase) +
+    var cabC = cabConLogo(torneoLogoImg(id, 38), esc(c.name)) + '<small>Fase: ' + esc(c.phase) +
       (c.champion && !contPendiente(c) ? ' · 🏆 ' + esc(c.champion.n) : '') + '</small>';
     if (rView === 'gol') {
       title.innerHTML = cabC;
@@ -3523,7 +3523,7 @@
     var nombre = cual === 'uefa' ? 'Supercopa de UEFA' : 'Recopa Sudamericana';
     /* la Recopa no tiene logo propio en la carpeta, así que va sin él:
        antes que poner el de otro torneo, mejor sólo el nombre */
-    var cabSC = cabConLogo(cual === 'uefa' ? torneoLogoImg('supercup', 24) : '', esc(nombre));
+    var cabSC = cabConLogo(cual === 'uefa' ? torneoLogoImg('supercup', 34) : '', esc(nombre));
     if (!t) {
       title.innerHTML = cabSC;
       body.innerHTML = '<p class="hint">Todavía no se ha jugado.</p>';

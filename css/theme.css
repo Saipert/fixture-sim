@@ -1701,9 +1701,9 @@ body.conclub{scrollbar-color:var(--club-scroll,var(--line)) rgba(255,255,255,.04
 .rn-tit .clogo{margin:0}
 .navcomp .clogo{margin-right:7px}
 @media (max-width:760px){
-  .rn-tit{gap:7px}
-  .rn-tit .clogo{height:20px}
-  .navcomp .clogo{height:17px;margin-right:6px}
+  .rn-tit{gap:8px}
+  .rn-tit .clogo{height:28px}
+  .navcomp .clogo{height:24px;margin-right:7px}
 }
 
 /* En el teléfono los dos equipos van uno debajo del otro. En una sola fila
