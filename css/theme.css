@@ -1720,3 +1720,21 @@ body.conclub{scrollbar-color:var(--club-scroll,var(--line)) rgba(255,255,255,.04
   .br-listagrid.ancha .br-tie .br-sep ~ .t em{order:2;text-align:left}
   .br-listagrid.ancha .br-tie .br-sep ~ .t b{order:3}
 }
+
+/* =========================================================================
+   LA CABECERA DEL CUADRO, EN UNA SOLA LÍNEA
+   Logo y nombre a la izquierda, la ronda a la derecha y las flechas en los
+   extremos. Antes iba apilado en el centro y se comía tres renglones de
+   alto, que es justo lo que hacía falta scrollear en grupos y en octavos.
+   ========================================================================= */
+.panel > h3:has(.rn-izq){padding:4px 10px}
+.rn-izq{flex:1 1 auto;min-width:0;display:flex;align-items:center;gap:10px;overflow:hidden}
+.rn-izq .rn-tit{min-width:0}
+.rn-paso{flex:0 0 auto;color:var(--dim);font-size:12.5px;text-transform:none;
+  letter-spacing:0;font-weight:600;white-space:nowrap}
+.rn-flecha{width:26px;height:26px;font-size:15px}
+@media (max-width:760px){
+  .panel > h3:has(.rn-izq){padding:4px 6px;gap:6px}
+  .rn-izq{gap:7px}
+  .rn-paso{font-size:11px;white-space:normal;text-align:right;max-width:38%}
+}

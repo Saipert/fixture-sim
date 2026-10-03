@@ -2915,13 +2915,9 @@
   function tituloPasoSel(dentro, pasos) {
     var p = pasos[selPaso];
     if (!p || pasos.length < 2) return dentro;
-    return '<button class="rn-flecha" data-paso="-1"' + (selPaso > 0 ? '' : ' disabled') +
-      ' title="Anterior">&#8249;</button>' +
-      '<span class="rn-nombre">' + dentro +
-      '<small>' + esc(p.nombre) + ' · ' + p.n + ' ' + p.unidad + (p.n === 1 ? '' : 's') +
-      (p.ciega ? ' · por jugar' : '') + '</small></span>' +
-      '<button class="rn-flecha" data-paso="1"' + (selPaso < pasos.length - 1 ? '' : ' disabled') +
-      ' title="Siguiente">&#8250;</button>';
+    return cabeceraRonda(dentro, esc(p.nombre) + (p.ciega ? ' · por jugar' : ''),
+      flechaRonda('data-paso', -1, selPaso > 0, 'Anterior', '&#8249;'),
+      flechaRonda('data-paso', 1, selPaso < pasos.length - 1, 'Siguiente', '&#8250;'));
   }
   /* Los pasos de una copa continental: la previa, los grupos y cada ronda
      del cuadro, para recorrerlos con las mismas flechas. */
@@ -3464,16 +3460,23 @@
       hayAntes: rondaIdx > 0, hayDespues: rondaIdx < rondasVista.length - 1 };
   }
   /* la cabecera con las flechas a los lados */
+  /* La cabecera de un cuadro: a la izquierda el logo y el nombre del
+     torneo, a la derecha sólo en qué ronda estamos, y las flechas en los
+     dos extremos. Antes iba todo apilado en el centro. */
+  function flechaRonda(attr, val, activa, titulo, signo) {
+    return '<button class="rn-flecha" ' + attr + '="' + val + '"' + (activa ? '' : ' disabled') +
+      ' title="' + titulo + '">' + signo + '</button>';
+  }
+  function cabeceraRonda(dentro, paso, izq, der) {
+    return izq + '<span class="rn-izq">' + dentro + '</span>' +
+      '<span class="rn-paso">' + paso + '</span>' + der;
+  }
   function tituloConRondas(dentro) {
     var r = rondaActual();
     if (!r) return dentro;
-    return '<button class="rn-flecha" data-ronda="-1"' + (r.hayAntes ? '' : ' disabled') +
-      ' title="Ronda anterior">&#8249;</button>' +
-      '<span class="rn-nombre">' + dentro +
-      '<small>' + esc(r.nombre) + ' · ' + r.n + ' cruce' + (r.n === 1 ? '' : 's') +
-      (r.futura ? ' · por jugar' : '') + '</small></span>' +
-      '<button class="rn-flecha" data-ronda="1"' + (r.hayDespues ? '' : ' disabled') +
-      ' title="Ronda siguiente">&#8250;</button>';
+    return cabeceraRonda(dentro, esc(r.nombre) + (r.futura ? ' · por jugar' : ''),
+      flechaRonda('data-ronda', -1, r.hayAntes, 'Ronda anterior', '&#8249;'),
+      flechaRonda('data-ronda', 1, r.hayDespues, 'Ronda siguiente', '&#8250;'));
   }
   function bracketBody(rounds, champion) {
     var todas = (rounds || []).filter(function (r) { return r.ties && r.ties.length && !isPrelim(r); });

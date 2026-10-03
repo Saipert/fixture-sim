@@ -20,11 +20,15 @@
   --acc5:#ff7fa3;
   --on-acc:#0b1220;
   --radius:8px;
-  --f-head:Oswald,'Arial Narrow',Impact,sans-serif;
+  --f-head:Oswald,'Arial Narrow',"Segoe UI",system-ui,sans-serif;
 }
+/* La letra del menu principal, en todo el juego: una sola tipografia de
+   arriba abajo. Lo que estaba en mayusculas sigue en mayusculas y lo que
+   estaba en minuscula sigue en minuscula: aqui no se toca ningun
+   text-transform, solo de que esta hecha la letra. */
 body{
   background:var(--bg) linear-gradient(180deg,var(--bg) 0%,#000 100%) fixed;
-  font-family:Inter,"Segoe UI",system-ui,sans-serif;
+  font-family:var(--f-head);
 }
 h1,h2,h3{font-family:var(--f-head);letter-spacing:.03em;text-transform:uppercase;font-weight:600}
 h2{font-size:22px}
@@ -119,6 +123,9 @@ select:focus,input:focus,textarea:focus{outline:2px solid var(--acc);outline-off
   .menu-grid{grid-template-columns:1fr}
   .menu-grid .mcard{min-height:100px}
   .mcard[data-go="world"] b{font-size:28px}
+  /* con una sola columna, el «span 2» de Plantillas se inventaba una
+     segunda columna y dejaba la mitad de las tarjetas en 52 pixeles */
+  .mcard[data-go="squads"]{grid-column:auto}
 }
 
 /* ---------- créditos ---------- */
