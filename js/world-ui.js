@@ -3593,7 +3593,62 @@
   /* =====================================================================
      VISTA · PALMARÉS
      ===================================================================== */
-  var hYear = null, hScope = 'todo', hCuantas = -1;
+  var hYear = null, hScope = 'todo', hCuantas = -1, hComp = null;
+  /* ---------- palmarés de una competición ----------
+     Todos los campeones de la simulación, temporada a temporada, y quién
+     la ha ganado más veces. */
+  function competicionesDelPalmares() {
+    var st = World.state, vistos = {}, out = [];
+    (st.history || []).forEach(function (s) {
+      ['conts', 'cups', 'leagues'].forEach(function (kind) {
+        (s[kind] || []).forEach(function (c) {
+          if (!c.champion) return;
+          var k = kind + ':' + c.id;
+          if (vistos[k]) return;
+          vistos[k] = 1;
+          out.push({ v: k, t: c.name, kind: kind, id: c.id });
+        });
+      });
+    });
+    var ORDEN = { conts: 0, cups: 1, leagues: 2 };
+    out.sort(function (a, b) {
+      return (ORDEN[a.kind] - ORDEN[b.kind]) || a.t.localeCompare(b.t, 'es');
+    });
+    return out;
+  }
+  function palmaresCompHTML() {
+    var st = World.state;
+    var i0 = hComp.indexOf(':');
+    var kind = hComp.slice(0, i0), id = hComp.slice(i0 + 1);
+    var filas = [], cuenta = {}, orden = [];
+    (st.history || []).slice().reverse().forEach(function (s) {
+      (s[kind] || []).forEach(function (c) {
+        if (String(c.id) !== id || !c.champion) return;
+        filas.push({ anio: s.year, champ: c.champion, sec: c.runnerUp });
+        var k2 = c.champion.leagueId + '|' + c.champion.n;
+        if (!cuenta[k2]) { cuenta[k2] = { t: c.champion, n: 0 }; orden.push(k2); }
+        cuenta[k2].n++;
+      });
+    });
+    if (!filas.length) return '<p class="hint">Esta competición todavía no ha dado campeón.</p>';
+    orden.sort(function (a, b) { return cuenta[b].n - cuenta[a].n; });
+    var top = '<h4 class="subh">Más veces campeón</h4><div class="palm-top">' +
+      orden.map(function (k2) {
+        var x = cuenta[k2];
+        return '<div class="pt-fila' + (x.t === me ? ' mine' : '') + '">' +
+          crest(x.t, 22) + '<em>' + esc(x.t.n) + '</em><b>' + x.n + '</b></div>';
+      }).join('') + '</div>';
+    var lista = '<h4 class="subh">Temporada a temporada</h4><div class="palm">' +
+      filas.map(function (f) {
+        var mine = (f.champ === me || f.sec === me) ? ' mine' : '';
+        return '<div class="trow2' + mine + '">' +
+          '<span class="cmp">' + esc(f.anio) + '</span>' +
+          '<span class="win">' + crest(f.champ, 22) + '<em>' + esc(f.champ.n) + '</em><i>campeón</i></span>' +
+          '<span class="sec">' + (f.sec ? crest(f.sec, 20) + '<em>' + esc(f.sec.n) + '</em><i>subcampeón</i>'
+            : '<em class="hint">—</em>') + '</span></div>';
+      }).join('') + '</div>';
+    return top + lista;
+  }
   function viewHistory() {
     var st = World.state;
     if (!st.history.length) {
@@ -3616,20 +3671,31 @@
       { v: 'cont', t: 'Continentales' },
       { v: 'liga', t: 'Ligas' },
       { v: 'copa', t: 'Copas' },
+      { v: 'comp', t: 'Por competición' },
       esJugador ? { v: 'mis', t: 'Mis títulos' } : { v: 'mio', t: 'Mi equipo' }
     ];
     /* el entrenador tiene además su palmarés personal, el de todos sus clubes */
     if (!esJugador) SCOPES.push({ v: 'mis', t: 'Mi palmarés' });
     if (esJugador && hScope === 'mio') hScope = 'mis';
     var mis = hScope === 'mis';
+    var porComp = hScope === 'comp';
+    var comps = porComp ? competicionesDelPalmares() : [];
+    if (porComp && !comps.some(function (x) { return x.v === hComp; })) {
+      hComp = comps.length ? comps[0].v : null;
+    }
     var bar = '<div class="mbar"><div class="toolbar" style="gap:8px">' +
-      (mis ? '' : '<label>Temporada</label><select id="hYear">' + years.map(function (y) {
+      (porComp ? '<label>Competición</label><select id="hComp">' + comps.map(function (x) {
+        return '<option value="' + esc(x.v) + '"' + (x.v === hComp ? ' selected' : '') +
+          '>' + esc(x.t) + '</option>';
+      }).join('') + '</select>'
+      : mis ? '' : '<label>Temporada</label><select id="hYear">' + years.map(function (y) {
         return '<option value="' + y + '"' + (y === hYear ? ' selected' : '') + '>' + y + '</option>';
       }).join('') + '</select>') +
       '<label>Ver</label><select id="hScope">' + SCOPES.map(function (x) {
         return '<option value="' + x.v + '"' + (x.v === hScope ? ' selected' : '') + '>' + esc(x.t) + '</option>';
       }).join('') + '</select>' +
-      '<span class="hint">' + (mis ? (esJugador ? 'Todo lo que has ganado desde que empezaste.'
+      '<span class="hint">' + (porComp ? 'Todos los campeones de la simulación, temporada a temporada.'
+        : mis ? (esJugador ? 'Todo lo que has ganado desde que empezaste.'
           : 'Todo lo que has ganado como entrenador, en cualquier club.')
         : 'Campeón y subcampeón de cada competición.') + '</span>' +
       '</div></div>';
@@ -3650,6 +3716,14 @@
         '<small>' + cuantos + (cuantos === 1 ? ' título' : ' títulos') + '</small></h3>' +
         '<div class="pbody" id="hBody">' +
         (window.CarreraUI ? CarreraUI.palmaresJugador() : '') + '</div></div></div>';
+    }
+    if (porComp) {
+      var nom = (comps.filter(function (x) { return x.v === hComp; })[0] || {}).t || 'Palmarés';
+      return '<div class="mv-wrap">' + bar +
+        '<div class="panel" style="flex:1"><h3>' + esc(nom) +
+        '<small>' + st.history.length + ' temporada(s) jugadas</small></h3>' +
+        '<div class="pbody" id="hBody">' + (hComp ? palmaresCompHTML()
+          : '<p class="hint">Todavía no hay competiciones con campeón.</p>') + '</div></div></div>';
     }
     return '<div class="mv-wrap">' + bar +
       '<div class="panel" style="flex:1"><h3>Temporada ' + Temporada(s0.year) +
@@ -4058,6 +4132,9 @@
        vistas. */
     if ($('#hYear')) {
       $('#hYear').onchange = function () { hYear = +this.value; renderBody(); };
+    }
+    if ($('#hComp')) {
+      $('#hComp').onchange = function () { hComp = this.value; renderBody(); };
     }
     if ($('#hScope')) {
       $('#hScope').onchange = function () { hScope = this.value; renderBody(); };

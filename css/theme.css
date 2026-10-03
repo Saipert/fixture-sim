@@ -1868,3 +1868,13 @@ body.conclub{scrollbar-color:var(--club-scroll,var(--line)) rgba(255,255,255,.04
 @media (max-width:760px){
   .cu-comp{flex:0 0 78px;font-size:10px}
 }
+
+/* el palmarés de una competición: quién la ha ganado más veces */
+.palm-top{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:6px;
+  margin-bottom:12px}
+.pt-fila{display:flex;align-items:center;gap:9px;padding:6px 10px;border-radius:8px;
+  background:var(--card);border:1px solid var(--line)}
+.pt-fila em{flex:1;min-width:0;font-style:normal;overflow:hidden;text-overflow:ellipsis;
+  white-space:nowrap}
+.pt-fila b{font-variant-numeric:tabular-nums;font-size:15px}
+.pt-fila.mine{border-color:var(--acc);box-shadow:inset 2px 0 0 var(--acc)}
