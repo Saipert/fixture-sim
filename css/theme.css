@@ -1627,3 +1627,31 @@ body.conclub{scrollbar-color:var(--club-scroll,var(--line)) rgba(255,255,255,.04
 .mk-res { font-weight: 800; font-size: 13px; white-space: nowrap; }
 .mk-oferta.si .mk-res { color: var(--acc); }
 .mk-oferta.no .mk-res { color: var(--red); }
+
+/* el segundo de grupo que se juega la repesca de octavos */
+.q-po td { color: #8fd0ff; }
+.gsel tr.q-po .pos-chip { background: rgba(80,160,255,.20); color: #8fd0ff; }
+.zleg i.po { background: #1d4a63; }
+
+/* =========================================================================
+   CRUCES EN EL TELÉFONO
+   Antes de cuartos hay ocho, trece o hasta veinte llaves, y el cuadro las
+   reparte en varias columnas. A 375 px eso deja menos de ciento sesenta
+   píxeles por cruce: no entra el escudo, ni el nombre, ni el marcador. En
+   el teléfono van de una en una.
+   ========================================================================= */
+@media (max-width: 760px) {
+  .br-listagrid { grid-template-columns: 1fr; }
+  .br-listagrid.ancha { grid-template-columns: 1fr !important; gap: 6px; height: auto; }
+  .br-listagrid.ancha .br-tie { padding: 8px 10px; column-gap: 8px; }
+  .br-listagrid.ancha .br-tie .t { font-size: 12.5px; gap: 7px; }
+  .br-listagrid.ancha .br-tie .t:first-child { grid-template-columns: 26px minmax(0, 1fr) auto; }
+  .br-listagrid.ancha .br-tie .br-sep ~ .t { grid-template-columns: auto minmax(0, 1fr) 26px; }
+  .br-listagrid.ancha .br-tie .t .cw { width: 26px !important; height: 26px !important; }
+  .br-listagrid.ancha .br-tie .t .cw img { width: 100% !important; height: 100% !important; }
+  .br-listagrid.ancha .br-tie .lg { font-size: 10px; }
+  /* el cuadro de dos ramas tampoco cabe: se deshace en lista */
+  .br2 { display: block; }
+  .br2 .br-side { display: block; }
+  .br-round { margin-bottom: 10px; }
+}

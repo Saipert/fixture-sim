@@ -2864,14 +2864,18 @@
         n: ties.length, unidad: 'cruce',
         campeon: (ciega || soloIda) ? null : campeon });
     }
-    ronda('Fase previa', c.prelimTies);
+    /* Al jugarse, los cruces de la previa y del play-off se mudan a su
+       propia lista; mirando sólo los pendientes, esas rondas desaparecían
+       del visor en cuanto terminaban y no había forma de volver a ellas. */
+    /* en el orden en que se juegan: previa, play-off y después los grupos */
+    ronda('Fase previa', (c.prelimTies || []).concat(c.prelimHechas || []));
+    ronda('Play-off', (c.playoffTies || []).concat(c.playoffHechas || []));
     if (!cortado && c.groups && c.groups.length) {
       out.push({ nombre: 'Fase de grupos', tipo: 'gruposCont', c: c,
         n: c.groups.length, unidad: 'grupo' });
       /* la tabla ya se corta sola, pero lo que venga después no se enseña */
       if (jornadaEnEspera(c.name) != null) cortado = true;
     }
-    ronda('Play-off', c.playoffTies);
     var ko = c.koRounds || [];
     ko.forEach(function (r, i) {
       ronda(r.name, r.ties, (i === ko.length - 1) ? c.champion : null);
@@ -3132,7 +3136,7 @@
         '<th class="num">PJ</th><th class="num">Pts</th><th class="num">DG</th></tr></thead><tbody>' +
         rows.map(function (r, i) {
           var q = qmap[r.t.leagueId + '|' + r.t.n];
-          var cls = q === 'yes' ? 'q-yes' : q === 'alt' ? 'q-alt' : 'q-no';
+          var cls = q === 'yes' ? 'q-yes' : q === 'po' ? 'q-po' : q === 'alt' ? 'q-alt' : 'q-no';
           return '<tr class="' + cls + (r.t === me ? ' me' : '') + '"><td class="num">' + (i + 1) + '</td>' +
             '<td><div class="tname">' + crest(r.t, 18) + '<span>' + esc(r.t.n) + '</span></div></td>' +
             '<td class="num">' + r.pj + '</td><td class="num"><b>' + r.pts + '</b></td>' +
@@ -3152,11 +3156,22 @@
     var map = {};
     if (!c.groups) return map;
     var extras = [];
+    /* Quién pasa y por dónde. La Europa y la Conference tienen repesca
+       propia, así que su segundo no se va a ninguna parte: se queda a
+       jugársela contra el que cae del torneo de arriba. */
+    var repesca = !!c.cfg.repescaDe;
     c.groups.forEach(function (g) {
-      (g.standings || Comp.sortTable(g.table)).forEach(function (r, i) {
+      /* con las MISMAS filas que se pintan, que están cortadas en la
+         jornada ya vista: con la tabla final los colores salían en otras
+         posiciones de las que se ven */
+      filasGrupoCont(c, g).forEach(function (r, i) {
         var k = r.t.leagueId + '|' + r.t.n;
         if (i < c.cfg.qualify) map[k] = 'yes';
-        else if (i === c.cfg.qualify) { extras.push(r); if (c.cfg.feeds) map[k] = 'alt'; }
+        else if (repesca && i === c.cfg.qualify) map[k] = 'po';
+        else if (i === c.cfg.qualify + (repesca ? 1 : 0)) {
+          extras.push(r);
+          if (c.cfg.feeds) map[k] = 'alt';
+        }
       });
     });
     if (c.cfg.bestExtra) {
@@ -3170,6 +3185,11 @@
     var out = '<div class="zleg"><span class="k"><i class="top"></i>clasificado';
     if (c.cfg.bestExtra) out += ' (con los ' + c.cfg.bestExtra + ' mejores terceros)';
     out += '</span>';
+    if (c.cfg.repescaDe) {
+      var de = (World.state.conts[c.cfg.repescaDe] || {}).name || '';
+      out += '<span class="k"><i class="po"></i>a la repesca de octavos' +
+        (de ? ' (contra los terceros de ' + esc(de) + ')' : '') + '</span>';
+    }
     if (c.cfg.feeds) {
       var d = (World.state.conts[c.cfg.feeds] || {}).name || '';
       out += '<span class="k"><i class="second"></i>pasa a ' + esc(d) + '</span>';
