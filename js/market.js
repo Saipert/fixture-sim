@@ -232,13 +232,14 @@
   /* Las ligas que fichan a golpe de talonario. No es que su fútbol tire:
      es que pagan lo que nadie paga, y por eso se llevan a quien quieren.
      op: cuánto multiplican sus opciones · caja: cuántas veces el
-     presupuesto que les daría su liga · golpes: a cuántas estrellas van
-     al año. La MLS no asalta el mercado como Arabia: ficha a uno y para,
-     que es lo que hace de verdad. */
+     presupuesto que les daría su liga · golpes: a cuántas estrellas va
+     cada club que lo intenta · prob: cada cuántos veranos lo intenta.
+     La MLS no asalta el mercado como Arabia: le cae un Messi de vez en
+     cuando, no media Europa todos los años. */
   var PETRO = {
-    saudi: { op: 2.6, caja: 2.6, golpes: 2 },
-    china: { op: 1.5, caja: 1.8, golpes: 1 },
-    mls:   { op: 1.3, caja: 1.5, golpes: 1 }
+    saudi: { op: 2.2, caja: 2.0, golpes: 1, prob: 0.34 },
+    china: { op: 1.4, caja: 1.5, golpes: 1, prob: 0.10 },
+    mls:   { op: 1.2, caja: 1.2, golpes: 1, prob: 0.08 }
   };
   function factorPetro(compra) {
     var x = PETRO[compra.leagueId];
@@ -509,8 +510,8 @@
       });
       estrellas = mezcla(estrellas);
       deTalonario.forEach(function (comp) {
-        var golpes = PETRO[comp.t.leagueId].golpes, vistos = 0;
-        if (azar() < 0.35) golpes--;        /* no todos los veranos */
+        var cfg = PETRO[comp.t.leagueId];
+        var golpes = azar() < cfg.prob ? cfg.golpes : 0, vistos = 0;
         for (var i = 0; i < estrellas.length && golpes > 0 && vistos < 40; i++) {
           var o = estrellas[i];
           if (o.vendido || o.de === comp) continue;
