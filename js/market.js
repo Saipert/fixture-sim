@@ -184,7 +184,11 @@
     var base = l[1] * 120e6;
     var k = Math.pow(1.17, (equipo.ovr || 65) - mediaLiga(equipo.leagueId));
     var taq = taquilla(equipo) * 17;
-    return redondea(Math.max(60000, base * k * 0.55 + taq * 0.6));
+    /* Los del talonario no gastan lo que ingresan, gastan lo que les
+       dejan: con el presupuesto de su liga no les llegaba ni para pujar
+       por un crack, y por eso no fichaban más que descartes. */
+    var petro = PETRO[equipo.leagueId] ? PETRO[equipo.leagueId].caja : 1;
+    return redondea(Math.max(60000, (base * k * 0.55 + taq * 0.6) * petro));
   }
   var _medias = {};
   function mediaLiga(id) {
@@ -225,10 +229,28 @@
   function grandeDeBrasil(equipo) {
     return equipo.leagueId === 'brasileirao' && (equipo.ovr || 0) >= 74;
   }
+  /* Las ligas que fichan a golpe de talonario. No es que su fútbol tire:
+     es que pagan lo que nadie paga, y por eso se llevan a quien quieren.
+     op: cuánto multiplican sus opciones · caja: cuántas veces el
+     presupuesto que les daría su liga · golpes: a cuántas estrellas van
+     al año. La MLS no asalta el mercado como Arabia: ficha a uno y para,
+     que es lo que hace de verdad. */
+  var PETRO = {
+    saudi: { op: 2.6, caja: 2.6, golpes: 2 },
+    china: { op: 1.5, caja: 1.8, golpes: 1 },
+    mls:   { op: 1.3, caja: 1.5, golpes: 1 }
+  };
+  function factorPetro(compra) {
+    var x = PETRO[compra.leagueId];
+    return x ? x.op : 1;
+  }
+  function esPetro(equipo) { return !!PETRO[equipo.leagueId]; }
   function factorGeo(vende, compra) {
     var a = confDe(vende.leagueId), b = confDe(compra.leagueId);
     var f = (GEO[a] && GEO[a][b] != null) ? GEO[a][b] : 0.2;
     if (b === 'CONMEBOL' && a !== 'CONMEBOL' && grandeDeBrasil(compra)) f = Math.max(f, 0.18);
+    /* al que paga el triple se le cruza el mundo entero */
+    if (esPetro(compra) && a !== b) f = Math.max(f, 0.62);
     return f;
   }
 
@@ -266,6 +288,16 @@
 
     /* la geografía */
     p *= factorGeo(vende, compra);
+
+    /* Donde el dinero no es problema se mira otra vez al que ya habia
+       dicho que no: es lo que pasa de verdad con Arabia. */
+    p *= factorPetro(compra);
+
+    /* Pagar una barbaridad tiene que servir de algo. A un crack su propia
+       valoración le ponía un techo del dos por ciento dieras lo que dieras,
+       así que el deslizador no hacía nada. Desde un 30% por encima de lo
+       que piden el suelo sube, y al doblar la oferta es media moneda. */
+    if (r > 1.3) p = Math.max(p, 0.5 * Math.min(1, (r - 1.3) / 0.7));
 
     /* Si al que vende le deja por debajo del mínimo de plantilla, no lo
        suelta ni loco. Si sólo le deja justo en una línea, lo piensa: sabe que
@@ -428,10 +460,15 @@
       movimientos.push({ j: o.jug, de: o.de.t, a: comp.t, precio: precio });
     }
 
+    /* primero los del talonario: en la vida real su oferta llega antes y
+       no hay con qué taparla, así que eligen ellos y el resto reparte lo
+       que queda */
+    compradores.sort(function (a, b) { return (esPetro(b.t) ? 1 : 0) - (esPetro(a.t) ? 1 : 0); });
     compradores.forEach(function (comp) {
       var tope = 1 + (comp.caja > 8e6 ? 1 : 0) + (azar() < 0.5 ? 1 : 0) + (azar() < 0.2 ? 1 : 0);
-      /* de vez en cuando se mira a Europa, pero no desde Sudamérica */
-      var mirarUEFA = comp.conf !== 'CONMEBOL' && azar() < 0.25;
+      /* de vez en cuando se mira a Europa, pero no desde Sudamérica. Los
+         del talonario miran siempre: su mercado es el mundo. */
+      var mirarUEFA = esPetro(comp.t) || (comp.conf !== 'CONMEBOL' && azar() < 0.25);
       var candidatas = (porConf[comp.conf] || []).concat(
         mirarUEFA ? (porConf.UEFA || []).slice(0, 400) : []);
       /* Sólo se estudian a fondo unos cuantos de los que puede pagar: la
@@ -447,10 +484,46 @@
         var g = interesa(comp.t, o.jug);
         if (!g) continue;
         if (puedeSalir(o.de.t, o.jug)) continue;
-        var p = opciones(o.jug, o.de.t, comp.t, o.precio) * (g >= 3 ? 1.6 : g === 2 ? 1.25 : 1);
-        if (azar() < p) cerrar(o, comp, o.precio);
+        /* y no regatean: ponen la mitad de más encima de la mesa */
+        var pone = esPetro(comp.t) ? Math.min(comp.caja, Math.round(o.precio * 1.55)) : o.precio;
+        var p = opciones(o.jug, o.de.t, comp.t, pone) * (g >= 3 ? 1.6 : g === 2 ? 1.25 : 1);
+        if (azar() < p) cerrar(o, comp, pone);
       }
     });
+
+    /* ---- 3b. el golpe de talonario ----
+       A los buenos de verdad no los pone nadie en la lista: ningún club
+       ofrece a su mejor jugador. Pero cuando llega una oferta imposible
+       de rechazar lo vende, que es lo que pasa cada verano con Arabia.
+       Sin esto allí sólo acababan descartes. */
+    var deTalonario = compradores.filter(function (c) { return esPetro(c.t); });
+    if (deTalonario.length) {
+      var enBolsa = {};
+      bolsa.forEach(function (o) { enBolsa[o.jug[0] + '@' + o.de.t.n] = 1; });
+      var estrellas = [];
+      clubes.forEach(function (c) {
+        (c.t.p || []).forEach(function (j) {
+          if (j[2] < 82 || enBolsa[j[0] + '@' + c.t.n]) return;
+          estrellas.push({ jug: j, de: c, precio: pedido(j, c.t), linea: linea(j) });
+        });
+      });
+      estrellas = mezcla(estrellas);
+      deTalonario.forEach(function (comp) {
+        var golpes = PETRO[comp.t.leagueId].golpes, vistos = 0;
+        if (azar() < 0.35) golpes--;        /* no todos los veranos */
+        for (var i = 0; i < estrellas.length && golpes > 0 && vistos < 40; i++) {
+          var o = estrellas[i];
+          if (o.vendido || o.de === comp) continue;
+          if (!fichable(comp.t, o.jug)) continue;
+          if (puedeSalir(o.de.t, o.jug)) continue;
+          vistos++;
+          /* el doble de lo que piden: de eso va el asunto */
+          var pone = Math.round(o.precio * 2);
+          if (pone > comp.caja) continue;
+          if (azar() < opciones(o.jug, o.de.t, comp.t, pone)) { cerrar(o, comp, pone); golpes--; }
+        }
+      });
+    }
 
     /* ---- 4. nadie se queda sin fichar ni sin vender ----
        El orden importa: primero se ficha (así el que estaba al mínimo ya

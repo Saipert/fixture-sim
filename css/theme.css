@@ -1782,3 +1782,59 @@ body.conclub{scrollbar-color:var(--club-scroll,var(--line)) rgba(255,255,255,.04
   .br-listagrid.ancha.n-semis .br-tie .br-sep ~ .t{grid-template-columns:30px minmax(0,1fr) auto}
   .br-listagrid.ancha.n-semis .br-tie .t b{font-size:18px}
 }
+
+/* =========================================================================
+   LAS IMÁGENES DEL MENÚ
+   Cada sección con su emblema a la derecha, y el modo carrera con los
+   cuatro en fila medio pisándose. El texto manda: la imagen va detrás y
+   se disuelve antes de llegar a él.
+   ========================================================================= */
+.mcard .memb{
+  position:absolute;top:50%;right:14px;transform:translateY(-50%);
+  width:46%;height:82%;background-repeat:no-repeat;background-position:right center;
+  background-size:contain;opacity:.5;pointer-events:none;z-index:0;
+  transition:opacity .25s ease,transform .45s ease;
+  -webkit-mask-image:linear-gradient(to right,transparent 0,#000 34%);
+  mask-image:linear-gradient(to right,transparent 0,#000 34%);
+}
+.mcard:hover .memb{opacity:.72;transform:translateY(-50%) scale(1.06)}
+
+/* el modo carrera: los cuatro bustos, cada uno pisando al anterior.
+   El solape va en transform, que es el unico porcentaje que se mide sobre
+   el ancho de la propia foto: con «left» se medía sobre la tarjeta, que es
+   ocho veces más ancha, y los cuatro quedaban desperdigados. */
+.mcard .mcolage{position:absolute;top:0;bottom:0;right:0;left:30%;overflow:hidden;
+  pointer-events:none;z-index:0}
+.mcard .mfila{position:absolute;top:0;bottom:0;right:0;display:flex;align-items:stretch}
+.mcard .mret{
+  position:static;flex:0 0 auto;display:block;height:100%;width:auto;
+  -webkit-mask-image:linear-gradient(to right,transparent 0,#000 18%,#000 82%,transparent 100%),
+    linear-gradient(to bottom,#000 74%,transparent 100%);
+  -webkit-mask-composite:source-in;
+  mask-image:linear-gradient(to right,transparent 0,#000 18%,#000 82%,transparent 100%),
+    linear-gradient(to bottom,#000 74%,transparent 100%);
+  mask-composite:intersect;
+}
+.mcard .mret.r1{transform:translateX(96%);z-index:1}
+.mcard .mret.r2{transform:translateX(64%);z-index:2}
+.mcard .mret.r3{transform:translateX(32%);z-index:3}
+.mcard .mret.r4{transform:translateX(0);z-index:4}
+/* el velo: a la izquierda el fondo de la tarjeta, abajo sombra para el texto */
+.mcard .mvelo{position:absolute;inset:0;display:block;
+  background:linear-gradient(to right,var(--card) 0,rgba(0,0,0,0) 32%),
+    linear-gradient(to top,rgba(11,17,28,.68) 0,rgba(11,17,28,0) 46%)}
+
+/* en el teléfono la tarjeta es más estrecha: sólo Enzo y Bilardo, que es
+   lo que entra sin que se pisen las caras */
+@media (max-width:760px){
+  /* la tarjeta es mucho mas estrecha y el texto cae encima de la foto:
+     se baja la foto y se alarga el velo hasta mas de la mitad */
+  .mcard .memb{width:42%;height:76%;opacity:.26}
+  .mcard .mcolage{left:34%;opacity:.5}
+  .mcard .mvelo{background:
+    linear-gradient(to right,var(--card) 0,rgba(0,0,0,0) 64%),
+    linear-gradient(to top,rgba(11,17,28,.8) 0,rgba(11,17,28,.12) 72%)}
+  .mcard .mret.r1,.mcard .mret.r3{display:none}
+  .mcard .mret.r2{transform:translateX(32%)}
+  .mcard .mret.r4{transform:translateX(0)}
+}
