@@ -2968,7 +2968,7 @@
     if (p.tipo === 'grupos') return bloqueGrupos(p.gs, mia, p.hasta, p.clasi);
     /* mismo cuadro que en los clubes: cuatro filas de cruces por columna */
     var cols = Math.min(4, Math.max(1, Math.ceil(p.ties.length / 4)));
-    return '<div class="br-listagrid ancha cols-' + cols +
+    return '<div class="br-listagrid ancha cols-' + cols + claseCuantos(p.ties.length) +
       '" style="grid-template-columns:repeat(' + cols + ',minmax(0,1fr))">' +
       p.ties.map(function (t) {
         return brTie(p.ciega ? tieSinVer(t) : p.soloIda ? tieSoloIda(t) : t);
@@ -3270,8 +3270,9 @@
       return;
     }
     var c = st.conts[id];
-    var cabC = cabConLogo(torneoLogoImg(id, 38), esc(c.name)) + '<small>Fase: ' + esc(c.phase) +
-      (c.champion && !contPendiente(c) ? ' · 🏆 ' + esc(c.champion.n) : '') + '</small>';
+    /* ni la fase ni el campeon en la cabecera: la ronda ya se lee a la
+       derecha y el campeon sale a lo grande debajo del cuadro */
+    var cabC = cabConLogo(torneoLogoImg(id, 38), esc(c.name));
     if (rView === 'gol') {
       title.innerHTML = cabC;
       body.innerHTML = X.scorersHTML(Comp.topScorers(c.scorers, 40));
@@ -3448,7 +3449,7 @@
        dos, dieciseisavos en cuatro. Nunca sobra un cruce suelto. */
     var n = r.ties.length;
     var cols = Math.min(4, Math.max(1, Math.ceil(n / 4)));
-    return '<div class="br-listagrid ancha cols-' + cols +
+    return '<div class="br-listagrid ancha cols-' + cols + claseCuantos(n) +
       '" style="grid-template-columns:repeat(' + cols + ',minmax(0,1fr))">' +
       r.ties.map(brTie).join('') + '</div>' + camp;
   }
@@ -3542,6 +3543,13 @@
   /* Un nombre largo no se corta con puntos suspensivos: se le baja la
      letra hasta que entra. El escalón lo marca el más largo de los dos,
      para que los dos lados del cruce queden parejos. */
+  /* La final va sola y centrada, y las semifinales una arriba y otra
+     abajo: con dos cruces en fila quedaban pegadas y pequeñas. */
+  function claseCuantos(n) {
+    if (n === 1) return ' n-final';
+    if (n === 2) return ' n-semis';
+    return '';
+  }
   function claseLargo(a, b) {
     var n = Math.max((a || '').length, (b || '').length);
     if (n > 26) return ' n-xxl';

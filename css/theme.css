@@ -1669,7 +1669,9 @@ body.conclub{scrollbar-color:var(--club-scroll,var(--line)) rgba(255,255,255,.04
    Dos columnas, y el nombre del equipo entero: nada de puntos suspensivos.
    Si es largo se le baja la letra, que es lo que pidió quien lo usa.
    ========================================================================= */
-.br-listagrid.ancha { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+/* El número de columnas lo pone el cuadro: cuatro cruces por columna, así
+   que octavos salen en dos columnas de cuatro, cuartos en una de cuatro,
+   semifinales una arriba y otra abajo, y la final sola. */
 .br-listagrid.ancha .br-tie .t em {
   min-width: 0; overflow: visible; text-overflow: clip; white-space: nowrap;
 }
@@ -1737,4 +1739,46 @@ body.conclub{scrollbar-color:var(--club-scroll,var(--line)) rgba(255,255,255,.04
   .panel > h3:has(.rn-izq){padding:4px 6px;gap:6px}
   .rn-izq{gap:7px}
   .rn-paso{font-size:11px;white-space:normal;text-align:right;max-width:38%}
+}
+
+/* =========================================================================
+   LA FINAL Y LAS SEMIFINALES
+   La final va sola, centrada y a lo grande, que es el partido del año. Las
+   semis, una arriba y otra abajo: en fila quedaban pegadas y pequeñas.
+   ========================================================================= */
+/* no se lleva el alto entero: debajo va la banda del campeon, y con
+   «height:100%» la final empujaba la banda fuera y salia barra */
+.br-listagrid.ancha.n-final{height:auto;min-height:calc(100% - 76px);
+  align-content:center;justify-items:center}
+.br-listagrid.ancha.n-final .br-tie{width:min(820px,96%);max-height:none;padding:26px 30px;row-gap:8px}
+.br-listagrid.ancha.n-final .br-tie .t{font-size:20px}
+.br-listagrid.ancha.n-final .br-tie .t .cw{width:64px!important;height:64px!important}
+.br-listagrid.ancha.n-final .br-tie .t:first-child{grid-template-columns:64px minmax(0,1fr) auto}
+.br-listagrid.ancha.n-final .br-tie .br-sep ~ .t{grid-template-columns:auto minmax(0,1fr) 64px}
+.br-listagrid.ancha.n-final .br-tie .t b{font-size:38px;min-width:34px}
+.br-listagrid.ancha.n-final .br-tie .br-sep{font-size:22px}
+.br-listagrid.ancha.n-final .br-tie .lg{font-size:13px;padding-top:4px}
+
+.br-listagrid.ancha.n-semis .br-tie{max-height:none;padding:18px 24px}
+.br-listagrid.ancha.n-semis .br-tie .t{font-size:17px}
+.br-listagrid.ancha.n-semis .br-tie .t .cw{width:48px!important;height:48px!important}
+.br-listagrid.ancha.n-semis .br-tie .t:first-child{grid-template-columns:48px minmax(0,1fr) auto}
+.br-listagrid.ancha.n-semis .br-tie .br-sep ~ .t{grid-template-columns:auto minmax(0,1fr) 48px}
+.br-listagrid.ancha.n-semis .br-tie .t b{font-size:26px}
+
+/* en el teléfono los dos equipos van apilados, así que aquí sólo se sube un
+   punto el tamaño; con los escudos de sesenta y cuatro no entraba nada */
+@media (max-width:760px){
+  .br-listagrid.ancha.n-final .br-tie{width:100%;padding:14px 14px}
+  .br-listagrid.ancha.n-final .br-tie .t{font-size:15px}
+  .br-listagrid.ancha.n-final .br-tie .t .cw{width:38px!important;height:38px!important}
+  .br-listagrid.ancha.n-final .br-tie .t:first-child,
+  .br-listagrid.ancha.n-final .br-tie .br-sep ~ .t{grid-template-columns:38px minmax(0,1fr) auto}
+  .br-listagrid.ancha.n-final .br-tie .t b{font-size:24px;min-width:24px}
+  .br-listagrid.ancha.n-semis .br-tie{padding:10px 12px}
+  .br-listagrid.ancha.n-semis .br-tie .t{font-size:13.5px}
+  .br-listagrid.ancha.n-semis .br-tie .t .cw{width:30px!important;height:30px!important}
+  .br-listagrid.ancha.n-semis .br-tie .t:first-child,
+  .br-listagrid.ancha.n-semis .br-tie .br-sep ~ .t{grid-template-columns:30px minmax(0,1fr) auto}
+  .br-listagrid.ancha.n-semis .br-tie .t b{font-size:18px}
 }
