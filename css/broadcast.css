@@ -223,4 +223,11 @@ body.conclub .wtop,body.conclub .tabs.sub{border-color:var(--line);border-width:
 .nc-comp:hover{border-color:var(--acc)}
 .nc-comp.on{border-color:var(--acc)}
 .nc-vacio{padding:10px 4px;margin:0}
+/* los continentales no se buscan entre los paises: van en su apartado,
+   y el titulillo se queda pegado arriba al desplazar la lista */
+.nc-sec{position:sticky;top:0;z-index:1;background:var(--bg2);
+  padding:7px 9px 4px;font-size:10px;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--dim);font-weight:700}
+.nc-sec + .nc-row{margin-top:0}
+.nc-row .clogo{margin:0;height:18px}
 @media (max-width:640px){.nc-cols{grid-template-columns:1fr}.navcomp{min-width:0;width:100%;max-width:none}}

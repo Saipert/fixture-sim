@@ -1663,5 +1663,60 @@ body.conclub{scrollbar-color:var(--club-scroll,var(--line)) rgba(255,255,255,.04
    caben de verdad, con un tope de dos: en una pantalla ancha tres o cuatro
    columnas de cuatrocientos píxeles vuelven a encoger los nombres y dejan
    el cuadro vacío por arriba y por abajo. */
-.br-listagrid.ancha { grid-template-columns: repeat(auto-fit, minmax(max(300px, 45%), 1fr)) !important; }
-.br-listagrid.ancha .br-tie .t em { min-width: 0; }
+
+/* =========================================================================
+   LOS CRUCES DEL CUADRO
+   Dos columnas, y el nombre del equipo entero: nada de puntos suspensivos.
+   Si es largo se le baja la letra, que es lo que pidió quien lo usa.
+   ========================================================================= */
+.br-listagrid.ancha { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+.br-listagrid.ancha .br-tie .t em {
+  min-width: 0; overflow: visible; text-overflow: clip; white-space: nowrap;
+}
+.br-listagrid.ancha .br-tie .t.n-l em   { font-size: .88em; }
+.br-listagrid.ancha .br-tie .t.n-xl em  { font-size: .78em; letter-spacing: 0; }
+.br-listagrid.ancha .br-tie .t.n-xxl em { font-size: .68em; letter-spacing: -.2px; }
+
+/* en el teléfono, uno por fila y un punto más de recorte en la letra */
+@media (max-width: 760px) {
+  .br-listagrid.ancha { grid-template-columns: 1fr !important; }
+  .br-listagrid.ancha .br-tie .t.n-l em   { font-size: .84em; }
+  .br-listagrid.ancha .br-tie .t.n-xl em  { font-size: .74em; }
+  .br-listagrid.ancha .br-tie .t.n-xxl em { font-size: .64em; }
+}
+
+/* =========================================================================
+   EL LOGO DE LA COMPETICIÓN
+   En resultados y tablas, junto al nombre del torneo y en el botón que lo
+   elige. Antes sólo había bandera de país, y dos ligas del mismo país se
+   veían exactamente igual.
+   ========================================================================= */
+/* El de la Champions es azul marino sobre fondo azul marino y desaparecia.
+   Un halo blanco de un pixel lo recorta sin repintar el logo; a los que ya
+   son claros apenas se les nota. */
+.clogo{object-fit:contain;width:auto;flex:0 0 auto;vertical-align:middle;margin-right:8px;
+  filter:drop-shadow(0 0 1px rgba(255,255,255,.95)) drop-shadow(0 0 1px rgba(255,255,255,.8))
+    drop-shadow(0 0 2px rgba(255,255,255,.45))}
+.rn-tit{display:inline-flex;align-items:center;gap:9px;min-width:0}
+.rn-tit .clogo{margin:0}
+.navcomp .clogo{margin-right:7px}
+@media (max-width:760px){
+  .rn-tit{gap:7px}
+  .rn-tit .clogo{height:20px}
+  .navcomp .clogo{height:17px;margin-right:6px}
+}
+
+/* En el teléfono los dos equipos van uno debajo del otro. En una sola fila
+   al nombre le quedaban setenta y ocho píxeles, y como ya no se corta con
+   puntos suspensivos se montaba encima del escudo. Apilados le queda el
+   ancho entero y entran completos; el escudo, siempre pegado al nombre. */
+@media (max-width:760px){
+  .br-listagrid.ancha .br-tie{grid-template-columns:minmax(0,1fr);row-gap:5px}
+  .br-listagrid.ancha .br-tie .br-sep{display:none}
+  .br-listagrid.ancha .br-tie .t:first-child,
+  .br-listagrid.ancha .br-tie .br-sep ~ .t{
+    grid-column:1/-1;grid-template-columns:26px minmax(0,1fr) auto}
+  .br-listagrid.ancha .br-tie .br-sep ~ .t .cw{order:1}
+  .br-listagrid.ancha .br-tie .br-sep ~ .t em{order:2;text-align:left}
+  .br-listagrid.ancha .br-tie .br-sep ~ .t b{order:3}
+}

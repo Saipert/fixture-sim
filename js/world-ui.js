@@ -43,6 +43,24 @@
       'height="' + (h || 13) + '" onerror="this.remove()">';
   }
   function lflagImg(id, h) { return flagImg((LMETA[id] || {}).cid, h); }
+  /* El logo de la competición. Al mirar resultados o tablas lo primero que
+     se busca es de qué torneo son, y una bandera de país no lo dice: dos
+     ligas del mismo país llevaban la misma. */
+  function compLogoImg(mapa, id, h) {
+    var f = id && mapa ? mapa[id] : null;
+    if (!f) return '';
+    return '<img class="clogo" src="' + f + '" alt="" ' +
+      'height="' + (h || 22) + '" onerror="this.remove()">';
+  }
+  function ligaLogoImg(id, h) {
+    return compLogoImg(window.LEAGUE_LOGO, id, h) || lflagImg(id, 16);
+  }
+  function torneoLogoImg(id, h) { return compLogoImg(window.COMP_LOGO, id, h); }
+  /* logo y nombre en la misma línea: la cabecera de las eliminatorias
+     apila en columna, y sueltos el logo se iba encima del nombre */
+  function cabConLogo(logo, texto) {
+    return logo ? '<span class="rn-tit">' + logo + texto + '</span>' : texto;
+  }
   /* la bandera del país del jugador */
   function natImg(p, h) { return window.Nac ? Nac.bandera(Nac.de(p, me), h || 12) : ''; }
   function lflag(id) { return ''; }
@@ -3080,13 +3098,22 @@
         return '<button class="nc-pill' + (k === pConf ? ' on' : '') + '" data-k="' + k + '">' +
           esc(CONF_LABEL[k]) + '</button>';
       }).join('');
-      var izq = L.sc.map(function (x) {
+      function fila(x) {
         var cid = x.v.indexOf('C:') === 0 ? x.v.slice(2) : '';
+        var logo = x.v.indexOf('K:') === 0 ? torneoLogoImg(x.v.slice(2), 18) : '';
         var on = (x.v === pScope) || (!cid && pConf === rConf && x.v === rScope);
         return '<button class="nc-row' + (on ? ' on' : '') + '" data-s="' + esc(x.v) + '">' +
-          '<span>' + (cid ? flagImg(cid, 12) : '') + esc(x.t) + '</span>' +
+          '<span>' + (cid ? flagImg(cid, 12) : logo) + esc(x.t) + '</span>' +
           (cid ? '<i>›</i>' : '') + '</button>';
-      }).join('');
+      }
+      /* los torneos continentales, arriba y en su propio apartado: estaban
+         detrás de treinta y siete países y había que bajar hasta el fondo */
+      var torneos = L.sc.filter(function (x) { return x.v.indexOf('C:') !== 0; });
+      var paises = L.sc.filter(function (x) { return x.v.indexOf('C:') === 0; });
+      var izq = (torneos.length && paises.length)
+        ? '<div class="nc-sec">Continentales</div>' + torneos.map(fila).join('') +
+          '<div class="nc-sec">Ligas y copas por país</div>' + paises.map(fila).join('')
+        : L.sc.map(fila).join('');
       var der = L.cp.length ? L.cp.map(function (x) {
         var on = pConf === rConf && pScope === rScope && x.v === rComp;
         return '<button class="nc-row nc-comp' + (on ? ' on' : '') + '" data-c="' + esc(x.v) + '"><span>' +
@@ -3136,8 +3163,13 @@
     var scTxt = (scopes.filter(function (x) { return x.v === rScope; })[0] || {}).t || '';
     var cpTxt = (comps.filter(function (x) { return x.v === rComp; })[0] || {}).t || '';
     var cid0 = rScope && rScope.indexOf('C:') === 0 ? rScope.slice(2) : '';
+    /* el botón también lleva el logo: así se ve qué se está mirando sin
+       tener que leer. Si la competición no tiene, queda la bandera */
+    var kComp = rComp ? rComp.charAt(0) : '', iComp = rComp ? rComp.slice(2) : '';
+    var logo0 = kComp === 'L' ? compLogoImg(window.LEAGUE_LOGO, iComp, 20)
+      : (kComp === 'K' || kComp === 'U') ? torneoLogoImg(iComp, 20) : '';
     resBar = '<div class="toolbar" style="gap:8px">' +
-      '<button class="navcomp" id="rNav" aria-haspopup="true">' + (cid0 ? flagImg(cid0, 12) : '') +
+      '<button class="navcomp" id="rNav" aria-haspopup="true">' + (logo0 || (cid0 ? flagImg(cid0, 12) : '')) +
       '<span class="nc-t"><small>' + esc(CONF_LABEL[rConf] || '') + '</small>' +
       '<b>' + esc(cpTxt || scTxt || 'Elegir competición') + '</b></span><i>▾</i></button>' +
       (views.length > 1 ? '<label>Ver</label><select id="rView">' + views.map(function (v) {
@@ -3193,7 +3225,8 @@
 
     if (k === 'L') {
       var lg = st.leagues[id];
-      title.innerHTML = lflagImg(id, 16) + esc(lname(id)) + '<small>Jornada ' + lg.played + ' de ' + lg.rounds.length + '</small>';
+      title.innerHTML = cabConLogo(ligaLogoImg(id, 22), esc(lname(id))) +
+        '<small>Jornada ' + lg.played + ' de ' + lg.rounds.length + '</small>';
       if (rView === 'gol') body.innerHTML = X.scorersHTML(Comp.topScorers(lg.scorers, 40));
       else if (rView === 'res') {
         /* la jornada que espera en la cola no se enseña hasta jugarla */
@@ -3212,7 +3245,7 @@
           body.innerHTML = bracketHTML(vis.rondas, vis.campeon) +
             (vis.campeon ? '<p class="hint" style="margin-top:10px">Ascendió <b>' +
               esc(vis.campeon.n) + '</b> a ' + esc(vis.sube || po.sube || '') + '.</p>' : '');
-          title.innerHTML = tituloConRondas(lflagImg(id, 16) + esc(lname(id)) +
+          title.innerHTML = tituloConRondas(cabConLogo(ligaLogoImg(id, 22), esc(lname(id))) +
             ' <i class="rn-camp">Play-off de ascenso ' + (po.year || '') + '</i>');
         }
       } else body.innerHTML = zonedTable(id, { form: true });
@@ -3235,12 +3268,13 @@
         campCup = null; proxCup = null;
       }
       body.innerHTML = bracketHTML(rondasCup, campCup, proxCup);
-      title.innerHTML = tituloConRondas(flagImg(id, 16) + esc(cup.name) +
+      title.innerHTML = tituloConRondas(
+        cabConLogo(torneoLogoImg(id, 22) || flagImg(id, 16), esc(cup.name)) +
         (campCup ? ' <i class="rn-camp">🏆 ' + esc(campCup.n) + '</i>' : ''));
       return;
     }
     var c = st.conts[id];
-    var cabC = esc(c.name) + '<small>Fase: ' + esc(c.phase) +
+    var cabC = cabConLogo(torneoLogoImg(id, 26), esc(c.name)) + '<small>Fase: ' + esc(c.phase) +
       (c.champion && !contPendiente(c) ? ' · 🏆 ' + esc(c.champion.n) : '') + '</small>';
     if (rView === 'gol') {
       title.innerHTML = cabC;
@@ -3487,18 +3521,31 @@
     var SC = World.state.superCopas || {};
     var t = cual === 'uefa' ? SC.uefa : SC.conmebol;
     var nombre = cual === 'uefa' ? 'Supercopa de UEFA' : 'Recopa Sudamericana';
+    /* la Recopa no tiene logo propio en la carpeta, así que va sin él:
+       antes que poner el de otro torneo, mejor sólo el nombre */
+    var cabSC = cabConLogo(cual === 'uefa' ? torneoLogoImg('supercup', 24) : '', esc(nombre));
     if (!t) {
-      title.innerHTML = esc(nombre);
+      title.innerHTML = cabSC;
       body.innerHTML = '<p class="hint">Todavía no se ha jugado.</p>';
       return;
     }
-    title.innerHTML = esc(nombre) + (t.w ? ' <i class="rn-camp">🏆 ' + esc(t.w.n) + '</i>' : '');
+    title.innerHTML = cabSC + (t.w ? ' <i class="rn-camp">🏆 ' + esc(t.w.n) + '</i>' : '');
     body.innerHTML = bracketHTML([{ name: 'Final', ties: [t] }], t.w || null) +
       (cual === 'conmebol'
         ? '<p class="hint" style="margin-top:10px">El campeón de la Libertadores cierra la serie en casa.</p>'
         : '<p class="hint" style="margin-top:10px">Partido único en campo neutral.</p>');
   }
 
+  /* Un nombre largo no se corta con puntos suspensivos: se le baja la
+     letra hasta que entra. El escalón lo marca el más largo de los dos,
+     para que los dos lados del cruce queden parejos. */
+  function claseLargo(a, b) {
+    var n = Math.max((a || '').length, (b || '').length);
+    if (n > 26) return ' n-xxl';
+    if (n > 21) return ' n-xl';
+    if (n > 16) return ' n-l';
+    return '';
+  }
   function brTie(t) {
     if (!t || !t.a) return '';
     if (!t.b) {
@@ -3524,10 +3571,11 @@
     var pa = t.pens ? '<i class="pens">(' + t.pens.a + ')</i>' : '';
     var pb = t.pens ? '<i class="pens">(' + t.pens.b + ')</i>' : '';
     var mine = (t.a === me || t.b === me) ? ' mine' : '';
+    var lrg = claseLargo(t.a.n, t.b.n);
     return '<div class="br-tie' + mine + '">' +
-      '<div class="t' + (t.w === t.a ? ' win' : '') + '">' + crest(t.a, 16) + '<em>' + esc(t.a.n) + '</em><b>' + sa + pa + '</b></div>' +
+      '<div class="t' + lrg + (t.w === t.a ? ' win' : '') + '">' + crest(t.a, 16) + '<em>' + esc(t.a.n) + '</em><b>' + sa + pa + '</b></div>' +
       '<span class="br-sep">–</span>' +
-      '<div class="t' + (t.w === t.b ? ' win' : '') + '">' + crest(t.b, 16) + '<em>' + esc(t.b.n) + '</em><b>' + sb + pb + '</b></div>' +
+      '<div class="t' + lrg + (t.w === t.b ? ' win' : '') + '">' + crest(t.b, 16) + '<em>' + esc(t.b.n) + '</em><b>' + sb + pb + '</b></div>' +
       (lg ? '<div class="lg">' + lg + '</div>' : '') + '</div>';
   }
 
@@ -3993,9 +4041,14 @@
       fillResults();
     }
 
-    /* palmarés */
+    /* Palmarés. Cada selector por su cuenta: el de «Ver» colgaba del de
+       temporada, y como en «Mi palmarés» la temporada no se enseña, se
+       quedaba sin conectar y ya no había manera de volver a las otras
+       vistas. */
     if ($('#hYear')) {
       $('#hYear').onchange = function () { hYear = +this.value; renderBody(); };
+    }
+    if ($('#hScope')) {
       $('#hScope').onchange = function () { hScope = this.value; renderBody(); };
     }
   }
