@@ -858,7 +858,67 @@
       raiz.style.setProperty('--club-scroll-on', rgbaDe(vivo, 1));
     }
     if (filo) raiz.style.setProperty('--club-scroll-filo', rgbaDe(filo, 0.45));
+    /* El fondo es el primario del club oscurecido hasta que el texto se lea
+       (un club negro, fondo negro). Lo demás sigue en azul marino y blanco. */
+    var c1 = aRGB(me.c1);
+    if (c1) {
+      var luz = (0.299 * c1[0] + 0.587 * c1[1] + 0.114 * c1[2]) / 255;
+      var k = Math.min(1, 0.17 / Math.max(luz, 0.001));
+      raiz.style.setProperty('--club-bg', 'rgb(' + c1.map(function (v) { return Math.round(v * k); }).join(',') + ')');
+    }
     raiz.classList.add('conclub');
+  }
+
+  /* El palmarés del entrenador: en qué club estuvo cada temporada y qué
+     ganó con él. Se apunta al cerrarla, porque después «me» puede cambiar
+     de club y el historial general sólo guarda campeones, no quién dirigía. */
+  function registraTemporadaDT(sum) {
+    var st = World.state;
+    if (!me || !sum) return;
+    var titulos = [];
+    (sum.conts || []).forEach(function (c) { if (c.champion === me) titulos.push({ k: 'cont', n: c.name }); });
+    (sum.cups || []).forEach(function (c) { if (c.champion === me) titulos.push({ k: 'copa', n: c.name }); });
+    (sum.leagues || []).forEach(function (l) { if (l.champion === me) titulos.push({ k: 'liga', n: l.name }); });
+    var sub = [];
+    (sum.conts || []).concat(sum.cups || [], sum.leagues || []).forEach(function (c) {
+      if (c.runnerUp === me) sub.push(c.name);
+    });
+    st.dtPalmares = (st.dtPalmares || []).filter(function (r) { return r.anio !== sum.year; });
+    st.dtPalmares.push({ anio: sum.year, club: me.n, liga: (LMETA[me.leagueId] || {}).name || '',
+      titulos: titulos, sub: sub });
+  }
+
+  /* la vista: títulos de toda su carrera, de más reciente a más antiguo */
+  function palmaresEntrenador() {
+    var reg = (World.state.dtPalmares || []).slice().sort(function (a, b) { return b.anio - a.anio; });
+    var total = 0;
+    reg.forEach(function (r) { total += r.titulos.length; });
+    var porClub = {};
+    reg.forEach(function (r) {
+      var c = porClub[r.club] || (porClub[r.club] = { temporadas: 0, titulos: 0 });
+      c.temporadas++; c.titulos += r.titulos.length;
+    });
+    var ICONO = { cont: '🏆', liga: '🥇', copa: '🏅' };
+    var filas = reg.filter(function (r) { return r.titulos.length; }).map(function (r) {
+      return r.titulos.map(function (t) {
+        return '<div class="pal"><span class="pal-cup">' + (ICONO[t.k] || '🏆') + '</span><div><b>' + esc(t.n) +
+          '</b><small>' + Temporada(r.anio) + ' · ' + esc(r.club) + '</small></div></div>';
+      }).join('');
+    }).join('');
+    var clubes = Object.keys(porClub).map(function (n) {
+      var c = porClub[n];
+      return '<div class="tot"><small>' + esc(n) + '</small><b>' + c.titulos + '</b><span>' +
+        c.temporadas + (c.temporadas === 1 ? ' temporada' : ' temporadas') + '</span></div>';
+    }).join('');
+    var subs = reg.reduce(function (n, r) { return n + (r.sub || []).length; }, 0);
+    return '<div class="totales" style="margin-bottom:12px">' +
+      '<div class="tot"><small>Títulos</small><b>' + total + '</b><span>en tu carrera</span></div>' +
+      '<div class="tot"><small>Subcampeonatos</small><b>' + subs + '</b><span>finales perdidas</span></div>' +
+      '<div class="tot"><small>Temporadas</small><b>' + reg.length + '</b><span>dirigidas</span></div></div>' +
+      (clubes ? '<h4 class="subh">Por club</h4><div class="totales" style="margin-bottom:12px">' + clubes + '</div>' : '') +
+      '<h4 class="subh">Títulos</h4>' +
+      (filas ? '<div class="palmares">' + filas + '</div>'
+        : '<p class="hint">Todavía no has ganado ningún título como entrenador. Llegarán.</p>');
   }
 
   function render() {
@@ -967,6 +1027,7 @@
         return;
       }
       var sum = World.endSeason();
+      if (modo === 'dt') registraTemporadaDT(sum);
       World.setDetail(me, false);
       currentMatch = null;
       mkSel = null;
@@ -2977,6 +3038,88 @@
       '<div class="pbody">' + cuerpo + '</div></div></div>';
   }
 
+  /* El selector de competiciones: un solo panel con los continentes arriba,
+     los países o torneos a la izquierda y las competiciones a la derecha. */
+  function navListas(conf, scope) {
+    var c0 = rConf, s0 = rScope;
+    rConf = conf; rScope = scope;
+    var out = { sc: scopeList(), cp: compList() };
+    rConf = c0; rScope = s0;
+    return out;
+  }
+  function cierraNavegador() {
+    var p = document.getElementById('navPanel');
+    if (p) p.remove();
+    document.removeEventListener('click', fueraNav, true);
+    document.removeEventListener('keydown', teclaNav, true);
+  }
+  function fueraNav(e) {
+    var p = document.getElementById('navPanel');
+    if (p && !p.contains(e.target)) cierraNavegador();
+  }
+  function teclaNav(e) { if (e.key === 'Escape') cierraNavegador(); }
+  function abreNavegador(btn) {
+    if (document.getElementById('navPanel')) { cierraNavegador(); return; }
+    var pConf = rConf, pScope = rScope;
+    var panel = document.createElement('div');
+    panel.id = 'navPanel'; panel.className = 'navpanel';
+    document.body.appendChild(panel);
+
+    function aplica(conf, scope, comp) {
+      rConf = conf; rScope = scope; rComp = comp; rView = null; rondaIdx = null;
+      cierraNavegador(); renderBody();
+    }
+    function pinta() {
+      var L = navListas(pConf, pScope);
+      if (pConf !== 'MIAS' && pConf !== 'SEL' && !L.sc.some(function (x) { return x.v === pScope; })) {
+        pScope = null; L.cp = [];
+      }
+      var pills = CONF_ORDER.filter(function (k) {
+        return k !== 'MIAS' || (me && misCompeticiones().length);
+      }).map(function (k) {
+        return '<button class="nc-pill' + (k === pConf ? ' on' : '') + '" data-k="' + k + '">' +
+          esc(CONF_LABEL[k]) + '</button>';
+      }).join('');
+      var izq = L.sc.map(function (x) {
+        var cid = x.v.indexOf('C:') === 0 ? x.v.slice(2) : '';
+        var on = (x.v === pScope) || (!cid && pConf === rConf && x.v === rScope);
+        return '<button class="nc-row' + (on ? ' on' : '') + '" data-s="' + esc(x.v) + '">' +
+          '<span>' + (cid ? flagImg(cid, 12) : '') + esc(x.t) + '</span>' +
+          (cid ? '<i>›</i>' : '') + '</button>';
+      }).join('');
+      var der = L.cp.length ? L.cp.map(function (x) {
+        var on = pConf === rConf && pScope === rScope && x.v === rComp;
+        return '<button class="nc-row nc-comp' + (on ? ' on' : '') + '" data-c="' + esc(x.v) + '"><span>' +
+          esc(x.t) + '</span></button>';
+      }).join('') : '<p class="hint nc-vacio">' + (pConf === 'MIAS' || pConf === 'SEL'
+        ? 'Elige una competición de la lista.' : 'Elige un país para ver sus competiciones.') + '</p>';
+      panel.innerHTML = '<div class="nc-pills">' + pills + '</div>' +
+        '<div class="nc-cols"><div class="nc-col">' + izq + '</div>' +
+        '<div class="nc-col">' + der + '</div></div>';
+      panel.querySelectorAll('.nc-pill').forEach(function (b) {
+        b.onclick = function () { pConf = b.dataset.k; pScope = null; pinta(); };
+      });
+      panel.querySelectorAll('[data-s]').forEach(function (b) {
+        b.onclick = function () {
+          var v = b.dataset.s, N = navListas(pConf, v);
+          if (v.indexOf('C:') === 0 && N.cp.length > 1) { pScope = v; pinta(); return; }
+          aplica(pConf, v, N.cp.length ? N.cp[0].v : null);
+        };
+      });
+      panel.querySelectorAll('[data-c]').forEach(function (b) {
+        b.onclick = function () { aplica(pConf, pScope, b.dataset.c); };
+      });
+    }
+    pinta();
+    var r = btn.getBoundingClientRect();
+    panel.style.top = (r.bottom + 6) + 'px';
+    panel.style.left = Math.max(8, Math.min(r.left, window.innerWidth - panel.offsetWidth - 8)) + 'px';
+    setTimeout(function () {
+      document.addEventListener('click', fueraNav, true);
+      document.addEventListener('keydown', teclaNav, true);
+    }, 0);
+  }
+
   function viewResults() {
     var st = World.state;
     var scopes = scopeList();
@@ -2990,19 +3133,13 @@
 
     /* los filtros se pintan arriba, en la fila de pestañas: así el cuadro
        se queda con toda la altura de la pantalla */
+    var scTxt = (scopes.filter(function (x) { return x.v === rScope; })[0] || {}).t || '';
+    var cpTxt = (comps.filter(function (x) { return x.v === rComp; })[0] || {}).t || '';
+    var cid0 = rScope && rScope.indexOf('C:') === 0 ? rScope.slice(2) : '';
     resBar = '<div class="toolbar" style="gap:8px">' +
-      '<label>Continente</label><select id="rConf">' + CONF_ORDER.filter(function (k) {
-        return k !== 'MIAS' || (me && misCompeticiones().length);
-      }).map(function (k) {
-        return '<option value="' + k + '"' + (k === rConf ? ' selected' : '') + '>' + esc(CONF_LABEL[k]) + '</option>';
-      }).join('') + '</select>' +
-      '<label>' + (rConf === 'MIAS' ? 'Competición' : rConf === 'SEL' ? 'Torneo' : 'País o torneo') +
-      '</label><select id="rScope">' + scopes.map(function (s) {
-        return '<option value="' + s.v + '"' + (s.v === rScope ? ' selected' : '') + '>' + esc(s.t) + '</option>';
-      }).join('') + '</select>' +
-      (comps.length ? '<label>Competición</label><select id="rComp">' + comps.map(function (c) {
-        return '<option value="' + c.v + '"' + (c.v === rComp ? ' selected' : '') + '>' + esc(c.t) + '</option>';
-      }).join('') + '</select>' : '') +
+      '<button class="navcomp" id="rNav" aria-haspopup="true">' + (cid0 ? flagImg(cid0, 12) : '') +
+      '<span class="nc-t"><small>' + esc(CONF_LABEL[rConf] || '') + '</small>' +
+      '<b>' + esc(cpTxt || scTxt || 'Elegir competición') + '</b></span><i>▾</i></button>' +
       (views.length > 1 ? '<label>Ver</label><select id="rView">' + views.map(function (v) {
         return '<option value="' + v.v + '"' + (v.v === rView ? ' selected' : '') + '>' + esc(v.t) + '</option>';
       }).join('') + '</select>' : '') +
@@ -3422,7 +3559,8 @@
       { v: 'copa', t: 'Copas' },
       esJugador ? { v: 'mis', t: 'Mis títulos' } : { v: 'mio', t: 'Mi equipo' }
     ];
-    if (!esJugador && hScope === 'mis') hScope = 'mio';
+    /* el entrenador tiene además su palmarés personal, el de todos sus clubes */
+    if (!esJugador) SCOPES.push({ v: 'mis', t: 'Mi palmarés' });
     if (esJugador && hScope === 'mio') hScope = 'mis';
     var mis = hScope === 'mis';
     var bar = '<div class="mbar"><div class="toolbar" style="gap:8px">' +
@@ -3432,10 +3570,19 @@
       '<label>Ver</label><select id="hScope">' + SCOPES.map(function (x) {
         return '<option value="' + x.v + '"' + (x.v === hScope ? ' selected' : '') + '>' + esc(x.t) + '</option>';
       }).join('') + '</select>' +
-      '<span class="hint">' + (mis ? 'Todo lo que has ganado desde que empezaste.'
+      '<span class="hint">' + (mis ? (esJugador ? 'Todo lo que has ganado desde que empezaste.'
+          : 'Todo lo que has ganado como entrenador, en cualquier club.')
         : 'Campeón y subcampeón de cada competición.') + '</span>' +
       '</div></div>';
 
+    if (mis && !esJugador) {
+      var nT = 0;
+      (st.dtPalmares || []).forEach(function (r) { nT += r.titulos.length; });
+      return '<div class="mv-wrap">' + bar +
+        '<div class="panel" style="flex:1"><h3>Mi palmarés como entrenador' +
+        '<small>' + nT + (nT === 1 ? ' título' : ' títulos') + '</small></h3>' +
+        '<div class="pbody" id="hBody">' + palmaresEntrenador() + '</div></div></div>';
+    }
     if (mis) {
       var jj = Carrera.jugador();
       var cuantos = jj ? jj.palmares.length : 0;
@@ -3825,12 +3972,8 @@
     };
 
     /* resultados */
-    if ($('#rConf')) {
-      $('#rConf').onchange = function () { rConf = this.value; rScope = null; rComp = null; renderBody(); };
-      if ($('#rScope')) $('#rScope').onchange = function () { rScope = this.value; rComp = null; rView = null; renderBody(); };
-      if ($('#rComp')) $('#rComp').onchange = function () {
-        rComp = this.value; rView = null; rondaIdx = null; renderBody();
-      };
+    if ($('#rNav')) {
+      $('#rNav').onclick = function (e) { e.stopPropagation(); abreNavegador(this); };
       var cab = $('#rTitle');
       if (cab) cab.onclick = function (e) {
         var b = e.target;

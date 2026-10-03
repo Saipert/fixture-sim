@@ -768,30 +768,46 @@
     $('#conCuposNota').textContent = 'Los cupos son los de la temporada actual. Pulsa cualquier club para cambiarlo por otro de su país.';
     var fases = {};
     conCupos.forEach(function (q) { (fases[q.fase] = fases[q.fase] || []).push(q); });
-    $('#conCuposBody').innerHTML = ['grupos', 'po', 'pre', 'ko'].filter(function (f2) { return fases[f2]; })
-      .map(function (f2) {
-        return (Object.keys(fases).length > 1
-          ? '<h4 class="subh">' + esc(FASE_NOMBRE[f2]) + ' <small>' +
-            fases[f2].reduce(function (s2, q) { return s2 + q.plazas; }, 0) + ' plazas</small></h4>' : '') +
+    var orden = ['grupos', 'po', 'pre', 'ko'].filter(function (f2) { return fases[f2]; });
+    /* una barra por fase: cuántas plazas están cubiertas y cuáles faltan */
+    var barras = orden.map(function (f2) {
+      var plazas = 0, hechas = 0;
+      fases[f2].forEach(function (q) {
+        plazas += q.plazas;
+        hechas += Math.min(q.plazas, (conSel[q.cid + '|' + q.fase] || []).filter(Boolean).length);
+      });
+      var ok = hechas >= plazas;
+      return '<div class="cu-fase' + (ok ? '' : ' falta') + '"><div class="cu-fase-h"><span>' +
+        esc(FASE_NOMBRE[f2]) + '</span><b>' + hechas + '/' + plazas + '</b></div>' +
+        '<div class="cu-bar"><i style="width:' + (plazas ? Math.round(100 * hechas / plazas) : 0) + '%"></i></div></div>';
+    }).join('');
+    $('#conCuposBody').innerHTML = '<div class="cu-fases">' + barras + '</div>' +
+      orden.map(function (f2) {
+        return (orden.length > 1 ? '<h4 class="subh">' + esc(FASE_NOMBRE[f2]) + '</h4>' : '') +
           pintaFase(fases[f2]);
       }).join('');
   }
 
+  /* cada país en su caja y cada plaza, un escudo: el nombre sale al pasar el ratón */
   function pintaFase(lista) {
-    return lista.map(function (q) {
-      var slots = (conSel[q.cid + '|' + q.fase] || []).map(function (t, i) {
-        return '<button class="cupo" data-c="' + esc(q.cid) + '" data-f="' + esc(q.fase) +
-          '" data-i="' + i + '">' +
-          '<span class="cupo-n">' + (q.campeones ? '🏆' : q.caidos ? '🪂' : (q.desde + i + 1) + 'º') + '</span>' +
-          '<span class="cupo-cr">' + Crest.html(t, 22) + '</span>' +
-          '<b>' + esc(t.n) + '</b><small>' + t.ovr + '</small></button>';
+    return '<div class="cu-grid">' + lista.map(function (q) {
+      var sel = conSel[q.cid + '|' + q.fase] || [];
+      var slots = sel.map(function (t, i) {
+        var pos = q.campeones ? 'Campeón' : q.caidos ? 'Cae de otra competición' : (q.desde + i + 1) + 'º';
+        return '<button class="cupo cupo-esc" data-c="' + esc(q.cid) + '" data-f="' + esc(q.fase) +
+          '" data-i="' + i + '" title="' + esc(pos + ' · ' + t.n + ' (' + t.ovr + ')') + '">' +
+          '<span class="cupo-cr">' + Crest.html(t, 30) + '</span>' +
+          '<small>' + (q.campeones ? '🏆' : q.caidos ? '🪂' : (q.desde + i + 1) + 'º') + '</small></button>';
       }).join('');
-      return '<div class="cupopais"><div class="cupopais-h">' + esc(q.flag || '') + ' <b>' + esc(q.name) +
-        '</b> <span class="hint">' + esc(q.campeones ? q.campeones.join(' · ')
-          : q.caidos ? ('llegan de ' + (q.caidos.de || 'otra competición')) : LG[q.lid].name) + ' · ' + q.plazas +
-        (q.plazas === 1 ? ' plaza' : ' plazas') + '</span></div>' +
-        '<div class="cupos">' + slots + '</div></div>';
-    }).join('');
+      var vacias = Math.max(0, q.plazas - sel.filter(Boolean).length);
+      var faltan = '';
+      for (var v = 0; v < vacias; v++) faltan += '<span class="cupo-esc vacio-esc" title="Plaza sin elegir">+</span>';
+      return '<div class="cu-pais' + (vacias ? ' falta' : '') + '"><div class="cu-pais-h"><span>' + esc(q.flag || '') +
+        ' <b>' + esc(q.name) + '</b></span><span class="hint">' + q.plazas + '</span></div>' +
+        '<div class="cu-esc">' + slots + faltan + '</div>' +
+        '<div class="cu-sub hint">' + esc(q.campeones ? q.campeones.join(' · ')
+          : q.caidos ? ('llegan de ' + (q.caidos.de || 'otra competición')) : LG[q.lid].name) + '</div></div>';
+    }).join('') + '</div>';
   }
 
   /* ---------- elegir a mano, liga por liga ---------- */

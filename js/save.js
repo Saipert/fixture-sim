@@ -147,7 +147,8 @@
         rosters[t.uid] = {
           lg: id, n: t.n, s: t.s, fm: t.fm || 0,
           p: t.p.map(function (p) {
-            return clean(p[0]) + FS + p[1] + FS + p[2] + FS + p[3] + FS +
+            return clean(p[0]) + FS + p[1] + FS + p[2] + FS + p[3] + FS +
+
               (p.gen ? '1' : '') + FS + (p[4] || '');
           }).join(RS)
         };
@@ -293,6 +294,7 @@
       qualification: encQual(st.qualification), history: history, weekLog: weekLog,
       playoffs: encPlayoffs(st.playoffs),
       plantilla: st.plantilla || {}, plantillaDe: st.plantillaDe || null,
+      dtPalmares: st.dtPalmares || [],
       selHecha: st.selHecha != null ? st.selHecha : null,
       selCompleta: !!st.selCompleta,
       poCompleta: !!st.poCompleta,
@@ -305,7 +307,8 @@
       fichajes: encMov(st.fichajes), ventas: encMov(st.ventas),
       /* carrera de jugador y ciclo de selecciones */
       carrera: global.Carrera ? Carrera.exporta() : null,
-      miSeleccion: st.miSeleccion || null,
+      miSeleccion: st.miSeleccion || null,
+
       cambioSeleccion: !!st.cambioSeleccion,
       seleccionCiclo: st.seleccionCiclo || 0,
       /* Con los partidos y goles de cada torneo: si sólo se guarda el
@@ -471,6 +474,7 @@
     });
     st.plantilla = data.plantilla || {};
     st.plantillaDe = data.plantillaDe || null;
+    st.dtPalmares = data.dtPalmares || [];
     st.selHecha = data.selHecha != null ? data.selHecha : null;
     st.selCompleta = !!data.selCompleta;
     st.poCompleta = !!data.poCompleta;
@@ -518,7 +522,8 @@
       };
     });
 
-    st.miSeleccion = data.miSeleccion || null;
+    st.miSeleccion = data.miSeleccion || null;
+
     st.cambioSeleccion = !!data.cambioSeleccion;
     st.seleccionCiclo = data.seleccionCiclo || 0;
     st.seleccionHistorial = data.seleccionHistorial || [];

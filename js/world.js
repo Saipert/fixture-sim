@@ -189,7 +189,7 @@
       year: 2026, week: 0, total: W.total,
       manualDraw: !!opts.manualDraw, paused: false, pendingDraws: [], detailTeam: null, detailVisual: false,
       leagues: {}, cups: {}, conts: {}, draws: [],
-      qualification: null, weekLog: [], seasonLog: [], history: [], playoffs: {},
+      qualification: null, weekLog: [], seasonLog: [], history: [], dtPalmares: [], playoffs: {},
       plantilla: {}, plantillaDe: null, selHecha: null, superCopas: null
     };
     Object.keys(global.LEAGUES).forEach(function (id) {
@@ -514,6 +514,18 @@
     return true;
   }
 
+  /* ¿esta competición espera a los que caigan de otra que todavía no ha
+     jugado su previa o su play-off? */
+  function esperaCaidos(id) {
+    return Object.keys(global.CONT_COMPS).some(function (otro) {
+      var cfg = global.CONT_COMPS[otro];
+      if (!cfg || cfg.feeds !== id) return false;
+      var o = state.conts[otro];
+      return !!(o && ((o.prelimPool && o.prelimPool.length) ||
+        (o.playoffPool && o.playoffPool.length)));
+    });
+  }
+
   function buildContinentals() {
     state.conts = {};
     ['libertadores', 'sudamericana', 'ucl', 'uel', 'conference', 'concachampions', 'afccl', 'cafcl'].forEach(function (id) {
@@ -533,6 +545,11 @@
       }
       var esperaPrevia = (c.prelimPool && c.prelimPool.length) ||
         (c.playoffPool && c.playoffPool.length);
+      /* Y tampoco se sortea si está esperando a los que caigan de otra:
+         la Sudamericana recibe a los cuatro que pierden la previa de la
+         Libertadores. Sorteando antes, esas cuatro plazas se rellenaban
+         con equipos al azar y el eliminado se quedaba sin torneo. */
+      if (!esperaPrevia && esperaCaidos(id) ) esperaPrevia = true;
       if (!esperaPrevia && !state.manualDraw) sorteaGrupos(c, null);
     });
 

@@ -1,0 +1,226 @@
+/* =========================================================================
+   ESTILO "TRANSMISIÓN DEPORTIVA" — se carga el último y manda sobre el resto.
+   Superficies planas, esquinas de 8px, un único acento lima y titulares en
+   tipografía condensada. Para volver al aspecto anterior basta con quitar
+   el <link> de este archivo en index.html.
+   ========================================================================= */
+:root{
+  --bg:#101929;
+  --bg2:#152036;
+  --card:#182339;
+  --card2:#182339;
+  --line:#27364f;
+  --line2:#344764;
+  --txt:#f2f5fa;
+  --dim:#8a96ab;
+  --acc:#ffffff;      /* blanco — acento único */
+  --acc2:#6ea8ff;     /* azul apagado — enlaces y estados secundarios */
+  --acc3:#a99bff;
+  --acc4:#ffa56b;
+  --acc5:#ff7fa3;
+  --on-acc:#0b1220;
+  --radius:8px;
+  --f-head:Oswald,'Arial Narrow',Impact,sans-serif;
+}
+body{
+  background:var(--bg) linear-gradient(180deg,var(--bg) 0%,#000 100%) fixed;
+  font-family:Inter,"Segoe UI",system-ui,sans-serif;
+}
+h1,h2,h3{font-family:var(--f-head);letter-spacing:.03em;text-transform:uppercase;font-weight:600}
+h2{font-size:22px}
+h3{font-size:18px}
+
+/* ---------- cabecera ---------- */
+.topbar{background:var(--bg);box-shadow:none;border-bottom:1px solid var(--line);backdrop-filter:none}
+.brand:hover{background:var(--card)}
+.brand h1{
+  font-size:22px;background:none;-webkit-background-clip:border-box;background-clip:border-box;
+  color:var(--txt);margin:0;
+}
+.ball{filter:none;font-size:22px}
+.crumb{text-transform:none}
+
+/* ---------- superficies ---------- */
+.card{background:var(--card);box-shadow:none;border-radius:var(--radius)}
+select,input[type=search],input[type=text],input[type=number],textarea{border-radius:6px}
+select:focus,input:focus,textarea:focus{outline:2px solid var(--acc);outline-offset:-1px}
+.chk input{accent-color:var(--acc)}
+
+/* ---------- botones ---------- */
+.primary{
+  background:var(--acc);color:var(--on-acc,#0b1220);box-shadow:none;border-radius:6px;
+  text-transform:uppercase;letter-spacing:.06em;font-weight:700;
+}
+.primary:hover{filter:brightness(1.1);transform:none}
+.mini{background:var(--card);border-color:var(--line2);border-radius:6px}
+.mini:hover{border-color:var(--acc);color:var(--txt);background:#22304d}
+.primary.mini{background:var(--acc);color:var(--on-acc,#0b1220);border-color:var(--acc)}
+.primary.mini:hover{filter:brightness(1.1)}
+.navb button{background:var(--card);border-color:var(--line2);border-radius:6px}
+.navb button:hover{border-color:var(--acc)}
+
+/* ---------- pestañas y selectores activos ---------- */
+.tabs button.active,.tabs.sub button.active,.pk-tab.on,.modos button.on,.seg button.on,.sb-speed .spb.on{
+  background:var(--acc);color:var(--on-acc,#0b1220);border-color:var(--acc);font-weight:700;
+}
+
+/* ---------- menú principal ---------- */
+.menu-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.menu-grid .mcard,.mcard{
+  position:relative;aspect-ratio:auto;min-height:120px;justify-content:flex-end;gap:6px;
+  padding:16px;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  box-shadow:none;transform:none;
+}
+.mcard::before{
+  inset:0 auto 0 0;width:3px;height:auto;background:transparent;transition:background .15s;
+}
+.mcard::after{display:none}
+.mcard:hover{
+  background:#22304d;border-color:var(--line2);transform:none;box-shadow:none;
+}
+.mcard:hover::before{background:var(--acc)}
+.mcard:hover::after{display:none}
+/* la foto queda como textura apagada, no como protagonista */
+.mcard .mimg{opacity:.14;filter:grayscale(1);transform:none;transition:opacity .2s}
+.mcard:hover .mimg{opacity:.28;transform:none}
+.mcard .ic{
+  width:34px;height:34px;font-size:17px;margin-bottom:4px;border-radius:6px;
+  background:#26365a;border:1px solid var(--line2);filter:grayscale(1) brightness(1.15);
+}
+.menu-grid .mcard .ic{width:34px;height:34px;font-size:17px}
+.mcard b,.menu-grid .mcard b{
+  font-family:var(--f-head);font-size:17px;font-weight:500;letter-spacing:.03em;
+  text-transform:uppercase;text-shadow:none;
+}
+.mcard .desc,.mcard span:last-child{color:var(--dim);text-shadow:none;font-size:12.5px}
+.mcard[data-go]{--mc:var(--acc)}
+
+/* Modo carrera es el protagonista: banda de ancho completo arriba de todo */
+.mcard[data-go="world"]{
+  grid-column:1/-1;order:-1;min-height:150px;border-left:3px solid var(--acc);border-radius:4px;
+  padding:22px 24px;
+}
+.mcard[data-go="world"]::before{display:none}
+.mcard[data-go="world"] b{font-size:30px}
+.mcard[data-go="world"] .desc{font-size:14px;max-width:560px}
+.mcard[data-go="world"] .mimg{opacity:.22}
+.mcard[data-go="world"]::after{
+  display:block;content:'Destacado';inset:22px 24px auto auto;left:auto;bottom:auto;width:auto;height:auto;
+  background:none;filter:none;opacity:1;border-radius:0;z-index:1;
+  color:var(--acc);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+}
+.mcard[data-go="world"]:hover::after{display:block}
+
+/* siete tarjetas tras la destacada: la última rellena el hueco de la fila */
+.mcard[data-go="squads"]{grid-column:span 2}
+@media (max-width:1180px){.menu-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.mcard[data-go="squads"]{grid-column:1/-1}}
+@media (max-width:860px){.menu-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.mcard[data-go="squads"]{grid-column:span 2}}
+@media (max-width:560px){
+  .menu-grid{grid-template-columns:1fr}
+  .menu-grid .mcard{min-height:100px}
+  .mcard[data-go="world"] b{font-size:28px}
+}
+
+/* ---------- créditos ---------- */
+.credits{background:var(--card);border-radius:var(--radius)}
+.cr-main b{
+  background:none;-webkit-background-clip:border-box;background-clip:border-box;
+  color:var(--acc);font-family:var(--f-head);font-size:20px;letter-spacing:.04em;text-transform:uppercase;
+}
+.cr-link{background:var(--bg2);border-radius:6px}
+.cr-link:hover{border-color:var(--acc);color:var(--acc);transform:none}
+
+/* ---------- ventanas y paneles (selector, plantilla, sorteo) ---------- */
+.pk-ov,.pf-ov{backdrop-filter:none;background:rgba(5,9,16,.8)}
+.pk-box,.pf-box{background:var(--bg2);border:1px solid var(--line2);border-radius:10px;box-shadow:none}
+.pk-head,.pf-head{background:var(--card)}
+.pk-search{background:var(--bg);border-radius:6px}
+
+/* ---------- filas, fichas y cruces: planas ---------- */
+.fx div.scline,.pk-lg,.pk-tm,.pickbtn,.team-badge.pick,.br-tie,.br-col .tie,.trow2,
+.qhost,.qteam,.cupo,.cupo.fijo:hover,.modos button{
+  background:var(--card);
+}
+.pk-lg-logo.noimg{background:#22304d}
+.pk-tm.sel{background:#22304d}
+.fx div.scline.mine{background:color-mix(in srgb,var(--acc) 12%,transparent);border-left:3px solid var(--acc)}
+.br-champ{background:color-mix(in srgb,var(--acc) 10%,var(--card));border-color:color-mix(in srgb,var(--acc) 40%,var(--line))}
+.rendbar i{background:var(--acc)}
+
+/* siguiente partido y estados */
+.qnext{background:rgba(110,168,255,.12);box-shadow:inset 0 0 0 1px rgba(110,168,255,.4)}
+.qnext.hecho{background:color-mix(in srgb,var(--acc) 12%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--acc) 40%,transparent)}
+.qnext.jugando{background:rgba(243,180,36,.12);box-shadow:inset 0 0 0 1px rgba(243,180,36,.45)}
+.calcard.proximo,.oferta.on{border-color:var(--acc);box-shadow:none}
+.swbtn.on i{background:color-mix(in srgb,var(--acc) 35%,transparent);box-shadow:inset 0 0 0 1px var(--acc)}
+
+/* barra de desplazamiento discreta */
+*{scrollbar-color:#3a4e73 transparent}
+
+/* ---------- clasificados por liga: cupos con progreso y escudos ---------- */
+.cu-fases{display:flex;gap:18px;flex-wrap:wrap;margin:2px 0 14px}
+.cu-fase{flex:1 1 220px;min-width:180px}
+.cu-fase-h{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px;
+  font-family:var(--f-head);text-transform:uppercase;letter-spacing:.04em;font-size:14px}
+.cu-fase-h b{color:var(--acc);font-weight:500}
+.cu-fase.falta .cu-fase-h b{color:var(--warn)}
+.cu-bar{height:4px;background:var(--line);border-radius:2px;overflow:hidden}
+.cu-bar i{display:block;height:100%;background:var(--acc)}
+.cu-fase.falta .cu-bar i{background:var(--warn)}
+.cu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px;margin-bottom:12px}
+.cu-pais{background:var(--bg2);border:1px solid var(--line);border-radius:8px;padding:9px 12px}
+.cu-pais.falta{border-color:var(--warn)}
+.cu-pais-h{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13px;margin-bottom:7px}
+.cu-esc{display:flex;gap:5px;flex-wrap:wrap}
+.cu-sub{margin-top:6px;font-size:11px}
+.cupo.cupo-esc{flex-direction:column;gap:1px;padding:5px 7px;min-width:44px;align-items:center;justify-content:center}
+.cupo-esc small{font-size:10px;color:var(--dim);line-height:1}
+.vacio-esc{display:inline-flex;align-items:center;justify-content:center;min-width:44px;height:50px;
+  border:1px dashed var(--warn);border-radius:6px;color:var(--warn);font-size:16px}
+
+/* ---------- modo carrera: el club tiñe sólo el fondo ----------
+   Paneles, bordes y botones siguen en azul marino y blanco; del club sale
+   únicamente el degradé de fondo (su primario oscurecido hacia negro). La
+   variable --club-bg la pone pintaColores() en world-ui.js. */
+body.conclub{
+  background-color:var(--club-bg,var(--bg));
+  background-image:linear-gradient(180deg,var(--club-bg,var(--bg)) 0%,#000 100%);
+  background-attachment:fixed;background-repeat:no-repeat;background-size:100% 100%;
+}
+body.conclub .topbar{background:var(--club-bg,var(--bg))}
+body.conclub .panel,body.conclub .card,
+body.conclub .wtop,body.conclub .tabs.sub{border-color:var(--line);border-width:1px}
+
+/* ---------- selector de competiciones (Resultados) ---------- */
+.navcomp{
+  display:inline-flex;align-items:center;gap:8px;min-width:230px;max-width:340px;
+  background:var(--card);border:1px solid var(--line2);border-radius:6px;padding:5px 10px;
+  color:var(--txt);text-align:left;cursor:pointer;
+}
+.navcomp:hover{border-color:var(--acc)}
+.navcomp .nc-t{display:flex;flex-direction:column;min-width:0;flex:1;line-height:1.15}
+.navcomp small{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--dim)}
+.navcomp b{font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.navcomp i{font-style:normal;color:var(--dim)}
+.navpanel{
+  position:fixed;z-index:80;width:min(640px,calc(100vw - 16px));max-height:min(70vh,520px);
+  display:flex;flex-direction:column;background:var(--bg2);border:1px solid var(--line2);
+  border-radius:10px;padding:10px;box-shadow:0 18px 40px rgba(0,0,0,.5);
+}
+.nc-pills{display:flex;gap:6px;flex-wrap:wrap;padding-bottom:10px;border-bottom:1px solid var(--line);margin-bottom:8px}
+.nc-pill{background:var(--card);border:1px solid var(--line2);color:var(--dim);border-radius:14px;padding:3px 11px;font-size:12px}
+.nc-pill:hover{color:var(--txt);border-color:var(--acc)}
+.nc-pill.on{background:var(--acc);color:var(--on-acc,#0b1220);border-color:var(--acc);font-weight:600}
+.nc-cols{display:grid;grid-template-columns:1fr 1fr;gap:10px;min-height:0;flex:1}
+.nc-col{display:flex;flex-direction:column;gap:2px;overflow:auto;max-height:min(52vh,400px);padding-right:2px}
+.nc-row{display:flex;justify-content:space-between;align-items:center;gap:8px;background:none;border:0;
+  border-radius:6px;padding:7px 9px;color:var(--txt);text-align:left;font-size:13px;cursor:pointer}
+.nc-row span{display:flex;align-items:center;gap:7px;min-width:0}
+.nc-row i{font-style:normal;color:var(--dim)}
+.nc-row:hover{background:var(--card)}
+.nc-row.on{background:var(--card);box-shadow:inset 3px 0 0 var(--acc)}
+.nc-comp{border:1px solid var(--line);background:var(--card)}
+.nc-comp:hover{border-color:var(--acc)}
+.nc-comp.on{border-color:var(--acc)}
+.nc-vacio{padding:10px 4px;margin:0}
+@media (max-width:640px){.nc-cols{grid-template-columns:1fr}.navcomp{min-width:0;width:100%;max-width:none}}
