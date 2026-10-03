@@ -750,11 +750,17 @@
   function cuposTemporada(k) {
     var comps = k.pack.filter(function (id) { return PUERTAS_COMP[id]; });
     if (!comps.length) return null;
-    /* de cada puerta de BERTHS, a qué competición y fase va */
+    /* De cada puerta de BERTHS, a qué competición y fase va. Va por
+       confederación: «top» es la Champions en Europa, la Libertadores en
+       Sudamérica, la Concacaf en Norteamérica... y si no se mira de dónde
+       es el país, se la quedaba entera la última de la lista. */
     var destino = {};
     comps.forEach(function (id) {
-      var mapa = PUERTAS_COMP[id];
-      Object.keys(mapa).forEach(function (f) { destino[mapa[f]] = { comp: id, fase: f }; });
+      var mapa = PUERTAS_COMP[id], kk = compPack(id);
+      if (!kk) return;
+      Object.keys(mapa).forEach(function (f) {
+        destino[kk.conf + '|' + mapa[f]] = { comp: id, fase: f };
+      });
     });
     var out = [];
     COUNTRIES.forEach(function (c) {
@@ -763,26 +769,26 @@
       var antes = 0;
       ORDEN_PUERTAS.forEach(function (puerta) {
         var n = b[puerta] || 0;
-        var d = destino[puerta];
-        if (n && d && compPack(d.comp) && compPack(d.comp).conf === b.conf) {
+        var d = destino[b.conf + '|' + puerta];
+        if (n && d) {
           out.push({ cid: c.id, comp: d.comp, name: c.name, flag: c.flag, have: c.have,
             lid: c.have[0], plazas: n, desde: antes, fase: d.fase });
         }
         antes += n;
       });
     });
-    /* y lo que no sale de una liga: campeones vigentes y los que caen */
+    /* Los campeones vigentes van los primeros: es lo primero que se
+       decide en una temporada, no lo último. Los que caen de una
+       competición a otra NO se eligen: salen del play-off y de la previa,
+       que aquí se juegan de verdad. */
+    var cab = [];
     comps.forEach(function (id) {
-      if (CAMPEONES_COMP[id]) {
-        out.push({ cid: '__camp_' + id, comp: id, name: 'Campeones vigentes', flag: '🏆',
-          have: null, lid: null, plazas: CAMPEONES_COMP[id].length, desde: 0,
-          fase: 'grupos', campeones: CAMPEONES_COMP[id] });
-      }
-      (CAIDOS_COMP[id] || []).forEach(function (x, i) {
-        out.push({ cid: '__caidos' + i + '_' + id, comp: id, name: x.name, flag: '🪂',
-          have: null, lid: null, plazas: x.n, desde: 0, fase: x.fase, caidos: x });
-      });
+      if (!CAMPEONES_COMP[id]) return;
+      cab.push({ cid: '__camp_' + id, comp: id, name: 'Campeones vigentes', flag: '🏆',
+        have: null, lid: null, plazas: CAMPEONES_COMP[id].length, desde: 0,
+        fase: 'grupos', campeones: CAMPEONES_COMP[id] });
     });
+    out = cab.concat(out);
     return out.length ? out : null;
   }
 
@@ -1177,6 +1183,8 @@
   }
   function conHint() {
     var k = conComp; if (!k) return;
+    /* una temporada completa ya puso su propio texto al elegirla */
+    if (k.temporada) { $('#btnCon').disabled = false; return; }
     var g = conEquipos('grupos').length, po = conEquipos('po').length, pre = conEquipos('pre').length;
     var corte = primeraRonda(k);
     if (corte && !pre && po > corte) { pre = corte; po -= corte; }
@@ -1507,126 +1515,115 @@
   }
   /* =====================================================================
      TEMPORADA COMPLETA
-     Una competición detrás de otra, guardando el campeón de cada una. Al
-     final se juegan la Supercopa y la Recopa entre esos campeones, y en la
-     mundial el Mundial de Clubes de ocho con los ocho campeones
-     continentales, que son justo los cupos del formato corto.
+     Todas a la vez, jornada a jornada, con el tablero de season.js. El
+     reparto de cupos ya se ha hecho una sola vez para toda la temporada,
+     así que aquí sólo hay que repartir cada campo por competición.
      ===================================================================== */
-
-
-  function conPrepara(id) {
-    conComp = compPack(id);
-    if (!conComp) return false;
-    packComp = id;
-    /* los cupos ya están repartidos para toda la temporada: aquí sólo se
-       cambia de competición, no se vuelve a sortear nada */
-    if (!conCupos) { conCupos = cuposDe(conComp); if (conCupos) conPorDefecto(); else conSel = {}; }
-    return true;
-  }
   function nombreDe(id) {
     var k = CONT.filter(function (x) { return x.id === id; })[0];
     return k ? k.name : id;
   }
 
-  /* el marcador de la temporada: lo ganado hasta ahora y lo que falta */
-  function packPanel(siguiente, texto) {
-    var p = packEstado, box = $('#conOut');
-    var filas = p.orden.map(function (id) {
-      var t = p.campeones[id];
-      return '<div class="cu-pais' + (t ? '' : ' falta') + '"><div class="cu-pais-h">' +
-        '<span><b>' + esc(p.titulos[id] || nombreDe(id)) + '</b></span></div>' +
-        '<div class="cu-esc">' + (t
-          ? '<span class="cupo-esc" title="' + esc(t.n) + '">' + Crest.html(t, 30) + '</span>'
-          : '<span class="cupo-esc vacio-esc">+</span>') + '</div>' +
-        '<div class="cu-sub hint">' + esc(t ? t.n : 'por jugar') + '</div></div>';
-    }).join('');
-    var caja = document.createElement('div');
-    caja.className = 'card';
-    caja.innerHTML = '<div class="cuposhead"><div><h3>' + esc(p.k.name) + '</h3>' +
-      '<p class="hint">' + esc(texto || '') + '</p></div>' +
-      (siguiente ? '<button class="primary" id="packNext">' + esc(siguiente) + '</button>' : '') +
-      '</div><div class="cu-grid">' + filas + '</div>';
-    box.insertBefore(caja, box.firstChild);
-    if ($('#packNext')) $('#packNext').onclick = function () { packSigue(); };
-    caja.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
-
-  function packSigue() {
-    var p = packEstado; if (!p) return;
-    var box = $('#conOut');
-    box.innerHTML = '';
-    /* 1 · las competiciones, una por una */
-    if (p.paso < p.k.pack.length) {
-      var id = p.k.pack[p.paso++];
-      if (!conPrepara(id)) { packSigue(); return; }
-      conAlAcabar = function (camp) {
-        p.campeones[id] = camp;
-        packPanel(p.paso < p.k.pack.length
-          ? 'Jugar ' + nombreDe(p.k.pack[p.paso])
-          : (p.extras.length ? 'Jugar ' + p.titulos[p.extras[0]] : 'Ver la temporada'),
-          'Campeón de ' + nombreDe(id) + ': ' + (camp ? camp.n : '—'));
-      };
-      conArranca();
-      return;
+  /* El campo de una competición de la temporada, sacado del reparto único:
+     los de grupos, los del play-off y los de la previa. */
+  function campoDe(id) {
+    var antes = packComp;
+    packComp = id;
+    var r = { grupos: conEquipos('grupos'), po: conEquipos('po'), pre: conEquipos('pre'),
+      ko: conEquipos('ko') };
+    packComp = antes;
+    /* la OFC no tiene cupos en BERTHS: juega con el campo de siempre */
+    if (!r.grupos.length && !r.po.length && !r.pre.length) {
+      var k0 = compPack(id);
+      if (k0) r.grupos = entrantsFor(k0);
     }
-    /* 2 · las supercopas entre campeones */
-    if (p.extras.length) {
-      var ex = p.extras.shift(), sc = SUPERCOPAS[ex];
-      var a = p.campeones[sc.de[0]], b = p.campeones[sc.de[1]];
-      var resto = function (camp) {
-        p.campeones[ex] = camp;
-        packPanel(p.extras.length ? 'Jugar ' + p.titulos[p.extras[0]]
-          : (p.k.cwc ? 'Jugar el Mundial de Clubes' : 'Ver la temporada'),
-          sc.nombre + ': ' + (camp ? camp.n : '—'));
-      };
-      if (!a || !b) { resto(null); return; }
-      rondaClasi(box, sc.nombre, [a, b], function (ganan) { resto(ganan[0] || null); },
-        { legs: sc.legs, neutral: sc.legs === 1 });
-      return;
+    /* la previa de la Libertadores no tiene cupos propios: salen los más
+       flojos del play-off, como en la vista suelta */
+    var k = compPack(id), corte = k ? primeraRonda(k) : 0;
+    if (corte && !r.pre.length && r.po.length > corte) {
+      var orden = r.po.slice().sort(function (a, b) { return b.ovr - a.ovr; });
+      r.pre = orden.slice(orden.length - corte);
+      var fuera = {};
+      r.pre.forEach(function (t) { fuera[t.leagueId + '|' + t.n] = 1; });
+      r.po = r.po.filter(function (t) { return !fuera[t.leagueId + '|' + t.n]; });
     }
-    /* 3 · y el Mundial de Clubes con los ocho campeones continentales */
-    if (p.k.cwc && !p.campeones.cwc) {
-      /* Ocho, no nueve: Europa gana tres competiciones pero al Mundial de
-         Clubes corto sólo van dos por zona, que son sus cupos de verdad.
-         El campeón de la Conference se queda fuera, como en la realidad. */
-      var plazas = cuposCWC({ size: 8 }).plazas, puestos = {}, ocho = [];
-      p.k.pack.forEach(function (id2) {
-        var t = p.campeones[id2]; if (!t) return;
-        var k2 = CONT.filter(function (x) { return x.id === id2; })[0];
-        var z = (k2 && k2.conf) || confDe(t);
-        if ((puestos[z] || 0) >= (plazas[z] || 0)) return;
-        puestos[z] = (puestos[z] || 0) + 1; ocho.push(t);
-      });
-      ocho = sinRepetidos(ocho);
-      /* si alguna zona se quedó sin campeón, el cuadro tiene que seguir
-         cuadrando: se recorta al múltiplo de cuatro más cercano */
-      while (ocho.length % 4) ocho.pop();
-      if (ocho.length < 4) { packPanel(null, 'No hay campeones suficientes para el Mundial de Clubes.'); return; }
-      montaConSorteo(box, ocho, {
-        name: 'Mundial de Clubes', groupSize: 4, porConf: true, tercerPuesto: true,
-        neutral: true, legs: 1, groupDouble: false,
-        tras: function (R) {
-          R.alTerminar = function (fin) {
-            p.campeones.cwc = fin.champion || null;
-            packPanel(null, 'Campeón del mundo: ' + (fin.champion ? fin.champion.n : '—'));
-          };
-        }
-      }, { title: 'Mundial de Clubes · eliminatorias' });
-      return;
-    }
-    packPanel(null, 'Temporada terminada.');
+    return r;
   }
 
   function packArranca(k) {
-    var titulos = {};
-    k.pack.forEach(function (id) { titulos[id] = nombreDe(id); });
-    (k.supercopas || []).forEach(function (x) { titulos[x] = SUPERCOPAS[x].nombre; });
-    if (k.cwc) titulos.cwc = 'Mundial de Clubes';
-    packEstado = { k: k, paso: 0, campeones: {}, titulos: titulos,
-      extras: (k.supercopas || []).slice(),
-      orden: k.pack.concat(k.supercopas || []).concat(k.cwc ? ['cwc'] : []) };
-    packSigue();
+    packEstado = { k: k };
+    conTapaCupos(true);
+    var comps = k.pack.map(function (id) {
+      var kk = compPack(id);
+      if (!kk) return null;
+      var c = campoDe(id);
+      return { id: id, name: kk.name, k: kk, conf: kk.conf,
+        pre: c.pre, po: c.po, grupos: c.grupos };
+    }).filter(Boolean);
+    /* Quién hereda a los que caen. Son los mismos cupos de siempre: de la
+       previa de la Champions al play-off de la Europa, del play-off de la
+       Champions a sus grupos, y del play-off de la Europa a los grupos de
+       la Conference. */
+    var CASCADA = {
+      ucl:  { previa: { a: 'uel', fase: 'po' }, playoff: { a: 'uel', fase: 'grupos' } },
+      uel:  { playoff: { a: 'conf', fase: 'grupos' } },
+      lib:  { previa: { a: 'sud', fase: 'grupos' } }
+    };
+    /* cuántos le caen a cada una en el play-off: hace falta para saber si
+       esa fase existe y cuadrar el calendario */
+    comps.forEach(function (c) {
+      var ca = CASCADA[c.id];
+      if (!ca || !ca.previa || ca.previa.fase !== 'po') return;
+      var otro = comps.filter(function (x) { return x.id === ca.previa.a; })[0];
+      if (otro) otro.hereda = (otro.hereda || 0) + Math.floor((c.pre || []).length / 2);
+    });
+    Temporada.corre($('#conOut'), {
+      nombre: k.name,
+      comps: comps,
+      cascada: CASCADA,
+      choca: mismoPais,
+      /* al cerrar el campo de grupos: sin repetidos y cuadrando el formato */
+      cuadra: function (c, campo) {
+        var antes = packComp;
+        packComp = c.id; conComp = c.k;
+        var out = completaCupo(sinRepetidos(campo));
+        packComp = antes;
+        return out;
+      },
+      supercopas: (k.supercopas || []).map(function (x) {
+        return { id: x, nombre: SUPERCOPAS[x].nombre, de: SUPERCOPAS[x].de, legs: SUPERCOPAS[x].legs };
+      }),
+      cwc: k.cwc ? { nombre: 'Mundial de Clubes', plazas: cuposCWC({ size: 8 }).plazas,
+        confDe: confDe } : null,
+      alAcabar: function (campeones) { packResumen(k, campeones); }
+    });
   }
+
+  /* el cartel del final: todo lo ganado en la temporada */
+  function packResumen(k, campeones) {
+    var orden = k.pack.concat(k.supercopas || []).concat(k.cwc ? ['cwc'] : []);
+    var titulo = {};
+    k.pack.forEach(function (id) { titulo[id] = nombreDe(id); });
+    (k.supercopas || []).forEach(function (x) { titulo[x] = SUPERCOPAS[x].nombre; });
+    titulo.cwc = 'Mundial de Clubes';
+    var filas = orden.map(function (id) {
+      var t = campeones[id];
+      return '<div class="cu-pais' + (t ? '' : ' falta') + '"><div class="cu-pais-h">' +
+        '<span><b>' + esc(titulo[id] || id) + '</b></span></div>' +
+        '<div class="cu-esc">' + (t ? '<span class="cupo-esc">' + Crest.html(t, 30) + '</span>'
+          : '<span class="cupo-esc vacio-esc">+</span>') + '</div>' +
+        '<div class="cu-sub hint">' + esc(t ? t.n : 'sin campeón') + '</div></div>';
+    }).join('');
+    var caja = document.createElement('div');
+    caja.className = 'card';
+    caja.innerHTML = '<div class="cuposhead"><div><h3>' + esc(k.name) + '</h3>' +
+      '<p class="hint">Temporada terminada.</p></div></div>' +
+      '<div class="cu-grid">' + filas + '</div>';
+    var box = $('#conOut');
+    box.insertBefore(caja, box.firstChild);
+    caja.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
   $('#btnCon').onclick = function () {
     packEstado = null;
     if (conComp && conComp.temporada) { packArranca(conComp); return; }
