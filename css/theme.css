@@ -1655,3 +1655,11 @@ body.conclub{scrollbar-color:var(--club-scroll,var(--line)) rgba(255,255,255,.04
   .br2 .br-side { display: block; }
   .br-round { margin-bottom: 10px; }
 }
+
+/* El número de columnas lo decide el ancho, no una cuenta fija: con «cols-2»
+   en una ventana estrecha cada cruce se quedaba en doscientos píxeles, el
+   nombre se encogía hasta desaparecer y los dos escudos quedaban colgando en
+   los extremos. Pidiendo trescientos de mínimo, el navegador pone las que
+   caben de verdad. */
+.br-listagrid.ancha { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)) !important; }
+.br-listagrid.ancha .br-tie .t em { min-width: 0; }
