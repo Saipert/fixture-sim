@@ -552,14 +552,20 @@
      África, Asia y Concacaf, una para Oceanía y la del anfitrión, que sale
      de Concacaf— con tope de dos por país. El viejo de ocho era uno o dos
      por confederación y nunca dos del mismo país. */
-  function entrantsCWC(k) {
-    /* la tabla va dentro: esto se usa antes de que corra el cuerpo del
-       módulo, y fuera llegaba sin asignar y tumbaba la carga entera */
-    var CUPOS_CWC = {
+  /* Los cupos del Mundial de Clubes. Es una función y no una constante
+     porque esto se usa antes de que corra el cuerpo del módulo: como
+     variable suelta llegaba sin asignar y tumbaba la carga entera. */
+  function cuposCWC(k) {
+    var T = {
       8:  { tope: 1, plazas: { UEFA: 2, CONMEBOL: 2, CONCACAF: 1, AFC: 1, CAF: 1, OFC: 1 } },
       32: { tope: 2, plazas: { UEFA: 12, CONMEBOL: 6, CONCACAF: 5, AFC: 4, CAF: 4, OFC: 1 } }
     };
-    var cfg = CUPOS_CWC[(k && k.size) || 8] || CUPOS_CWC[8];
+    return T[(k && k.size) || 8] || T[8];
+  }
+  var CONF_NOMBRE = { UEFA: 'Europa', CONMEBOL: 'Sudamérica', CONCACAF: 'Norte y Centroamérica',
+    AFC: 'Asia', CAF: 'África', OFC: 'Oceanía' };
+  function entrantsCWC(k) {
+    var cfg = cuposCWC(k);
     var porConf = {};
     COUNTRIES.forEach(function (c) {
       c.have.forEach(function (lid) {
@@ -673,6 +679,20 @@
   }
 
   function cuposDe(k) {
+    /* el Mundial de Clubes no reparte por liga sino por confederación:
+       una fila por zona, con sus plazas */
+    if (k.porConf) {
+      var cfg = cuposCWC(k), out0 = [];
+      Object.keys(cfg.plazas).forEach(function (conf) {
+        var ligas = [];
+        COUNTRIES.forEach(function (c) { if (c.conf === conf) ligas = ligas.concat(c.have); });
+        if (!ligas.length) return;
+        out0.push({ cid: '__z' + conf + '__', name: (CONF_NOMBRE[conf] || conf) + ' (' + conf + ')',
+          flag: '🌐', have: ligas, lid: null, plazas: cfg.plazas[conf], desde: 0,
+          fase: 'grupos', zona: conf, tope: cfg.tope });
+      });
+      return out0.length ? out0 : null;
+    }
     var mapa = PUERTAS_COMP[k.id];
     if (!mapa) return null;
     var out = [];
@@ -722,11 +742,30 @@
     conSel = {};
     /* 1 · los cupos por liga, que son los que mandan */
     (conCupos || []).forEach(function (q) {
-      if (q.campeones || q.caidos) return;
+      if (q.campeones || q.caidos || q.zona) return;
       var orden = LG[q.lid].teams.slice().sort(function (a, b) { return b.ovr - a.ovr; });
       conSel[q.cid + '|' + q.fase] = orden.slice(q.desde, q.desde + q.plazas);
     });
     /* 2 · y después los que llegan de fuera, sin repetir a nadie */
+    /* las zonas del Mundial de Clubes: los mejores de cada confederación
+       con su tope por país */
+    (conCupos || []).forEach(function (q) {
+      if (!q.zona) return;
+      var lista = [];
+      COUNTRIES.forEach(function (c) {
+        if (c.conf !== q.zona) return;
+        c.have.forEach(function (lid) { lista = lista.concat(LG[lid].teams); });
+      });
+      lista.sort(function (a, b) { return b.ovr - a.ovr; });
+      var paises = {}, tomados = [];
+      lista.forEach(function (t) {
+        if (tomados.length >= q.plazas) return;
+        var pa = Draw.countryOf(t);
+        if ((paises[pa] || 0) >= (q.tope || 1)) return;
+        paises[pa] = (paises[pa] || 0) + 1; tomados.push(t);
+      });
+      conSel[q.cid + '|' + q.fase] = tomados;
+    });
     (conCupos || []).forEach(function (q) {
       if (!q.campeones && !q.caidos) return;
       var puestos = [];
@@ -807,11 +846,13 @@
     return '<div class="cu-grid">' + lista.map(function (q) {
       var sel = conSel[q.cid + '|' + q.fase] || [];
       var slots = sel.map(function (t, i) {
-        var pos = q.campeones ? 'Campeón' : q.caidos ? 'Cae de otra competición' : (q.desde + i + 1) + 'º';
+        var pos = q.campeones ? 'Campeón' : q.caidos ? 'Cae de otra competición'
+          : q.zona ? q.name : (q.desde + i + 1) + 'º';
         return '<button class="cupo cupo-esc" data-c="' + esc(q.cid) + '" data-f="' + esc(q.fase) +
           '" data-i="' + i + '" title="' + esc(pos + ' · ' + t.n + ' (' + t.ovr + ')') + '">' +
           '<span class="cupo-cr">' + Crest.html(t, 30) + '</span>' +
-          '<small>' + (q.campeones ? '🏆' : q.caidos ? '🪂' : (q.desde + i + 1) + 'º') + '</small></button>';
+          '<small>' + (q.campeones ? '🏆' : q.caidos ? '🪂' : q.zona ? (i + 1) + 'º'
+            : (q.desde + i + 1) + 'º') + '</small></button>';
       }).join('');
       var vacias = Math.max(0, q.plazas - sel.filter(Boolean).length);
       var faltan = '';
@@ -820,7 +861,9 @@
         ' <b>' + esc(q.name) + '</b></span><span class="hint">' + q.plazas + '</span></div>' +
         '<div class="cu-esc">' + slots + faltan + '</div>' +
         '<div class="cu-sub hint">' + esc(q.campeones ? q.campeones.join(' · ')
-          : q.caidos ? ('llegan de ' + (q.caidos.de || 'otra competición')) : LG[q.lid].name) + '</div></div>';
+          : q.caidos ? ('llegan de ' + (q.caidos.de || 'otra competición'))
+          : q.zona ? ('cualquier club de la zona · máximo ' + (q.tope || 1) + ' por país')
+          : LG[q.lid].name) + '</div></div>';
     }).join('') + '</div>';
   }
 
@@ -840,7 +883,9 @@
     var cabecera = '<div class="man-head">' +
       '<button class="mini" id="manPrev"' + (conPaso ? '' : ' disabled') + '>&lsaquo; Anterior</button>' +
       '<div class="man-tit"><b>' + esc(q.flag || '') + ' ' + esc(q.name) + '</b>' +
-      '<small>' + esc(q.lid ? LG[q.lid].name : (q.caidos ? 'llegan de ' + q.caidos.de : 'campeones')) +
+      '<small>' + esc(q.lid ? LG[q.lid].name
+        : q.zona ? 'cualquier club de la zona'
+        : q.caidos ? 'llegan de ' + q.caidos.de : 'campeones') +
       ' · ' + esc(FASE_NOMBRE[q.fase] || q.fase) + ' · ' + q.plazas +
       (q.plazas === 1 ? ' plaza' : ' plazas') + '</small></div>' +
       (conPaso < total - 1
@@ -857,7 +902,7 @@
         var t2 = elegidos[c2];
         celdas.push('<button class="cupo' + (t2 ? '' : ' vacio') + '" data-c="' + esc(q.cid) +
           '" data-f="' + esc(q.fase) + '" data-i="' + c2 + '">' +
-          '<span class="cupo-n">' + (q.campeones ? '🏆' : '🪂') + '</span>' +
+          '<span class="cupo-n">' + (q.campeones ? '🏆' : q.zona ? '🌐' : '🪂') + '</span>' +
           (t2 ? '<span class="cupo-cr">' + Crest.html(t2, 22) + '</span><b>' + esc(t2.n) + '</b>' +
             '<small>' + t2.ovr + '</small>'
               : '<b>elegir club</b>') + '</button>');
@@ -938,7 +983,7 @@
     var q = conCupos.filter(function (x) { return x.cid === cid && x.fase === fase; })[0];
     if (!q) return;
     Picker.team({
-      title: q.campeones ? q.campeones[i] : q.caidos ? q.name
+      title: q.campeones ? q.campeones[i] : (q.caidos || q.zona) ? q.name
         : ('Plaza ' + (q.desde + i + 1) + 'ª de ' + q.name),
       nations: false,
       filterLeague: function (x) {
@@ -1136,7 +1181,21 @@
 
   /* El cuadro de una eliminación directa, bola a bola. */
   function sorteoCuadro(box, equipos, cfg, alAcabar) {
-    var r = Sorteo.reparteBye(equipos);
+    /* Una ronda suelta no es un cuadro: juegan todos y pasa la mitad. Con
+       el reparto de byes se armaba una llave completa, así que la previa
+       de veintiséis dejaba a seis esperando una segunda ronda que no
+       existe y los veinte restantes se cruzaban en el orden del ranking:
+       los dos mejores entre sí, y así hacia abajo. */
+    var r;
+    if (cfg.unaRonda) {
+      r = { juegan: equipos.slice(), esperan: [] };
+      if (r.juegan.length % 2) {
+        /* impares: el mejor pasa de oficio, que es lo que hace la UEFA */
+        var mejor = r.juegan.slice().sort(function (a, b) { return (b.ovr || 0) - (a.ovr || 0); })[0];
+        r.esperan = [mejor];
+        r.juegan = r.juegan.filter(function (t) { return t !== mejor; });
+      }
+    } else r = Sorteo.reparteBye(equipos);
     if (r.juegan.length < 4) { alAcabar(r.juegan, r.esperan); return; }
     var b1, b2, nombres;
     if (cfg.sorteoAzar) {
