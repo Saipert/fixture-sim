@@ -1789,15 +1789,23 @@ body.conclub{scrollbar-color:var(--club-scroll,var(--line)) rgba(255,255,255,.04
    cuatro en fila medio pisándose. El texto manda: la imagen va detrás y
    se disuelve antes de llegar a él.
    ========================================================================= */
-.mcard .memb{
-  position:absolute;top:50%;right:14px;transform:translateY(-50%);
-  width:46%;height:82%;background-repeat:no-repeat;background-position:right center;
-  background-size:contain;opacity:.5;pointer-events:none;z-index:0;
+/* Los dos emblemas de cada seccion, uno al lado del otro y pegados a la
+   derecha. Cada uno mide de ancho lo que mide de alto la tarjeta, asi que
+   se adaptan solos: no hay porcentajes del contenedor de por medio. */
+.mcard .membs{
+  position:absolute;top:50%;right:16px;transform:translateY(-50%);
+  height:78%;display:flex;align-items:center;gap:14px;
+  opacity:.5;pointer-events:none;z-index:0;
   transition:opacity .25s ease,transform .45s ease;
-  -webkit-mask-image:linear-gradient(to right,transparent 0,#000 34%);
-  mask-image:linear-gradient(to right,transparent 0,#000 34%);
+  -webkit-mask-image:linear-gradient(to right,transparent 0,#000 22%);
+  mask-image:linear-gradient(to right,transparent 0,#000 22%);
 }
-.mcard:hover .memb{opacity:.72;transform:translateY(-50%) scale(1.06)}
+.mcard .membs span{display:block;height:100%;aspect-ratio:1;flex:0 0 auto;
+  background-repeat:no-repeat;background-position:center;background-size:contain}
+/* donde sólo hay una foto se le deja el doble de ancho: el campo de
+   Plantillas es apaisado y en una caja cuadrada se quedaba diminuto */
+.mcard .membs span:only-child{aspect-ratio:1.9}
+.mcard:hover .membs{opacity:.72;transform:translateY(-50%) scale(1.06)}
 
 /* el modo carrera: los cuatro bustos, cada uno pisando al anterior.
    El solape va en transform, que es el unico porcentaje que se mide sobre
@@ -1829,7 +1837,7 @@ body.conclub{scrollbar-color:var(--club-scroll,var(--line)) rgba(255,255,255,.04
 @media (max-width:760px){
   /* la tarjeta es mucho mas estrecha y el texto cae encima de la foto:
      se baja la foto y se alarga el velo hasta mas de la mitad */
-  .mcard .memb{width:42%;height:76%;opacity:.26}
+  .mcard .membs{height:70%;gap:8px;opacity:.26}
   .mcard .mcolage{left:34%;opacity:.5}
   .mcard .mvelo{background:
     linear-gradient(to right,var(--card) 0,rgba(0,0,0,0) 64%),
@@ -1838,3 +1846,8 @@ body.conclub{scrollbar-color:var(--club-scroll,var(--line)) rgba(255,255,255,.04
   .mcard .mret.r2{transform:translateX(32%)}
   .mcard .mret.r4{transform:translateX(0)}
 }
+
+/* los logos de los enlaces de contacto, en vez de los dos símbolos sueltos */
+.cr-ic{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px}
+.cr-ic svg{width:100%;height:auto;display:block}
+.cr-link{display:inline-flex;align-items:center;gap:7px}

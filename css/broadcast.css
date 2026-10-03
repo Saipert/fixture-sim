@@ -109,16 +109,34 @@ select:focus,input:focus,textarea:focus{outline:2px solid var(--acc);outline-off
 .mcard[data-go="world"] .desc{font-size:14px;max-width:560px}
 .mcard[data-go="world"] .mimg{opacity:.22}
 .mcard[data-go="world"]::after{
-  display:block;content:'Destacado';inset:22px 24px auto auto;left:auto;bottom:auto;width:auto;height:auto;
+  display:block;content:'Destacado';inset:18px auto auto 24px;right:auto;bottom:auto;width:auto;height:auto;
   background:none;filter:none;opacity:1;border-radius:0;z-index:1;
   color:var(--acc);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
 }
 .mcard[data-go="world"]:hover::after{display:block}
 
-/* siete tarjetas tras la destacada: la última rellena el hueco de la fila */
+/* Las filas, tal y como se piden: la destacada entera, luego dos y dos,
+   y las tres de herramientas abajo. Seis columnas de base porque es el
+   único número que parte limpio en dos y en tres. */
+.menu-grid{grid-template-columns:repeat(6,minmax(0,1fr))}
+.mcard[data-go="world"]{grid-column:1/-1}
+.mcard[data-go="match"],.mcard[data-go="domestic"],
+.mcard[data-go="contin"],.mcard[data-go="nations"]{grid-column:span 3}
+.mcard[data-go="builder"],.mcard[data-go="editor"],
 .mcard[data-go="squads"]{grid-column:span 2}
-@media (max-width:1180px){.menu-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.mcard[data-go="squads"]{grid-column:1/-1}}
-@media (max-width:860px){.menu-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.mcard[data-go="squads"]{grid-column:span 2}}
+@media (max-width:1180px){
+  .menu-grid{grid-template-columns:repeat(6,minmax(0,1fr))}
+  .mcard[data-go="builder"],.mcard[data-go="editor"]{grid-column:span 3}
+  .mcard[data-go="squads"]{grid-column:1/-1}
+}
+@media (max-width:860px){
+  .menu-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .mcard[data-go="world"]{grid-column:1/-1}
+  .mcard[data-go="match"],.mcard[data-go="domestic"],
+  .mcard[data-go="contin"],.mcard[data-go="nations"],
+  .mcard[data-go="builder"],.mcard[data-go="editor"]{grid-column:auto}
+  .mcard[data-go="squads"]{grid-column:1/-1}
+}
 @media (max-width:560px){
   .menu-grid{grid-template-columns:1fr}
   .menu-grid .mcard{min-height:100px}
@@ -238,3 +256,14 @@ body.conclub .wtop,body.conclub .tabs.sub{border-color:var(--line);border-width:
 .nc-sec + .nc-row{margin-top:0}
 .nc-row .clogo{margin:0;height:24px}
 @media (max-width:640px){.nc-cols{grid-template-columns:1fr}.navcomp{min-width:0;width:100%;max-width:none}}
+
+/* La rejilla ocupa lo que queda de ventana en vez de amontonarse arriba:
+   con las tarjetas a cien píxeles sobraba media pantalla por debajo. La
+   destacada se lleva algo más de alto que las otras tres filas. */
+@media (min-width:861px){
+  body.menu .menu-grid{
+    min-height:calc(100vh - 215px);
+    grid-template-rows:1.25fr 1fr 1fr 1fr;
+  }
+  body.menu .menu-grid .mcard{min-height:0;aspect-ratio:auto}
+}
