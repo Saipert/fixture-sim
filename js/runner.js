@@ -462,7 +462,8 @@
 
     function paint() {
       var nx = peek(R);
-      el.label.textContent = R.label;
+      if (R.logo) el.label.innerHTML = R.logo + '<span>' + esc(R.label) + '</span>';
+      else el.label.textContent = R.label;
       el.next.innerHTML = nx
         ? 'Siguiente: ' + esc(nx.h.n) + ' — ' + esc(nx.a.n) +
         (nx.note ? ' <i>(' + esc(nx.note) + ')</i>' : '') + ' · quedan ' + remaining(R) + ' en esta ronda'
@@ -484,8 +485,8 @@
          entera desde el principio en vez de ir apareciendo de uno en uno.
          La ida y la vuelta son dos tandas distintas y no se mezclan. */
       var faltan = [];
-      if (R.log.length) {
-        var tanda = nx ? (nx.note || '') : '';
+      if (nx) {
+        var tanda = nx.note || '';
         faltan = R.pending.slice(R.idx).filter(function (m) { return (m.note || '') === tanda; });
       }
       el.logbox.classList.toggle('hidden', (!lg.length && !faltan.length) || !!R.hideLog);

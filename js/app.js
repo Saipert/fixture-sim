@@ -812,7 +812,11 @@
             '<span class="cupo-cr">' + Crest.html(t, 26) + '</span></button>';
         }).join('');
         var vacias = Math.max(0, q.plazas - sel.filter(Boolean).length), faltan = '';
-        for (var v = 0; v < vacias; v++) faltan += '<span class="cupo-esc vacio-esc">+</span>';
+        for (var v = 0; v < vacias; v++) {
+          /* los huecos también se pulsan: es como se eligen los campeones */
+          faltan += '<button class="cupo-esc vacio-esc" data-k="' + esc(claveQ(q)) +
+            '" data-i="' + (sel.filter(Boolean).length + v) + '" title="Elegir club">+</button>';
+        }
         return '<div class="cu-linea"><span class="cu-comp">' +
           esc(COMP_CORTO[q.comp] || q.comp) + '<i>' + esc(FASE_CORTA[q.fase] || q.fase) + '</i></span>' +
           '<span class="cu-esc">' + slots + faltan + '</span></div>';
@@ -876,6 +880,9 @@
       Object.keys(conSel).forEach(function (k2) {
         (conSel[k2] || []).forEach(function (t) { if (t) puestos.push(t); });
       });
+      /* los campeones vigentes de una temporada los elige siempre quien
+         juega: es lo primero que se decide y no tiene sentido sortearlo */
+      if (q.campeones && conComp && conComp.temporada) return;
       if (q.campeones) {
         var lista = [];
         var kk = q.comp ? compPack(q.comp) : conComp;
@@ -929,9 +936,14 @@
     }
     if (conModo === 'manual') { conPintaManual(); return; }
     if (conComp && conComp.temporada) {
-      $('#conCuposNota').textContent = 'Todas las competiciones de la temporada, país por país. ' +
-        'Ningún club ocupa dos plazas. Pulsa cualquier escudo para cambiarlo.';
+      var faltanC = cuantosCampeonesFaltan();
+      $('#conCuposNota').textContent = faltanC > 0
+        ? 'Elige primero los ' + faltanC + ' campeones vigentes que faltan: son lo primero ' +
+          'de la temporada. El resto de cupos ya está puesto y se puede dejar como está.'
+        : 'Todas las competiciones de la temporada, país por país. Ningún club ocupa ' +
+          'dos plazas. Pulsa cualquier escudo para cambiarlo.';
       $('#conCuposBody').innerHTML = pintaTemporada();
+      $('#btnCon').disabled = faltanC > 0;
       return;
     }
     $('#conCuposNota').textContent = 'Los cupos son los de la temporada actual. Pulsa cualquier club para cambiarlo por otro de su país.';
@@ -1148,6 +1160,7 @@
     });
     /* y lo que no sale de una liga: zonas, campeones y caídos */
     (conCupos || []).forEach(function (q) {
+      if (q.campeones && conComp && conComp.temporada) return;
       if (!q.campeones && !q.caidos && !q.zona) return;
       var kq = q.comp ? compPack(q.comp) : conComp;
       var cf = q.zona || ((kq || conComp) ? (kq || conComp).conf : null);
@@ -1214,7 +1227,7 @@
         (conComp.supercopas || []).map(function (x) { return ' · ' + SUPERCOPAS[x].nombre; }).join('') +
         (conComp.cwc ? ' · Mundial de Clubes de 8' : '') +
         ' · una detrás de otra, guardando los campeones';
-      $('#btnCon').disabled = false;
+      $('#btnCon').disabled = cuantosCampeonesFaltan() > 0;
       $('#conOut').innerHTML = '';
       return;
     }
@@ -1228,7 +1241,11 @@
   function conHint() {
     var k = conComp; if (!k) return;
     /* una temporada completa ya puso su propio texto al elegirla */
-    if (k.temporada) { $('#btnCon').disabled = false; return; }
+    if (k.temporada) {
+      var faltan = cuantosCampeonesFaltan();
+      $('#btnCon').disabled = faltan > 0;
+      return;
+    }
     var g = conEquipos('grupos').length, po = conEquipos('po').length, pre = conEquipos('pre').length;
     var corte = primeraRonda(k);
     if (corte && !pre && po > corte) { pre = corte; po -= corte; }
@@ -1563,6 +1580,23 @@
      reparto de cupos ya se ha hecho una sola vez para toda la temporada,
      así que aquí sólo hay que repartir cada campo por competición.
      ===================================================================== */
+  /* En una temporada completa, los campeones vigentes se eligen a mano
+     antes que nada: hasta que estén, no se simula. */
+  /* el logo de un torneo continental, para la barra y la pestaña */
+  function logoTorneo(id, h) {
+    var f = (window.COMP_LOGO || {})[id];
+    if (!f) return '';
+    return '<img class="clogo" src="' + f + '" alt="" height="' + (h || 22) +
+      '" onerror="this.remove()">';
+  }
+  function cuantosCampeonesFaltan() {
+    var n = 0;
+    (conCupos || []).forEach(function (q) {
+      if (!q.campeones) return;
+      n += q.plazas - (conSel[claveQ(q)] || []).filter(Boolean).length;
+    });
+    return n;
+  }
   function nombreDe(id) {
     var k = CONT.filter(function (x) { return x.id === id; })[0];
     return k ? k.name : id;
@@ -1606,6 +1640,7 @@
       var real = cfgReal(kk);
       return { id: id, name: kk.name, k: kk, conf: kk.conf,
         playoff: !!(real && real.playoff),
+        logo: logoTorneo(real ? real.id : id, 22),
         pre: c.pre, po: c.po, grupos: c.grupos };
     }).filter(Boolean);
     /* Quién hereda a los que caen. Son los mismos cupos de siempre: de la

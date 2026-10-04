@@ -77,6 +77,7 @@
        columna, la que se estaba sorteando se comía la pantalla y las demás
        quedaban en blanco. */
     caja.innerHTML = '<div class="card tb-bar" id="tbBar"></div>' +
+      '<div class="tb-camps hidden" id="tbCamp"></div>' +
       '<div class="tb-tabs" id="tbTabs"></div>' +
       '<div class="tb-panel" id="tbCajas"></div>';
     var cajas = caja.querySelector('#tbCajas');
@@ -89,8 +90,23 @@
       c.panel = d;
       c.caja = d.querySelector('.tb-cuerpo');
     });
+    /* Lo que viene después de la temporada también es una pestaña: antes
+       se colgaba debajo de todas las columnas y había que bajar media
+       pantalla para verlo. */
+    var extrasTabs = [];
+    function apartado(id, nombre) {
+      var d = document.createElement('div');
+      d.className = 'tb-comp';
+      d.innerHTML = '<div class="tb-cuerpo"></div>';
+      cajas.appendChild(d);
+      var x = { id: id, name: nombre, panel: d, caja: d.querySelector('.tb-cuerpo'), extra: true };
+      extrasTabs.push(x);
+      return x;
+    }
+    function todasLasTabs() { return comps.concat(extrasTabs); }
     function enseña(id) { activa = id; pintaTabs(); }
     function estadoDe(c) {
+      if (c.extra) return campeones[c.id] ? '🏆 ' + campeones[c.id].n : (c.estado || 'en juego');
       return !c.R ? 'por sortear'
         : c.R.esperaKO ? 'hay sorteo'
         : c.R.done ? (c.R.champion ? '🏆 ' + c.R.champion.n : 'terminada')
@@ -98,16 +114,30 @@
     }
     function pintaTabs() {
       var tabs = caja.querySelector('#tbTabs');
-      tabs.innerHTML = comps.map(function (c) {
+      tabs.innerHTML = todasLasTabs().map(function (c) {
         var avisa = (c.R && c.R.esperaKO) || (!c.R && fase !== 'fin');
         return '<button class="tb-tab' + (c.id === activa ? ' on' : '') +
           (avisa ? ' avisa' : '') + '" data-c="' + esc(c.id) + '">' +
-          '<b>' + esc(c.name) + '</b><small>' + esc(estadoDe(c)) + '</small></button>';
+          (c.logo || '') +
+          '<span><b>' + esc(c.name) + '</b><small>' + esc(estadoDe(c)) + '</small></span></button>';
       }).join('');
       Array.prototype.forEach.call(tabs.querySelectorAll('[data-c]'), function (b) {
         b.onclick = function () { enseña(b.dataset.c); };
       });
-      comps.forEach(function (c) { c.panel.classList.toggle('hidden', c.id !== activa); });
+      todasLasTabs().forEach(function (c) { c.panel.classList.toggle('hidden', c.id !== activa); });
+      pintaCampeones();
+    }
+    /* los campeones, siempre a la vista arriba */
+    function pintaCampeones() {
+      var d = caja.querySelector('#tbCamp');
+      if (!d) return;
+      var hechas = todasLasTabs().filter(function (c) { return campeones[c.id]; });
+      d.classList.toggle('hidden', !hechas.length);
+      d.innerHTML = hechas.map(function (c) {
+        var t = campeones[c.id];
+        return '<div class="tb-camp" title="' + esc(c.name + ' · ' + t.n) + '">' +
+          crest(t, 26) + '<span><small>' + esc(c.name) + '</small><b>' + esc(t.n) + '</b></span></div>';
+      }).join('');
     }
 
     /* ---------------- la barra de mando ---------------- */
@@ -125,8 +155,10 @@
       bar.innerHTML = '<div class="tb-now"><b>' + esc(cfg.nombre) + '</b><small>' + esc(txt) + '</small></div>' +
         '<div class="tb-btns">' +
         (fase === 'fin' ? ''
-          : '<button class="primary" id="tbJor"' + (falta.length ? ' disabled' : '') + '>Jugar la jornada</button>' +
-            '<button class="mini" id="tbTodo"' + (falta.length ? ' disabled' : '') + '>Simular hasta el final</button>') +
+          : '<button class="primary" id="tbJor"' + (falta.length || corriendo ? ' disabled' : '') +
+              '>Jugar la jornada</button>' +
+            '<button class="mini" id="tbTodo"' + (falta.length || corriendo ? ' disabled' : '') +
+              '>Simular hasta el final</button>') +
         '</div>';
       if (bar.querySelector('#tbJor')) bar.querySelector('#tbJor').onclick = function () { jornada(); };
       if (bar.querySelector('#tbTodo')) bar.querySelector('#tbTodo').onclick = function () { todo(); };
@@ -172,8 +204,8 @@
       });
       return comps.slice().sort(function (a, b) { return (manda[a.id] || 0) - (manda[b.id] || 0); });
     }
-    function jornada() {
-      if (conSorteo().length) return;
+    /* las que juegan esta jornada */
+    function lasDeHoy() {
       var listas = ordenDePaso().filter(function (c) {
         return c.R && !c.R.done && !c.R.esperaKO;
       });
@@ -184,20 +216,59 @@
         listas.forEach(function (c) { var r = restan(c); if (r > tope) tope = r; });
         listas = listas.filter(function (c) { return restan(c) >= tope; });
       }
-      listas.forEach(function (c) {
-        Runner.stepRound(c.R);
-        bajaTerceros(c);
-      });
+      return listas;
+    }
+    function cierraJornada(listas) {
+      listas.forEach(bajaTerceros);
       tic++;
+      corriendo = false;
       repinta();
       revisaFase();
     }
+    /* Los partidos no salen de golpe: van cayendo uno a uno, como en la
+       simulación rápida de siempre. Una jornada de trece cruces tarda poco
+       más de un segundo. */
+    var VELOCIDAD = 110;
+    var corriendo = false;
+    function jornada(alAcabar) {
+      if (corriendo || conSorteo().length) { if (alAcabar) alAcabar(); return; }
+      var listas = lasDeHoy();
+      if (!listas.length) { cierraJornada(listas); if (alAcabar) alAcabar(); return; }
+      corriendo = true;
+      /* la ronda y la tanda con que entra cada una: la jornada acaba ahí */
+      var hasta = {};
+      listas.forEach(function (c) {
+        var m = Runner.peek(c.R);
+        hasta[c.id] = { label: c.R.label, tanda: m ? (m.note || '') : '' };
+      });
+      pintaBarra();
+      function paso() {
+        var algo = false;
+        listas.forEach(function (c) {
+          var h = hasta[c.id];
+          if (c.R.done || c.R.label !== h.label) return;
+          var m = Runner.peek(c.R);
+          if (!m || (m.note || '') !== h.tanda) return;
+          Runner.step(c.R);
+          algo = true;
+        });
+        comps.forEach(function (c) { if (c.mando) c.mando.repaint(); });
+        if (algo) { setTimeout(paso, VELOCIDAD); return; }
+        cierraJornada(listas);
+        if (alAcabar) alAcabar();
+      }
+      paso();
+    }
+    /* «Simular hasta el final» no se para a enseñar nada: va de corrido */
     function todo() {
       var guarda = 0;
-      while (fase !== 'fin' && !conSorteo().length && guarda++ < 400) {
-        var antes = fase, antesTic = tic;
-        jornada();
-        if (fase === antes && tic === antesTic) break;
+      while (fase !== 'fin' && !conSorteo().length && !corriendo && guarda++ < 400) {
+        var listas = lasDeHoy();
+        if (!listas.length) { cierraJornada(listas); continue; }
+        var antes = tic;
+        listas.forEach(function (c) { Runner.stepRound(c.R); });
+        cierraJornada(listas);
+        if (tic === antes) break;
       }
     }
 
@@ -222,7 +293,9 @@
             byesFijos: byes.length ? byes : null
           });
           c.R.unaRonda = true;
-          c.mando = Runner.mount(c.caja, c.R);
+          if (c.logo) c.R.logo = c.logo;
+          if (c.logo) c.R.logo = c.logo;
+        c.mando = Runner.mount(c.caja, c.R);
           sigue();
         });
       }, function () { repinta(); });
@@ -261,7 +334,9 @@
             byesFijos: byes.length ? byes : null
           });
           c.R.unaRonda = true;
-          c.mando = Runner.mount(c.caja, c.R);
+          if (c.logo) c.R.logo = c.logo;
+          if (c.logo) c.R.logo = c.logo;
+        c.mando = Runner.mount(c.caja, c.R);
           sigue();
         });
       }, function () { repinta(); });
@@ -302,7 +377,9 @@
               antesDelKO: function (R2) { sorteoKO(c, R2); }
             };
             c.R = Runner.tournament(campo, c.cfgT);
-            c.mando = Runner.mount(c.caja, c.R);
+            if (c.logo) c.R.logo = c.logo;
+          if (c.logo) c.R.logo = c.logo;
+        c.mando = Runner.mount(c.caja, c.R);
             sigue();
           }
         });
@@ -316,6 +393,7 @@
           name: c.name, legs: 2, ordenFijo: true,
           byesFijos: byes.length ? byes : null
         });
+        if (c.logo) c.R.logo = c.logo;
         c.mando = Runner.mount(c.caja, c.R);
         sigue();
       });
@@ -383,31 +461,25 @@
     function extras() {
       fase = 'extras';
       var cola = (cfg.supercopas || []).slice();
-      var cajaEx = document.createElement('div');
-      cajaEx.className = 'tb-comp';
-      cajaEx.innerHTML = '<h3 class="tb-tit">Después de la temporada<small></small></h3>' +
-        '<div class="tb-cuerpo"></div>';
-      cajas.appendChild(cajaEx);
-      var dentro = cajaEx.querySelector('.tb-cuerpo');
       unoAUno(cola, function (sc, sigue) {
         var a = campeones[sc.de[0]], b = campeones[sc.de[1]];
         if (!a || !b) { sigue(); return; }
+        var x = apartado(sc.id, sc.nombre);
+        enseña(x.id);
         var R = Runner.knockout([a, b], {
           name: sc.nombre, legs: sc.legs, unaRonda: true, ordenFijo: true,
           neutral: sc.legs === 1
         });
-        var d = document.createElement('div');
-        dentro.appendChild(d);
-        var m = Runner.mount(d, R);
+        var m = Runner.mount(x.caja, R);
         R.alTerminar = function (fin) {
           campeones[sc.id] = (fin.ganadores || [])[0] || null;
-          m.repaint();
+          m.repaint(); pintaTabs();
           sigue();
         };
         Runner.stepAll(R);
-      }, function () { mundialDeClubes(dentro); });
+      }, function () { mundialDeClubes(); });
     }
-    function mundialDeClubes(dentro) {
+    function mundialDeClubes() {
       if (!cfg.cwc) { fin(); return; }
       var plazas = cfg.cwc.plazas, puestos = {}, ocho = [];
       comps.forEach(function (c) {
@@ -421,8 +493,9 @@
       while (ocho.length % 4) ocho.pop();
       if (ocho.length < 4) { fin(); return; }
       var st = Comp.structureFor(ocho.length, 4);
-      var d = document.createElement('div');
-      dentro.appendChild(d);
+      var x = apartado('cwc', cfg.cwc.nombre);
+      enseña(x.id);
+      var d = x.caja;
       Sorteo.grupos(d, {
         campo: ocho, nGrupos: st.groups, azar: false,
         zonaDe: cfg.cwc.confDe || null,
