@@ -1425,8 +1425,11 @@
       var pri = [], seg = [];
       q.forEach(function (row) { (row.pos === 1 ? pri : seg).push(row.t); });
       if (pri.length && pri.length === seg.length) {
+        /* El primero de grupo es cabeza de serie y cierra en casa, así que
+           sale del segundo bombo: el primero da el local de la ida. */
         return {
-          bombos: [pri, seg], nombres: ['Primeros de grupo', 'Segundos de grupo'],
+          bombos: [seg, pri],
+          nombres: ['Segundos de grupo', 'Primeros de grupo · cierran en casa'],
           choca: function (a, b) {
             var ga = grupoDe(R, a);
             if (ga && ga === grupoDe(R, b)) return true;

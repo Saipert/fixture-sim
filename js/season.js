@@ -455,10 +455,32 @@
       if (!e) { c.colaKO = null; c.sorteoAbierto = false; miraSorteos(); return; }
       var byes = (e.byes || []).slice();
       var juegan = e.campo.filter(function (t) { return byes.indexOf(t) < 0; });
-      var b1, b2, nombres;
-      if (e.bombos) { b1 = e.bombos[0].slice(); b2 = e.bombos[1].slice();
-        nombres = ['Segundos de grupo', 'Llegan de fuera']; }
-      else {
+      var b1, b2, nombres, choca = cfg.choca || null;
+      /* El sorteo no va por nivel: el primero de grupo es cabeza de serie y
+         cierra la eliminatoria en casa, así que sale del segundo bombo —el
+         primero da el local de la ida—, y los segundos van en el primero.
+         Y no se cruzan dos del mismo grupo. */
+      var grupo = {};
+      function marca(t, g) { if (t) grupo[(t.leagueId || '') + '|' + t.n] = g; }
+      function grupoDe(t) { return grupo[(t.leagueId || '') + '|' + t.n]; }
+      var pri = [], seg = [];
+      (R.groups || []).forEach(function (g) {
+        if (g.standings && g.standings[0]) { pri.push(g.standings[0].t); marca(g.standings[0].t, g.name); }
+        if (g.standings && g.standings[1]) { seg.push(g.standings[1].t); marca(g.standings[1].t, g.name); }
+      });
+      if (e.bombos) {
+        b1 = e.bombos[0].slice(); b2 = e.bombos[1].slice();
+        nombres = ['Segundos de grupo', 'Llegan de fuera'];
+      } else if (pri.length && pri.length === seg.length && pri.length * 2 === juegan.length) {
+        b1 = seg; b2 = pri;
+        nombres = ['Segundos de grupo', 'Primeros de grupo · cierran en casa'];
+        var antes = choca;
+        choca = function (a, b) {
+          var ga = grupoDe(a);
+          if (ga && ga === grupoDe(b)) return true;
+          return antes ? antes(a, b) : false;
+        };
+      } else {
         var orden = juegan.slice().sort(function (a, b) { return (b.ovr || 0) - (a.ovr || 0); });
         b1 = orden.slice(0, Math.ceil(orden.length / 2));
         b2 = orden.slice(Math.ceil(orden.length / 2));
@@ -468,7 +490,7 @@
       c.caja.insertBefore(cajita, c.caja.firstChild);
       enseña(c.id);
       Sorteo.cruces(cajita, {
-        bombos: [b1, b2], nombres: nombres, esperan: byes, choca: cfg.choca || null,
+        bombos: [b1, b2], nombres: nombres, esperan: byes, choca: choca,
         titulo: 'Sorteo de las eliminatorias',
         sub: c.name + ' · ' + juegan.length + ' equipos',
         boton: 'Listo',
