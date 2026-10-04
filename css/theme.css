@@ -1932,3 +1932,9 @@ body.conclub{scrollbar-color:var(--club-scroll,var(--line)) rgba(255,255,255,.04
 .scline.porjugar{opacity:.55}
 .scline.porjugar b{font-size:11px;font-weight:600;color:var(--dim);letter-spacing:.05em;
   text-transform:uppercase}
+
+/* el global de la eliminatoria, en chiquito debajo del marcador */
+.scline b .agg{display:block;font-style:normal;font-size:9.5px;font-weight:700;
+  letter-spacing:.04em;text-transform:uppercase;color:var(--dim);margin-top:1px;
+  white-space:nowrap}
+.scline b .agg.ida{color:var(--dim);opacity:.8;margin-top:3px}

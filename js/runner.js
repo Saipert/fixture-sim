@@ -60,6 +60,9 @@
     var gol = Comp.matchScorers(res);
     R.log.push({
       h: m.h, a: m.a, s: res.score, pens: res.pens || null, note: m.note || '',
+      /* la ida y el global de la eliminatoria: los calcula la vuelta y
+         hasta ahora se perdían aquí, así que no salían debajo */
+      ida: res.idaNote || '', agg: res.aggNote || '',
       gh: gol.home, ga: gol.away, tie: m.tie || null
     });
     if (R.idx >= R.pending.length) {
@@ -211,7 +214,10 @@
               var agA = t.leg1[0] + res.score[1], agB = t.leg1[1] + res.score[0];
               t.legs = [t.leg1, t.leg2];
               t.agg = [agA, agB];
-              /* en la vuelta el local es t.b: el global se escribe en ese orden */
+              /* en la vuelta el local es t.b: la ida y el global se escriben
+                 en ese orden, para que se lean en la misma dirección que el
+                 marcador que tienen encima */
+              res.idaNote = 'Ida ' + t.leg1[1] + '-' + t.leg1[0];
               res.aggNote = 'Global ' + agB + '-' + agA;
               if (agA === agB) {
                 t.pens = Comp.penaltyShootout(t.a, t.b);
@@ -433,9 +439,11 @@
     }
     function scoreLine(r) {
       var pen = r.pens ? '<i class="pen">pen ' + r.pens.a + '-' + r.pens.b + '</i>' : '';
+      var glob = (r.ida ? '<i class="agg ida">' + esc(r.ida) + '</i>' : '') +
+        (r.agg ? '<i class="agg">' + esc(r.agg) + '</i>' : '');
       return '<div class="scline">' +
         '<span class="sc-c" title="' + esc(r.h.n) + '">' + crest(r.h, 34) + '</span>' +
-        '<b>' + r.s[0] + ' - ' + r.s[1] + pen + '</b>' +
+        '<b>' + r.s[0] + ' - ' + r.s[1] + pen + glob + '</b>' +
         '<span class="sc-c" title="' + esc(r.a.n) + '">' + crest(r.a, 34) + '</span>' +
         golesHTML(r) + '</div>';
     }
@@ -464,9 +472,22 @@
 
       var lg = R.log.length ? R.log : (R.prevLog || []);
       var lgName = R.log.length ? R.label : (R.prevLabel || '');
-      /* Los que faltan de esta ronda, sin marcador. Así se ve la jornada
-         entera desde el principio en vez de ir apareciendo de uno en uno. */
-      var faltan = R.log.length ? R.pending.slice(R.idx) : [];
+      /* La ida y la vuelta se juegan en la misma ronda pero se miran por
+         separado: si no, al acabar la vuelta salían los veintiséis
+         partidos juntos y no se entendía nada. */
+      if (lg.length && esLeg(lg[lg.length - 1].note)) {
+        var tandaVista = lg[lg.length - 1].note;
+        lg = lg.filter(function (x) { return x.note === tandaVista; });
+        lgName += ' · ' + tandaVista;
+      }
+      /* Los que faltan de esta tanda, sin marcador: así se ve la jornada
+         entera desde el principio en vez de ir apareciendo de uno en uno.
+         La ida y la vuelta son dos tandas distintas y no se mezclan. */
+      var faltan = [];
+      if (R.log.length) {
+        var tanda = nx ? (nx.note || '') : '';
+        faltan = R.pending.slice(R.idx).filter(function (m) { return (m.note || '') === tanda; });
+      }
       el.logbox.classList.toggle('hidden', (!lg.length && !faltan.length) || !!R.hideLog);
       el.log.innerHTML = lg.map(scoreLine).join('') + faltan.map(porJugar).join('');
       el.logtitle.textContent = lg.length + ' resultado' + (lg.length === 1 ? '' : 's') +
