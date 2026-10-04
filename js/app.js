@@ -1204,9 +1204,36 @@
       conSel[claveQ(q)] = tom;
     });
   }
+  /* Al azar, pero sólo las plazas del paso en el que se está: eligiendo a
+     mano, lo ya elegido antes no se toca. */
+  function azarDelPaso() {
+    var q = conCupos[conPaso];
+    if (!q) return;
+    var cogidos = yaElegidos({ clave: claveQ(q), i: -1 });
+    var pool = [];
+    if (q.lid) {
+      pool = LG[q.lid].teams.slice();
+    } else {
+      var kq = q.comp ? compPack(q.comp) : conComp;
+      var cf = q.zona || ((kq || conComp) ? (kq || conComp).conf : null);
+      COUNTRIES.forEach(function (c) {
+        if (cf && c.conf !== cf) return;
+        c.have.forEach(function (lid) { pool = pool.concat(LG[lid].teams); });
+      });
+    }
+    pool = pool.filter(function (t) { return !cogidos[t.leagueId + '|' + t.n]; });
+    var tom = [];
+    for (var i = 0; i < q.plazas && pool.length; i++) {
+      var j = Math.floor(Math.random() * pool.length);
+      tom.push(pool[j]); pool.splice(j, 1);
+    }
+    conSel[claveQ(q)] = tom;
+  }
   $('#conAzar').onclick = function () {
     if (!conCupos) return;
-    conAlAzar(); conPaso = 0; conPintaCupos(); conHint();
+    if (conModo === 'manual') azarDelPaso();
+    else { conAlAzar(); conPaso = 0; }
+    conPintaCupos(); conHint();
   };
 
   /* las competiciones sueltas y, al final, las temporadas completas */
