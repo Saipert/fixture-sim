@@ -472,23 +472,21 @@
       ['one', 'live', 'round', 'all'].forEach(function (k) { el[k].disabled = R.done || busy || !nx; });
 
       var lg = R.log.length ? R.log : (R.prevLog || []);
-      var lgName = R.log.length ? R.label : (R.prevLabel || '');
-      /* La ida y la vuelta se juegan en la misma ronda pero se miran por
-         separado: si no, al acabar la vuelta salían los veintiséis
-         partidos juntos y no se entendía nada. */
-      if (lg.length && esLeg(lg[lg.length - 1].note)) {
-        var tandaVista = lg[lg.length - 1].note;
-        lg = lg.filter(function (x) { return x.note === tandaVista; });
-        lgName += ' · ' + tandaVista;
+      var lgName = R.log.length ? R.label : (R.prevLabel || R.label || '');
+      /* La ida y la vuelta se juegan dentro de la misma ronda, pero son dos
+         jornadas distintas: manda la que toca ahora. Al acabar la ida, lo
+         que se enseña es la vuelta por jugar, no las dos listas juntas. */
+      var tanda = nx ? (nx.note || '')
+        : (lg.length ? (lg[lg.length - 1].note || '') : '');
+      if (esLeg(tanda)) {
+        lg = lg.filter(function (x) { return x.note === tanda; });
+        lgName += ' · ' + tanda;
       }
-      /* Los que faltan de esta tanda, sin marcador: así se ve la jornada
-         entera desde el principio en vez de ir apareciendo de uno en uno.
-         La ida y la vuelta son dos tandas distintas y no se mezclan. */
-      var faltan = [];
-      if (nx) {
-        var tanda = nx.note || '';
-        faltan = R.pending.slice(R.idx).filter(function (m) { return (m.note || '') === tanda; });
-      }
+      /* los que faltan de esta misma tanda, sin marcador: así se ve la
+         jornada entera desde el principio */
+      var faltan = nx
+        ? R.pending.slice(R.idx).filter(function (m) { return (m.note || '') === tanda; })
+        : [];
       el.logbox.classList.toggle('hidden', (!lg.length && !faltan.length) || !!R.hideLog);
       el.log.innerHTML = lg.map(scoreLine).join('') + faltan.map(porJugar).join('');
       el.logtitle.textContent = lg.length + ' resultado' + (lg.length === 1 ? '' : 's') +

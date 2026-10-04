@@ -579,5 +579,7 @@
     return { campeones: function () { return campeones; } };
   }
 
-  global.Temporada = { corre: corre, jornadasDe: jornadasDe };
+  /* «Temporada» ya estaba cogido: competitions.js lo usa para escribir
+     «2026/2027», y al pisarlo se caía el modo carrera entero. */
+  global.Tablero = { corre: corre, jornadasDe: jornadasDe };
 })(window);

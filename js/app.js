@@ -1725,7 +1725,7 @@
       var otro = comps.filter(function (x) { return x.id === ca.previa.a; })[0];
       if (otro) otro.hereda = (otro.hereda || 0) + Math.floor((c.pre || []).length / 2);
     });
-    Temporada.corre($('#conOut'), {
+    Tablero.corre($('#conOut'), {
       nombre: k.name,
       comps: comps,
       cascada: CASCADA,
