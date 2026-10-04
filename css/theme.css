@@ -1913,3 +1913,22 @@ body.conclub{scrollbar-color:var(--club-scroll,var(--line)) rgba(255,255,255,.04
   .tb-bar{position:static}
   .tb-tab{flex:1 1 44%}
 }
+
+/* =========================================================================
+   UN FILO BLANCO EN LOS ESCUDOS
+   Hay escudos azul marino sobre fondo azul marino —Dinamo Tbilisi, Brujas,
+   media Europa del este— que sencillamente no se veían. Es un halo de un
+   píxel hecho con sombras, así que recorta el escudo sin repintarlo; a los
+   que ya son claros no se les nota.
+   ========================================================================= */
+.crest-img, .crest-svg{
+  filter:drop-shadow(0 0 .9px rgba(255,255,255,.95))
+         drop-shadow(0 0 .9px rgba(255,255,255,.7));
+}
+/* las banderas son rectangulares y con el halo parecen pegatinas */
+.crest-img.flag-img, .cflag{filter:none}
+
+/* los partidos de la jornada que todavía no se han jugado */
+.scline.porjugar{opacity:.55}
+.scline.porjugar b{font-size:11px;font-weight:600;color:var(--dim);letter-spacing:.05em;
+  text-transform:uppercase}

@@ -424,6 +424,13 @@
     Array.prototype.forEach.call(box.querySelectorAll('[data-r]'), function (n) { el[n.dataset.r] = n; });
     var mv = null, busy = false;
 
+    /* un partido que todavía no se ha jugado: los dos escudos y nada más */
+    function porJugar(m) {
+      return '<div class="scline porjugar">' +
+        '<span class="sc-c" title="' + esc(m.h.n) + '">' + crest(m.h, 34) + '</span>' +
+        '<b>' + (m.note ? esc(m.note) : 'vs') + '</b>' +
+        '<span class="sc-c" title="' + esc(m.a.n) + '">' + crest(m.a, 34) + '</span></div>';
+    }
     function scoreLine(r) {
       var pen = r.pens ? '<i class="pen">pen ' + r.pens.a + '-' + r.pens.b + '</i>' : '';
       return '<div class="scline">' +
@@ -457,9 +464,13 @@
 
       var lg = R.log.length ? R.log : (R.prevLog || []);
       var lgName = R.log.length ? R.label : (R.prevLabel || '');
-      el.logbox.classList.toggle('hidden', !lg.length || !!R.hideLog);
-      el.log.innerHTML = lg.map(scoreLine).join('');
+      /* Los que faltan de esta ronda, sin marcador. Así se ve la jornada
+         entera desde el principio en vez de ir apareciendo de uno en uno. */
+      var faltan = R.log.length ? R.pending.slice(R.idx) : [];
+      el.logbox.classList.toggle('hidden', (!lg.length && !faltan.length) || !!R.hideLog);
+      el.log.innerHTML = lg.map(scoreLine).join('') + faltan.map(porJugar).join('');
       el.logtitle.textContent = lg.length + ' resultado' + (lg.length === 1 ? '' : 's') +
+        (faltan.length ? ' · ' + faltan.length + ' por jugar' : '') +
         (lgName ? ' · ' + lgName : '');
 
       var h = '';
