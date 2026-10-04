@@ -847,11 +847,23 @@
   }
 
   function conPorDefecto() {
-    conSel = {};
+    /* En una temporada, los campeones vigentes ya están elegidos a mano y
+       se quedan donde están: el resto se reparte alrededor, sin repetirlos. */
+    var guarda = {}, usados = {};
+    if (conComp && conComp.temporada) {
+      (conCupos || []).forEach(function (q) {
+        if (!q.campeones) return;
+        var v = conSel[claveQ(q)] || [];
+        guarda[claveQ(q)] = v;
+        v.forEach(function (t) { if (t) usados[t.leagueId + '|' + t.n] = 1; });
+      });
+    }
+    conSel = guarda;
     /* 1 · los cupos por liga, que son los que mandan */
     (conCupos || []).forEach(function (q) {
       if (q.campeones || q.caidos || q.zona) return;
-      var orden = LG[q.lid].teams.slice().sort(function (a, b) { return b.ovr - a.ovr; });
+      var orden = LG[q.lid].teams.slice().sort(function (a, b) { return b.ovr - a.ovr; })
+        .filter(function (t) { return !usados[t.leagueId + '|' + t.n]; });
       conSel[claveQ(q)] = orden.slice(q.desde, q.desde + q.plazas);
     });
     /* 2 · y después los que llegan de fuera, sin repetir a nadie */
@@ -1135,6 +1147,9 @@
         conSel[clave][i] = t;
         /* sin huecos: los nulos que queden se quitan */
         conSel[clave] = conSel[clave].filter(function (x) { return !!x; });
+        /* elegidos los campeones, el resto se reparte solo */
+        if (conComp && conComp.temporada && cuantosCampeonesFaltan() === 0 &&
+            !hayCuposPuestos()) conPorDefecto();
         conPintaCupos(); conHint();
       }
     });
@@ -1143,8 +1158,15 @@
   /* Los cupos al azar: en vez de los mejores de cada liga, cualquiera, sin
      repetir a nadie. Para jugar una temporada rara sin ir plaza por plaza. */
   function conAlAzar() {
-    conSel = {};
-    var usados = {};
+    /* los campeones vigentes elegidos a mano no se tocan */
+    var guarda = {}, usados = {};
+    (conCupos || []).forEach(function (q) {
+      if (!q.campeones || !conComp || !conComp.temporada) return;
+      var v = conSel[claveQ(q)] || [];
+      guarda[claveQ(q)] = v;
+      v.forEach(function (t) { if (t) usados[t.leagueId + '|' + t.n] = 1; });
+    });
+    conSel = guarda;
     /* primero las plazas de liga, que son las que mandan */
     (conCupos || []).forEach(function (q) {
       if (q.campeones || q.caidos || q.zona || !q.lid) return;
@@ -1217,7 +1239,10 @@
        sus cupos por su cuenta según le toca */
     if (conComp.temporada) {
       conCupos = cuposTemporada(conComp);
-      if (conCupos) conPorDefecto(); else conSel = {};
+      /* Nada de rellenar todavía: primero los campeones vigentes. Si se
+         reparte el resto antes, al buscar un campeón salen todos los clubes
+         ocupados y no se puede elegir ninguno. */
+      conSel = {};
       $('#conFmt').classList.add('hidden'); $('#conFmtLbl').classList.add('hidden');
       $('#conCupos').classList.toggle('hidden', !conCupos);
       $('#conVerCupos').classList.add('hidden');
@@ -1588,6 +1613,12 @@
     if (!f) return '';
     return '<img class="clogo" src="' + f + '" alt="" height="' + (h || 22) +
       '" onerror="this.remove()">';
+  }
+  /* ¿se ha repartido ya algo que no sean los campeones? */
+  function hayCuposPuestos() {
+    return (conCupos || []).some(function (q) {
+      return !q.campeones && (conSel[claveQ(q)] || []).length;
+    });
   }
   function cuantosCampeonesFaltan() {
     var n = 0;
