@@ -173,7 +173,11 @@
               '>Simular hasta el final</button>') +
         '</div>';
       if (bar.querySelector('#tbJor')) bar.querySelector('#tbJor').onclick = function () { jornada(); };
-      if (bar.querySelector('#tbTodo')) bar.querySelector('#tbTodo').onclick = function () { todo(); };
+      if (bar.querySelector('#tbTodo')) bar.querySelector('#tbTodo').onclick = function () {
+        var n = bar.querySelector('.tb-now small');
+        if (n) n.innerHTML = '<span class="qnext-puntos"><i></i><i></i><i></i></span>';
+        setTimeout(todo, 420);
+      };
     }
     function repinta() {
       comps.forEach(function (c) { if (c.mando) c.mando.repaint(); });

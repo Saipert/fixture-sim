@@ -563,8 +563,36 @@
         paint();
       }, 750);
     };
-    el.round.onclick = function () { if (busy) return; cerrarVivo(); stepRound(R); paint(); };
-    el.all.onclick = function () { if (busy) return; cerrarVivo(); stepAll(R); paint(); };
+    /* Los resultados no caen de golpe: la jornada se va jugando, y lo que
+       tarda en pensárselo se enseña con los tres puntos de siempre. */
+    function puntos(on) {
+      el.next.innerHTML = on
+        ? '<span class="qnext-puntos"><i></i><i></i><i></i></span>' : el.next.innerHTML;
+    }
+    el.round.onclick = function () {
+      if (busy) return;
+      cerrarVivo();
+      busy = true; paint(); puntos(true);
+      var label = R.label, tanda = null, primero = peek(R);
+      if (primero && esLeg(primero.note)) tanda = primero.note;
+      function uno() {
+        var sig = peek(R);
+        var sigue = !R.done && R.label === label && sig &&
+          !(tanda && esLeg(sig.note) && sig.note !== tanda);
+        if (!sigue) { busy = false; paint(); return; }
+        step(R);
+        paint();
+        if (!R.done && R.label === label) puntos(true);
+        setTimeout(uno, 95);
+      }
+      setTimeout(uno, 260);
+    };
+    el.all.onclick = function () {
+      if (busy) return;
+      cerrarVivo();
+      busy = true; paint(); puntos(true);
+      setTimeout(function () { stepAll(R); busy = false; paint(); }, 420);
+    };
     el.live.onclick = function () {
       var m = peek(R);
       if (!m || busy) return;
