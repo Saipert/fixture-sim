@@ -1891,19 +1891,25 @@ body.conclub{scrollbar-color:var(--club-scroll,var(--line)) rgba(255,255,255,.04
 .tb-now b{font-size:15px}
 .tb-now small{color:var(--dim);font-size:12px}
 .tb-btns{display:flex;gap:8px;flex-wrap:wrap}
-.tempboard{display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));
-  gap:12px;align-items:start;margin-top:12px}
-.tb-comp{background:var(--bg2);border:1px solid var(--line);border-radius:12px;
-  overflow:hidden;min-width:0}
-.tb-tit{margin:0;padding:9px 13px;font-size:12px;text-transform:uppercase;
-  letter-spacing:1.1px;color:var(--dim);border-bottom:1px solid var(--line);
-  display:flex;justify-content:space-between;align-items:center;gap:8px}
-.tb-tit small{text-transform:none;letter-spacing:0;font-size:11px;color:var(--acc2);
-  text-align:right;min-width:0}
-.tb-cuerpo{padding:9px;min-width:0}
-/* cada torneo se deja llevar por la barra de arriba */
-.tempboard .rn-btns{display:none}
+/* una pestaña por competición y sólo una a la vista */
+.tb-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0 10px}
+.tb-tab{display:flex;flex-direction:column;align-items:flex-start;gap:1px;
+  background:var(--bg2);border:1px solid var(--line);border-radius:9px;
+  padding:6px 12px;color:var(--dim);text-align:left;line-height:1.25;min-width:0}
+.tb-tab b{font-size:12.5px;color:var(--txt);font-weight:500}
+.tb-tab small{font-size:10.5px;color:var(--dim)}
+.tb-tab:hover{border-color:var(--acc2)}
+.tb-tab.on{border-color:var(--acc);background:var(--card);box-shadow:inset 0 -2px 0 var(--acc)}
+.tb-tab.avisa small{color:var(--warn,#f3b424);font-weight:600}
+.tb-tab.avisa::after{content:'';position:absolute}
+.tb-panel{min-width:0}
+.tb-comp{min-width:0}
+.tb-cuerpo{min-width:0}
+/* la jornada la marca la barra de arriba: aquí sólo se juega partido a
+   partido, que es lo que no desincroniza el calendario */
+.tb-panel .rn-btns [data-r="round"],
+.tb-panel .rn-btns [data-r="all"]{display:none}
 @media (max-width:760px){
-  .tempboard{grid-template-columns:1fr}
   .tb-bar{position:static}
+  .tb-tab{flex:1 1 44%}
 }

@@ -1128,6 +1128,50 @@
     });
   };
   $('#conReset').onclick = function () { conPorDefecto(); conPintaCupos(); conHint(); };
+  /* Los cupos al azar: en vez de los mejores de cada liga, cualquiera, sin
+     repetir a nadie. Para jugar una temporada rara sin ir plaza por plaza. */
+  function conAlAzar() {
+    conSel = {};
+    var usados = {};
+    /* primero las plazas de liga, que son las que mandan */
+    (conCupos || []).forEach(function (q) {
+      if (q.campeones || q.caidos || q.zona || !q.lid) return;
+      var libres = LG[q.lid].teams.filter(function (t) { return !usados[t.leagueId + '|' + t.n]; });
+      var tomados = [];
+      for (var i = 0; i < q.plazas && libres.length; i++) {
+        var j = Math.floor(Math.random() * libres.length);
+        usados[libres[j].leagueId + '|' + libres[j].n] = 1;
+        tomados.push(libres[j]);
+        libres.splice(j, 1);
+      }
+      conSel[claveQ(q)] = tomados;
+    });
+    /* y lo que no sale de una liga: zonas, campeones y caídos */
+    (conCupos || []).forEach(function (q) {
+      if (!q.campeones && !q.caidos && !q.zona) return;
+      var kq = q.comp ? compPack(q.comp) : conComp;
+      var cf = q.zona || ((kq || conComp) ? (kq || conComp).conf : null);
+      var pool = [];
+      COUNTRIES.forEach(function (c) {
+        if (cf && c.conf !== cf) return;
+        c.have.forEach(function (lid) {
+          LG[lid].teams.forEach(function (t) { if (!usados[t.leagueId + '|' + t.n]) pool.push(t); });
+        });
+      });
+      var tom = [];
+      for (var i = 0; i < q.plazas && pool.length; i++) {
+        var j = Math.floor(Math.random() * pool.length);
+        usados[pool[j].leagueId + '|' + pool[j].n] = 1;
+        tom.push(pool[j]);
+        pool.splice(j, 1);
+      }
+      conSel[claveQ(q)] = tom;
+    });
+  }
+  $('#conAzar').onclick = function () {
+    if (!conCupos) return;
+    conAlAzar(); conPaso = 0; conPintaCupos(); conHint();
+  };
 
   /* las competiciones sueltas y, al final, las temporadas completas */
   var CONLISTA = CONT.concat(PACKS.filter(function (k) {
@@ -1557,17 +1601,27 @@
       var kk = compPack(id);
       if (!kk) return null;
       var c = campoDe(id);
+      /* la Libertadores clasifica en una sola ronda y de ahí a los grupos:
+         sólo la Champions, la Europa y la Conference tienen play-off */
+      var real = cfgReal(kk);
       return { id: id, name: kk.name, k: kk, conf: kk.conf,
+        playoff: !!(real && real.playoff),
         pre: c.pre, po: c.po, grupos: c.grupos };
     }).filter(Boolean);
     /* Quién hereda a los que caen. Son los mismos cupos de siempre: de la
        previa de la Champions al play-off de la Europa, del play-off de la
        Champions a sus grupos, y del play-off de la Europa a los grupos de
        la Conference. */
+    /* Y los terceros de grupo bajan a jugarse el pase con los segundos de
+       la de abajo, que es el cruce de siempre: terceros de Champions
+       contra segundos de Europa, terceros de Europa contra segundos de la
+       Conference, y terceros de la Libertadores contra segundos de la
+       Sudamericana. */
     var CASCADA = {
-      ucl:  { previa: { a: 'uel', fase: 'po' }, playoff: { a: 'uel', fase: 'grupos' } },
-      uel:  { playoff: { a: 'conf', fase: 'grupos' } },
-      lib:  { previa: { a: 'sud', fase: 'grupos' } }
+      ucl:  { previa: { a: 'uel', fase: 'po' }, playoff: { a: 'uel', fase: 'grupos' },
+              terceros: 'uel' },
+      uel:  { playoff: { a: 'conf', fase: 'grupos' }, terceros: 'conf' },
+      lib:  { previa: { a: 'sud', fase: 'grupos' }, terceros: 'sud' }
     };
     /* cuántos le caen a cada una en el play-off: hace falta para saber si
        esa fase existe y cuadrar el calendario */

@@ -31,11 +31,14 @@
   function jornadasDe(c) {
     var j = 0;
     var hereda = c.hereda || 0;        /* los que le caen de otra competición */
-    if ((c.pre || []).length >= 2) j += 2;
-    if ((c.po || []).length + hereda >= 2) j += 2;
-    var enGrupos = (c.grupos || []).length +
-      (((c.po || []).length + hereda) ? Math.floor(((c.po || []).length + hereda) / 2) : 0) +
-      ((c.pre || []).length ? Math.floor(c.pre.length / 4) : 0);
+    var hayPrevia = (c.pre || []).length >= 2;
+    var trasPrevia = hayPrevia ? Math.floor(c.pre.length / 2) : 0;
+    if (hayPrevia) j += 2;
+    /* los de la previa sólo juegan otra ronda si la competición la tiene */
+    var enPlayoff = (c.po || []).length + hereda + (c.playoff ? trasPrevia : 0);
+    if (enPlayoff >= 2) j += 2;
+    var enGrupos = (c.grupos || []).length + Math.floor(enPlayoff / 2) +
+      (c.playoff ? 0 : trasPrevia);
     if (c.k.groupSize) {
       j += 6;                                   /* grupos de cuatro, ida y vuelta */
       j += rondasKO(Math.max(2, enGrupos / 2)) * 2;
@@ -51,26 +54,65 @@
     var fase = 'previa';
     var tic = 0;
 
-    /* las que menos jornadas tienen entran más tarde */
-    var maxJ = 0;
-    comps.forEach(function (c) { c.jornadas = jornadasDe(c); if (c.jornadas > maxJ) maxJ = c.jornadas; });
-    comps.forEach(function (c) { c.espera = maxJ - c.jornadas; });
+    /* Las finales se alinean solas: cada jornada se mira cuántas le quedan
+       a cada una y juegan las que van más atrasadas. Con una cuenta hecha
+       de antemano siempre se escapaba alguna por una ronda. */
+    comps.forEach(function (c) { c.espera = 0; });
+    function restan(c) {
+      var R = c.R;
+      if (!R || R.done) return 0;
+      if (R.unaRonda) return Math.max(1, R.pending.length ? 2 : 1);
+      if (R.groups && R.phase !== 'ko') {
+        var total = R.groups[0].rounds.length;
+        var quedanGrupos = Math.max(0, total - R.gi - 1);
+        var enKO = (R.q && R.q.qualified ? R.q.qualified.length : R.groups.length * 2) +
+          ((R.cfgExtras || 0));
+        return quedanGrupos + rondasKO(enKO) * 2;
+      }
+      if (R.cur) return rondasKO(R.cur.length) * 2;
+      return 1;
+    }
 
+    /* Una pestaña por competición y una sola a la vista: con todas en
+       columna, la que se estaba sorteando se comía la pantalla y las demás
+       quedaban en blanco. */
     caja.innerHTML = '<div class="card tb-bar" id="tbBar"></div>' +
-      '<div class="tempboard" id="tbCajas"></div>';
+      '<div class="tb-tabs" id="tbTabs"></div>' +
+      '<div class="tb-panel" id="tbCajas"></div>';
     var cajas = caja.querySelector('#tbCajas');
+    var activa = comps.length ? comps[0].id : null;
     comps.forEach(function (c) {
       var d = document.createElement('div');
       d.className = 'tb-comp';
-      d.innerHTML = '<h3 class="tb-tit">' + esc(c.name) + '<small></small></h3><div class="tb-cuerpo"></div>';
+      d.innerHTML = '<div class="tb-cuerpo"></div>';
       cajas.appendChild(d);
+      c.panel = d;
       c.caja = d.querySelector('.tb-cuerpo');
-      c.rotulo = d.querySelector('.tb-tit small');
     });
+    function enseña(id) { activa = id; pintaTabs(); }
+    function estadoDe(c) {
+      return !c.R ? 'por sortear'
+        : c.R.esperaKO ? 'hay sorteo'
+        : c.R.done ? (c.R.champion ? '🏆 ' + c.R.champion.n : 'terminada')
+        : c.R.label;
+    }
+    function pintaTabs() {
+      var tabs = caja.querySelector('#tbTabs');
+      tabs.innerHTML = comps.map(function (c) {
+        var avisa = (c.R && c.R.esperaKO) || (!c.R && fase !== 'fin');
+        return '<button class="tb-tab' + (c.id === activa ? ' on' : '') +
+          (avisa ? ' avisa' : '') + '" data-c="' + esc(c.id) + '">' +
+          '<b>' + esc(c.name) + '</b><small>' + esc(estadoDe(c)) + '</small></button>';
+      }).join('');
+      Array.prototype.forEach.call(tabs.querySelectorAll('[data-c]'), function (b) {
+        b.onclick = function () { enseña(b.dataset.c); };
+      });
+      comps.forEach(function (c) { c.panel.classList.toggle('hidden', c.id !== activa); });
+    }
 
     /* ---------------- la barra de mando ---------------- */
     function vivos() {
-      return comps.filter(function (c) { return c.R && !c.R.done && !c.R.esperaKO && !c.espera; });
+      return comps.filter(function (c) { return c.R && !c.R.done && !c.R.esperaKO; });
     }
     function conSorteo() { return comps.filter(function (c) { return c.R && c.R.esperaKO; }); }
     function pintaBarra() {
@@ -89,23 +131,63 @@
       if (bar.querySelector('#tbJor')) bar.querySelector('#tbJor').onclick = function () { jornada(); };
       if (bar.querySelector('#tbTodo')) bar.querySelector('#tbTodo').onclick = function () { todo(); };
     }
-    function pintaRotulos() {
-      comps.forEach(function (c) {
-        var t = c.espera ? 'entra en ' + c.espera + ' jornada' + (c.espera === 1 ? '' : 's')
-          : !c.R ? 'esperando el sorteo'
-          : c.R.esperaKO ? 'hay que sortear'
-          : c.R.done ? (c.R.champion ? '🏆 ' + c.R.champion.n : 'terminada')
-          : c.R.label;
-        c.rotulo.textContent = t;
-      });
+    function repinta() {
+      comps.forEach(function (c) { if (c.mando) c.mando.repaint(); });
+      /* si la pestaña abierta no tiene nada pendiente y otra está esperando
+         un sorteo, se salta sola: con dos a la vez se quedaba uno escondido
+         y la barra decía «faltan sorteos» sin enseñar cuál */
+      var yo = comps.filter(function (c) { return c.id === activa; })[0];
+      if (!yo || !yo.R || !yo.R.esperaKO) {
+        var pide = conSorteo()[0];
+        if (pide) activa = pide.id;
+      }
+      pintaTabs(); pintaBarra();
     }
-    function repinta() { comps.forEach(function (c) { if (c.mando) c.mando.repaint(); }); pintaRotulos(); pintaBarra(); }
 
     /* ---------------- una jornada de todas a la vez ---------------- */
+    /* Los terceros de grupo de una competición se van a jugar el pase con
+       los segundos de la de abajo. Hay que dárselos antes de que la de
+       abajo cierre sus grupos, y como todas las cierran la misma jornada,
+       las de arriba juegan primero. */
+    function bajaTerceros(c) {
+      var destino = ((cfg.cascada || {})[c.id] || {}).terceros;
+      if (!destino || c.tercerosHechos || !c.R || !c.R.groups) return;
+      if (!c.R.esperaKO && c.R.phase !== 'ko') return;
+      var otro = porId(destino);
+      if (!otro || !otro.cfgT) { c.tercerosHechos = true; return; }
+      var terceros = [];
+      c.R.groups.forEach(function (g) {
+        if (g.standings && g.standings[2]) terceros.push(g.standings[2].t);
+      });
+      otro.cfgT.extraKO = terceros;
+      if (otro.R) otro.R.cfgExtras = terceros.length;
+      c.tercerosHechos = true;
+    }
+    function ordenDePaso() {
+      /* las que alimentan a otra, delante */
+      var manda = {};
+      Object.keys(cfg.cascada || {}).forEach(function (id) {
+        var t = cfg.cascada[id].terceros;
+        if (t) manda[t] = (manda[t] || 0) + 1;
+      });
+      return comps.slice().sort(function (a, b) { return (manda[a.id] || 0) - (manda[b.id] || 0); });
+    }
     function jornada() {
       if (conSorteo().length) return;
-      comps.forEach(function (c) { if (c.espera) c.espera--; });
-      vivos().forEach(function (c) { Runner.stepRound(c.R); });
+      var listas = ordenDePaso().filter(function (c) {
+        return c.R && !c.R.done && !c.R.esperaKO;
+      });
+      /* en el cuadro final sólo juegan las que van más atrasadas, para que
+         todas lleguen a su final la misma jornada */
+      if (fase === 'torneo' && listas.length > 1) {
+        var tope = 0;
+        listas.forEach(function (c) { var r = restan(c); if (r > tope) tope = r; });
+        listas = listas.filter(function (c) { return restan(c) >= tope; });
+      }
+      listas.forEach(function (c) {
+        Runner.stepRound(c.R);
+        bajaTerceros(c);
+      });
       tic++;
       repinta();
       revisaFase();
@@ -139,6 +221,7 @@
             name: c.name + ' · ronda previa', legs: 2, unaRonda: true, ordenFijo: true,
             byesFijos: byes.length ? byes : null
           });
+          c.R.unaRonda = true;
           c.mando = Runner.mount(c.caja, c.R);
           sigue();
         });
@@ -158,7 +241,9 @@
     function recogePrevia() {
       comps.forEach(function (c) {
         if (!c.R) return;
-        c.po = (c.po || []).concat(c.R.ganadores || []);
+        /* quien no tiene play-off pasa de la previa directo a los grupos */
+        var donde = c.playoff ? 'po' : 'grupos';
+        c[donde] = (c[donde] || []).concat(c.R.ganadores || []);
         reparteCaidos(c, c.R.perdedores || [], 'previa');
         c.R = null; c.mando = null; c.caja.innerHTML = '';
       });
@@ -175,6 +260,7 @@
             name: c.name + ' · play-off', legs: 2, unaRonda: true, ordenFijo: true,
             byesFijos: byes.length ? byes : null
           });
+          c.R.unaRonda = true;
           c.mando = Runner.mount(c.caja, c.R);
           sigue();
         });
@@ -199,17 +285,23 @@
         if (campo.length < 4) { sigue(); return; }
         var st = Comp.structureFor(campo.length, c.k.groupSize);
         if (!st.ok || st.mode !== 'groups') { montaSoloCuadro(c, campo, sigue); return; }
+        enseña(c.id);
         Sorteo.grupos(c.caja, {
           campo: campo, nGrupos: st.groups, azar: false,
           titulo: 'Sorteo de la fase de grupos',
           sub: c.name + ' · ' + campo.length + ' equipos en ' + st.groups + ' grupos de ' + st.groupSize,
           boton: 'Listo',
           onListo: function (gs) {
-            c.R = Runner.tournament(campo, {
+            /* el cfg se guarda: cuando la competición de arriba acabe sus
+               grupos, sus terceros se meten aquí como «extraKO», que es lo
+               que mira el motor al montar las eliminatorias */
+            c.cfgT = {
               name: c.name, groupSize: c.k.groupSize, groups: gs,
               neutral: true, legs: 2, groupDouble: true,
+              nombrePrimera: 'Play-off de octavos',
               antesDelKO: function (R2) { sorteoKO(c, R2); }
-            });
+            };
+            c.R = Runner.tournament(campo, c.cfgT);
             c.mando = Runner.mount(c.caja, c.R);
             sigue();
           }
@@ -246,6 +338,7 @@
       }
       var cajita = document.createElement('div');
       c.caja.insertBefore(cajita, c.caja.firstChild);
+      enseña(c.id);
       Sorteo.cruces(cajita, {
         bombos: [b1, b2], nombres: nombres, esperan: byes, choca: cfg.choca || null,
         titulo: 'Sorteo de las eliminatorias',
@@ -264,6 +357,7 @@
     /* el sorteo de una ronda suelta: juegan todos, y si son impares el
        mejor pasa de oficio */
     function sorteoRonda(c, equipos, titulo, listo) {
+      enseña(c.id);
       var juegan = equipos.slice(), byes = [];
       if (juegan.length % 2) {
         var mejor = juegan.slice().sort(function (a, b) { return (b.ovr || 0) - (a.ovr || 0); })[0];
@@ -363,9 +457,10 @@
       sigue();
     }
 
+
     sorteaPrevia();
     pintaBarra();
-    pintaRotulos();
+    pintaTabs();
     return { campeones: function () { return campeones; } };
   }
 
