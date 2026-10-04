@@ -93,24 +93,26 @@
     /* Lo que viene después de la temporada también es una pestaña: antes
        se colgaba debajo de todas las columnas y había que bajar media
        pantalla para verlo. */
-    var extrasTabs = [];
     function apartado(id, nombre) {
       var d = document.createElement('div');
       d.className = 'tb-comp';
       d.innerHTML = '<div class="tb-cuerpo"></div>';
       cajas.appendChild(d);
       var x = { id: id, name: nombre, panel: d, caja: d.querySelector('.tb-cuerpo'), extra: true };
-      extrasTabs.push(x);
+      /* va a la misma lista que las demás: estando en dos a la vez, su
+         pestaña salía duplicada */
+      comps.push(x);
       return x;
     }
-    function todasLasTabs() { return comps.concat(extrasTabs); }
+    function todasLasTabs() { return comps; }
     function enseña(id) { activa = id; pintaTabs(); }
     function estadoDe(c) {
-      if (c.extra) return campeones[c.id] ? '🏆 ' + campeones[c.id].n : (c.estado || 'en juego');
+      if (c.extra && !c.R) return c.estado || 'en juego';
       return !c.R ? 'por sortear'
         : c.sorteoAbierto ? 'hay sorteo'
         : c.colaKO ? 'espera a los grupos'
-        : c.R.done ? (c.R.champion ? '🏆 ' + c.R.champion.n : 'terminada')
+        : c.R.done ? (c.R.champion ? '🏆 ' + c.R.champion.n
+            : campeones[c.id] ? '🏆 ' + campeones[c.id].n : 'terminada')
         : c.R.label;
     }
     function pintaTabs() {
@@ -249,6 +251,8 @@
        más de un segundo. */
     var VELOCIDAD = 110;
     var corriendo = false;
+    /* cada tramo del final se monta una sola vez */
+    var hecho = {};
     function jornada(alAcabar) {
       if (corriendo || conSorteo().length) { if (alAcabar) alAcabar(); return; }
       var listas = lasDeHoy();
@@ -301,7 +305,13 @@
     function revisaFase() {
       if (fase === 'previa' && todasListas()) { recogePrevia(); sorteaPlayoff(); return; }
       if (fase === 'playoff' && todasListas()) { recogePlayoff(); sorteaGrupos(); return; }
-      if (fase === 'torneo' && todasListas()) { guardaCampeones(); extras(); return; }
+      if (fase === 'torneo' && todasListas() && !hecho.extras) {
+        hecho.extras = true; guardaCampeones(); extras(); return;
+      }
+      if (fase === 'extras' && todasListas() && !hecho.cwc) {
+        hecho.cwc = true; mundialDeClubes(); return;
+      }
+      if (fase === 'cwc' && todasListas() && !hecho.fin) { hecho.fin = true; fin(); return; }
     }
 
     /* ---------------- 1 · la ronda previa ---------------- */
@@ -500,31 +510,36 @@
     function guardaCampeones() {
       comps.forEach(function (c) { campeones[c.id] = c.R ? c.R.champion : null; });
     }
+    /* La Supercopa y la Recopa se juegan como todo lo demás: entran en el
+       tablero con su pestaña y se avanzan con la barra. Antes se jugaban
+       solas nada más aparecer y no había nada que simular. */
     function extras() {
       fase = 'extras';
-      var cola = (cfg.supercopas || []).slice();
-      unoAUno(cola, function (sc, sigue) {
+      var hechas = 0;
+      (cfg.supercopas || []).forEach(function (sc) {
         var a = campeones[sc.de[0]], b = campeones[sc.de[1]];
-        if (!a || !b) { sigue(); return; }
+        if (!a || !b) return;
         var x = apartado(sc.id, sc.nombre);
-        enseña(x.id);
-        var R = Runner.knockout([a, b], {
+        x.R = Runner.knockout([a, b], {
           name: sc.nombre, legs: sc.legs, unaRonda: true, ordenFijo: true,
           neutral: sc.legs === 1
         });
-        var m = Runner.mount(x.caja, R);
-        R.alTerminar = function (fin) {
-          campeones[sc.id] = (fin.ganadores || [])[0] || null;
-          m.repaint(); pintaTabs();
-          sigue();
+        x.R.unaRonda = true;
+        x.R.alTerminar = function (f2) {
+          campeones[sc.id] = (f2.ganadores || [])[0] || null;
+          repinta();
         };
-        Runner.stepAll(R);
-      }, function () { mundialDeClubes(); });
+        x.mando = Runner.mount(x.caja, x.R);
+        if (!hechas++) enseña(x.id);
+      });
+      if (!hechas) { mundialDeClubes(); return; }
+      repinta();
     }
     function mundialDeClubes() {
       if (!cfg.cwc) { fin(); return; }
       var plazas = cfg.cwc.plazas, puestos = {}, ocho = [];
       comps.forEach(function (c) {
+        if (c.extra) return;          /* la Supercopa y la Recopa no dan plaza */
         var t = campeones[c.id];
         if (!t) return;
         var z = c.conf || (cfg.cwc.confDe ? cfg.cwc.confDe(t) : '');
@@ -545,13 +560,15 @@
         sub: cfg.cwc.nombre + ' · ' + ocho.length + ' equipos en ' + st.groups + ' grupos de ' + st.groupSize,
         boton: 'Listo',
         onListo: function (gs) {
-          var R = Runner.tournament(ocho, {
+          x.R = Runner.tournament(ocho, {
             name: cfg.cwc.nombre, groupSize: 4, groups: gs,
-            neutral: true, legs: 1, groupDouble: false, tercerPuesto: true
+            neutral: true, legs: 1, groupDouble: false, tercerPuesto: true,
+            antesDelKO: function (R2) { sorteoKO(x, R2); }
           });
-          var m = Runner.mount(d, R);
-          R.alTerminar = function (f2) { campeones.cwc = f2.champion || null; m.repaint(); fin(); };
-          Runner.stepAll(R);
+          x.R.alTerminar = function (f2) { campeones.cwc = f2.champion || null; repinta(); };
+          x.mando = Runner.mount(d, x.R);
+          fase = 'cwc';
+          repinta();
         }
       });
     }
