@@ -108,14 +108,15 @@
     function estadoDe(c) {
       if (c.extra) return campeones[c.id] ? '🏆 ' + campeones[c.id].n : (c.estado || 'en juego');
       return !c.R ? 'por sortear'
-        : c.R.esperaKO ? 'hay sorteo'
+        : c.sorteoAbierto ? 'hay sorteo'
+        : c.colaKO ? 'espera a los grupos'
         : c.R.done ? (c.R.champion ? '🏆 ' + c.R.champion.n : 'terminada')
         : c.R.label;
     }
     function pintaTabs() {
       var tabs = caja.querySelector('#tbTabs');
       tabs.innerHTML = todasLasTabs().map(function (c) {
-        var avisa = (c.R && c.R.esperaKO) || (!c.R && fase !== 'fin');
+        var avisa = c.sorteoAbierto || (!c.R && fase !== 'fin');
         return '<button class="tb-tab' + (c.id === activa ? ' on' : '') +
           (avisa ? ' avisa' : '') + '" data-c="' + esc(c.id) + '">' +
           (c.logo || '') +
@@ -144,7 +145,18 @@
     function vivos() {
       return comps.filter(function (c) { return c.R && !c.R.done && !c.R.esperaKO; });
     }
-    function conSorteo() { return comps.filter(function (c) { return c.R && c.R.esperaKO; }); }
+    /* Sólo cuenta como «hay sorteo» el que está abierto de verdad. Los que
+       esperan su turno no bloquean el botón: los demás todavía tienen
+       grupos que jugar. */
+    function conSorteo() { return comps.filter(function (c) { return c.sorteoAbierto; }); }
+    /* Nadie juega una eliminatoria mientras quede una fase de grupos por
+       terminar, y hasta entonces tampoco se sortea. */
+    function enGrupos(c) {
+      return c.R && !c.R.done && c.R.groups && c.R.phase !== 'ko' &&
+        !c.R.esperaKO && !c.colaKO;
+    }
+    function quedanGrupos() { return comps.some(enGrupos); }
+    function enCuadro(c) { return c.R && (c.R.phase === 'ko' || !c.R.groups); }
     function pintaBarra() {
       var bar = caja.querySelector('#tbBar');
       var falta = conSorteo();
@@ -169,7 +181,7 @@
          un sorteo, se salta sola: con dos a la vez se quedaba uno escondido
          y la barra decía «faltan sorteos» sin enseñar cuál */
       var yo = comps.filter(function (c) { return c.id === activa; })[0];
-      if (!yo || !yo.R || !yo.R.esperaKO) {
+      if (!yo || !yo.sorteoAbierto) {
         var pide = conSorteo()[0];
         if (pide) activa = pide.id;
       }
@@ -207,8 +219,10 @@
     /* las que juegan esta jornada */
     function lasDeHoy() {
       var listas = ordenDePaso().filter(function (c) {
-        return c.R && !c.R.done && !c.R.esperaKO;
+        return c.R && !c.R.done && !c.R.esperaKO && !c.colaKO;
       });
+      /* si alguien sigue en grupos, las eliminatorias esperan */
+      if (quedanGrupos()) listas = listas.filter(function (c) { return !enCuadro(c); });
       /* en el cuadro final sólo juegan las que van más atrasadas, para que
          todas lleguen a su final la misma jornada */
       if (fase === 'torneo' && listas.length > 1) {
@@ -223,6 +237,7 @@
       tic++;
       corriendo = false;
       repinta();
+      miraSorteos();
       revisaFase();
     }
     /* Los partidos no salen de golpe: van cayendo uno a uno, como en la
@@ -250,6 +265,9 @@
           var m = Runner.peek(c.R);
           if (!m || (m.note || '') !== h.tanda) return;
           Runner.step(c.R);
+          /* en cuanto cierra sus grupos, sus terceros bajan: la de abajo
+             monta su cuadro en este mismo paso y los necesita ya */
+          bajaTerceros(c);
           algo = true;
         });
         comps.forEach(function (c) { if (c.mando) c.mando.repaint(); });
@@ -266,7 +284,7 @@
         var listas = lasDeHoy();
         if (!listas.length) { cierraJornada(listas); continue; }
         var antes = tic;
-        listas.forEach(function (c) { Runner.stepRound(c.R); });
+        listas.forEach(function (c) { Runner.stepRound(c.R); bajaTerceros(c); });
         cierraJornada(listas);
         if (tic === antes) break;
       }
@@ -401,8 +419,26 @@
 
     /* el sorteo de cada eliminatoria, ronda a ronda */
     function sorteoKO(c, R) {
+      if (!R.esperaKO) return;
+      c.colaKO = R;
+      miraSorteos();
+    }
+    /* los sorteos encolados se abren de uno en uno, y sólo cuando no queda
+       ninguna fase de grupos en marcha */
+    function miraSorteos() {
+      if (quedanGrupos()) { pintaTabs(); pintaBarra(); return; }
+      /* de uno en uno: con dos bombos abiertos a la vez no se sabe cuál
+         se está sorteando */
+      if (comps.some(function (c) { return c.sorteoAbierto; })) return;
+      var cola = comps.filter(function (c) { return c.colaKO && !c.sorteoAbierto; });
+      if (!cola.length) return;
+      var c = cola[0];
+      c.sorteoAbierto = true;
+      abreSorteoKO(c, c.colaKO);
+    }
+    function abreSorteoKO(c, R) {
       var e = R.esperaKO;
-      if (!e) return;
+      if (!e) { c.colaKO = null; c.sorteoAbierto = false; miraSorteos(); return; }
       var byes = (e.byes || []).slice();
       var juegan = e.campo.filter(function (t) { return byes.indexOf(t) < 0; });
       var b1, b2, nombres;
@@ -425,8 +461,10 @@
         onListo: function (campo, esperan) {
           cajita.remove();
           R.seguirKO(campo, esperan, true);
+          c.colaKO = null; c.sorteoAbierto = false;
           if (c.mando) c.mando.repaint();
           repinta();
+          miraSorteos();
         }
       });
       pintaBarra();
