@@ -471,8 +471,13 @@
           ? '🏆 Campeón: <b>' + esc(R.champion ? R.champion.n : '—') + '</b>' : '');
       ['one', 'live', 'round', 'all'].forEach(function (k) { el[k].disabled = R.done || busy || !nx; });
 
-      var lg = R.log.length ? R.log : (R.prevLog || []);
-      var lgName = R.log.length ? R.label : (R.prevLabel || R.label || '');
+      /* Al empezar una ronda, el panel se quedaba con los resultados de la
+         anterior y debajo los cruces nuevos, así que los mismos equipos
+         salían dos veces y la cabecera decía la ronda vieja. Si la ronda
+         nueva ya tiene partidos por jugar, lo de antes no pinta nada. */
+      var nueva = !R.log.length && !!nx;
+      var lg = R.log.length ? R.log : (nueva ? [] : (R.prevLog || []));
+      var lgName = (R.log.length || nueva) ? R.label : (R.prevLabel || '');
       /* La ida y la vuelta se juegan dentro de la misma ronda, pero son dos
          jornadas distintas: manda la que toca ahora. Al acabar la ida, lo
          que se enseña es la vuelta por jugar, no las dos listas juntas. */
