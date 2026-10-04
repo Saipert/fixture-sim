@@ -1559,11 +1559,23 @@
         if (st2.cups[k].name === nx.comp) cup = st2.cups[k];
       });
       if (!cup) return null;
+      /* Nada por delante de lo que tengo pendiente. Si me falta jugar una
+         ronda, el panel se queda en ella: enseñar el sorteo de la
+         siguiente ya contaba que la había pasado. */
+      var esp = esperaCopa(cup.name);
+      var rondas = cup.rounds || [];
+      if (esp != null) {
+        var corte = rondas.length;
+        rondas.forEach(function (x, i) {
+          if (corte === rondas.length && mismaRonda(x.name, esp)) corte = i;
+        });
+        rondas = rondas.slice(0, corte + 1);
+      }
       var rc = null;
-      (cup.rounds || []).forEach(function (x) {
+      rondas.forEach(function (x) {
         if (x.ties.some(function (t) { return t.a === me || t.b === me; })) rc = x;
       });
-      var prox = proximaCopa(cup);
+      var prox = esp == null ? proximaCopa(cup) : null;
       if (prox && prox.ties.some(function (t) { return t.a === me || t.b === me; })) {
         rc = { name: prox.name, ties: prox.ties };
       }
@@ -1583,7 +1595,13 @@
     }
     var r = rondaEnCurso(nx);
     if (r) {
-      var ciego = compEnEspera(r.sub) || compEnEspera(nx && nx.comp);
+      /* La ronda que me toca jugar nunca sale con marcadores. Mirar la cola
+         no basta: entre partido y partido está vacía, y el mundo ya ha
+         jugado la ronda entera, así que el cuadro cantaba mi resultado
+         antes de que yo lo viera. */
+      var esLaMia = !!(nx && (nx.cmp === 'Copa' || nx.cmp === 'Cont.') &&
+        mismaRonda(r.sub, nx.comp) && mismaRonda(r.nombre, nx.round));
+      var ciego = esLaMia || compEnEspera(r.sub) || compEnEspera(nx && nx.comp);
       return '<div class="panel"><h3>' + esc(r.nombre) +
         ' <small>' + esc(r.sub) + ' · ' + r.ties.length + ' cruces' +
         (ciego ? ' · por jugar' : '') + '</small></h3>' +
@@ -4191,20 +4209,4 @@
   }
 
   /* lo que necesita la ficha de club para pintar el calendario de cualquier equipo */
-  window.Career = {
-    calendarFor: calendarFor,
-    myTeam: function () { return started ? me : null; },
-    started: function () { return started; },
-    /* al entrar en el modo carrera */
-    preparaMundo: function () {
-      if (!mundoOriginal) mundoOriginal = capturaMundo();
-      if (started && mundoCarrera) { aplicaMundo(mundoCarrera); mundoCarrera = null; }
-    },
-    /* al salir a cualquier otro modo */
-    sacaMundo: function () {
-      if (!started || !mundoOriginal) return;
-      mundoCarrera = capturaMundo();
-      aplicaMundo(mundoOriginal);
-    }
-  };
 })();
