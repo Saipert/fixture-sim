@@ -1147,9 +1147,10 @@
         conSel[clave][i] = t;
         /* sin huecos: los nulos que queden se quitan */
         conSel[clave] = conSel[clave].filter(function (x) { return !!x; });
-        /* elegidos los campeones, el resto se reparte solo */
-        if (conComp && conComp.temporada && cuantosCampeonesFaltan() === 0 &&
-            !hayCuposPuestos()) conPorDefecto();
+        /* Elegidos los campeones, el resto se reparte solo. En «elegir a
+           mano» no: ahí no se preselecciona nada, que es de lo que se trata. */
+        if (conModo !== 'manual' && conComp && conComp.temporada &&
+            cuantosCampeonesFaltan() === 0 && !hayCuposPuestos()) conPorDefecto();
         conPintaCupos(); conHint();
       }
     });
