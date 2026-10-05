@@ -22,7 +22,7 @@
     superCopas: [56, 58],          /* Supercopa de UEFA y Recopa: ida y vuelta */
     cwcDraw: 59,
     cwcGrupos: [61, 62, 63],
-    cwc: [64, 65],
+    cwc: [64, 65, 66],           /* cuartos, semifinales y final con el tercer puesto */
     total: 66
   };
   var KO_SLOTS = W.ko.length;
@@ -187,6 +187,7 @@
     opts = opts || {};
     state = {
       year: 2026, week: 0, total: W.total,
+      cwcHost: opts.cwcHost || null,
       manualDraw: !!opts.manualDraw, paused: false, pendingDraws: [], detailTeam: null, detailVisual: false,
       leagues: {}, cups: {}, conts: {}, draws: [],
       qualification: null, weekLog: [], seasonLog: [], history: [], dtPalmares: [], playoffs: {},
@@ -998,27 +999,28 @@
     var ci = W.cwc.indexOf(w);
     if (ci >= 0) {
       var c = C.cwc;
-      if (ci === 0 && c.groups && !c.koRounds.length) cwcSemis(c);
+      if (ci === 0 && c.groups && !c.koRounds.length) cwcCuartos(c);
       var round = c.koRounds[ci];
       if (round) {
+        /* el tercer puesto va siempre antes que la final, nunca después */
+        if (round.ties.length === 1 && c.tercerPuesto && !c.tercerPuesto.w) {
+          playLeg(c.tercerPuesto, 1, c.scorers, true, rep, c.name + ' · Tercer puesto');
+        }
         round.ties.forEach(function (t) { playLeg(t, 1, c.scorers, true, rep, c.name + ' · ' + round.name); });
         round.done = true;
         var winners = round.ties.map(function (t) { return t.w; });
         if (winners.length === 1) {
           c.champion = winners[0]; c.phase = 'terminado';
         } else {
+          c.koRounds.push({ name: winners.length === 2 ? 'Final' : 'Semifinales',
+            ties: unSolo(makeTies(winners)), single: true });
           /* de semifinales salen la final y el partido por el tercer puesto */
-          var pierden = round.ties.map(function (t) { return t.w === t.a ? t.b : t.a; });
-          c.koRounds.push({ name: 'Final', ties: makeTies(winners), single: true });
-          if (pierden.length === 2) {
+          if (winners.length === 2) {
+            var pierden = round.ties.map(function (t) { return t.w === t.a ? t.b : t.a; });
             c.tercerPuesto = { a: pierden[0], b: pierden[1], w: null };
           }
         }
         rep.conts.push({ id: 'cwc', name: c.name, phase: round.name, ties: round.ties.slice(), champion: c.champion });
-      }
-      /* el 3º y 4º se juega el mismo día que la final */
-      if (c.tercerPuesto && !c.tercerPuesto.w && c.koRounds.length > 1 && ci === W.cwc.length - 1) {
-        playLeg(c.tercerPuesto, 1, c.scorers, true, rep, c.name + ' · Tercer puesto');
       }
     }
   }
@@ -1041,17 +1043,16 @@
     rep.conts.push({ id: 'cwc', name: c.name, phase: 'Grupos · jornada ' + (gi + 1), ties: [], champion: null });
   }
 
-  /* cruces de semifinales: 1º de un grupo contra 2º del otro */
-  function cwcSemis(c) {
-    var A = c.groups[0].standings, B = c.groups[1].standings;
-    if (!A || !B || A.length < 2 || B.length < 2) return;
-    c.koRounds.push({
-      name: 'Semifinales', single: true, done: false,
-      ties: [
-        { a: A[0].t, b: B[1].t, w: null },
-        { a: B[0].t, b: A[1].t, w: null }
-      ]
-    });
+  /* en el Mundial de Clubes todo es a partido único */
+  function unSolo(ties) { ties.forEach(function (t) { t.single = true; }); return ties; }
+  /* los cuartos: cruces fijados de antemano, no hay sorteo */
+  function cwcCuartos(c) {
+    c.groups.forEach(function (g) { g.standings = Comp.sortTable(g.table); });
+    c.groups.forEach(function (g) { g.standings.forEach(function (row) { row.group = g.name; }); });
+    var q = Comp.qualifiers(c.groups, 2, 2);
+    var flat = CWC12.cuadro(c.groups, q);
+    if (flat.length < 8) return;
+    c.koRounds.push({ name: 'Cuartos de final', single: true, done: false, ties: unSolo(makeTies(flat)) });
     c.phase = 'eliminatorias';
   }
 
@@ -1254,48 +1255,76 @@
   }
 
   var CONF_CWC = {
-    ucl: 'UEFA', uel: 'UEFA', libertadores: 'CONMEBOL', sudamericana: 'CONMEBOL',
-    concachampions: 'CONCACAF', afccl: 'AFC', cafcl: 'CAF'
+    ucl: 'UEFA', uel: 'UEFA', conference: 'UEFA', libertadores: 'CONMEBOL',
+    sudamericana: 'CONMEBOL', concachampions: 'CONCACAF', afccl: 'AFC', cafcl: 'CAF'
   };
+  /* de qué competición sale el campeón de cada plaza del Mundial de Clubes */
+  var ROL_CWC = {
+    ucl: 'ucl', uel: 'uel', conference: 'conf', libertadores: 'lib',
+    sudamericana: 'sud', concachampions: 'ccc', afccl: 'acl', cafcl: 'cafcl'
+  };
+  function confDeClub(t) {
+    var lg = t && global.LEAGUES[t.leagueId];
+    if (global.Nac && Nac.confDeLiga) { var m = Nac.confDeLiga(t.leagueId); if (m) return m; }
+    var co = (global.COUNTRIES || []).filter(function (c) { return c.have && c.have.indexOf(t.leagueId) >= 0; })[0];
+    return co ? co.conf : (lg && lg.conf) || '';
+  }
+  /* el anfitrión: el que eligió quien juega, o uno al azar entre los clubes
+     de primera que aún no tienen plaza */
+  function anfitrionCWC(ocupados) {
+    var n = state.cwcHost;
+    if (n) {
+      var elegido = null;
+      Object.keys(global.LEAGUES).forEach(function (id) {
+        if (id === '__nations__' || elegido) return;
+        (global.LEAGUES[id].teams || []).forEach(function (t) {
+          if (!elegido && t.n === n.n && (!n.l || t.leagueId === n.l)) elegido = t;
+        });
+      });
+      if (elegido && !ocupados[elegido.leagueId + '|' + elegido.n]) return elegido;
+    }
+    var cand = [];
+    (global.COUNTRIES || []).forEach(function (c) {
+      if (!c.have || !c.have.length || !global.LEAGUES[c.have[0]]) return;
+      global.LEAGUES[c.have[0]].teams.forEach(function (t) {
+        if (!ocupados[t.leagueId + '|' + t.n]) cand.push(t);
+      });
+    });
+    return cand.length ? cand[Math.floor(Math.random() * cand.length)] : null;
+  }
   function setupCWC(rep) {
-    var champs = [];
-    ['ucl', 'uel', 'libertadores', 'sudamericana', 'concachampions', 'afccl', 'cafcl'].forEach(function (id) {
+    var porRol = {}, champs = [], ocupados = {};
+    function mete(rol, t, de) {
+      if (!t || ocupados[t.leagueId + '|' + t.n]) return;
+      porRol[rol] = t; ocupados[t.leagueId + '|' + t.n] = 1;
+      champs.push({ t: t, de: de });
+    }
+    Object.keys(ROL_CWC).forEach(function (id) {
       var c = state.conts[id];
-      if (c && c.champion) champs.push({ t: c.champion, conf: CONF_CWC[id], de: c.name });
+      if (c && c.champion) mete(ROL_CWC[id], c.champion, c.name);
     });
     // Oceanía: campeón de la liga "Resto de OFC"
     var ofcLg = state.leagues[global.CONT_COMPS.ofc.leagueChampion];
     if (ofcLg) {
       var rows = Comp.sortTable(ofcLg.table);
-      if (rows.length) {
-        state.ofcChampion = rows[0].t;
-        champs.push({ t: rows[0].t, conf: 'OFC', de: 'Oceanía' });
-      }
+      if (rows.length) { state.ofcChampion = rows[0].t; mete('ofc', rows[0].t, 'Oceanía'); }
     }
+    /* los subcampeones de la Champions y de la Libertadores */
+    if (state.conts.ucl) mete('uclSub', finalLoser(state.conts.ucl.koRounds), 'Subcampeón de ' + state.conts.ucl.name);
+    if (state.conts.libertadores) {
+      mete('libSub', finalLoser(state.conts.libertadores.koRounds), 'Subcampeón de ' + state.conts.libertadores.name);
+    }
+    var host = anfitrionCWC(ocupados);
+    if (host) mete('host', host, 'Anfitrión');
+
     var cwc = state.conts.cwc;
     cwc.pool = champs.map(function (x) { return x.t; });
     cwc.deDonde = {};
     champs.forEach(function (x) { cwc.deDonde[x.t.leagueId + '|' + x.t.n] = x.de; });
 
-    /* Dos grupos de cuatro y ni una confederación repetida dentro de un
-       grupo: con dos campeones de UEFA y dos de CONMEBOL sale justo. */
-    var ocho = champs.slice(0, 8);
-    if (ocho.length >= 4) {
-      var gs = [{ name: 'Grupo A', teams: [], confs: {} }, { name: 'Grupo B', teams: [], confs: {} }];
-      /* primero los que tienen compañía de su confederación, que son los que
-         obligan; después el resto */
-      var cuenta = {};
-      ocho.forEach(function (x) { cuenta[x.conf] = (cuenta[x.conf] || 0) + 1; });
-      var orden = ocho.slice().sort(function (a, b) {
-        return (cuenta[b.conf] - cuenta[a.conf]) || ((b.t.ovr || 0) - (a.t.ovr || 0));
-      });
-      orden.forEach(function (x) {
-        var sitio = gs.filter(function (g) { return g.teams.length < 4 && !g.confs[x.conf]; });
-        if (!sitio.length) sitio = gs.filter(function (g) { return g.teams.length < 4; });
-        sitio.sort(function (p, q) { return p.teams.length - q.teams.length; });
-        var g = sitio[0];
-        g.teams.push(x.t); g.confs[x.conf] = 1;
-      });
+    var bombos = CWC12.bombos(porRol, confDeClub);
+    if (CWC12.completo(bombos)) {
+      var gs = CWC12.reparte(bombos);
       cwc.groups = gs.map(function (g) {
         return {
           name: g.name, teams: g.teams, table: Comp.newTable(g.teams),
@@ -1305,7 +1334,8 @@
       });
       cwc.phase = 'grupos';
     }
-    rep.notes.push('Mundial de Clubes: ' + champs.length + ' campeones continentales clasificados.');
+    rep.notes.push('Mundial de Clubes: ' + champs.length + ' clubes clasificados' +
+      (host ? ' · anfitrión ' + host.n : '') + '.');
   }
 
   /* =====================================================================

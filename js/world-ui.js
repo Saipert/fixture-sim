@@ -294,6 +294,21 @@
     });
   };
 
+  /* el anfitrión del Mundial de Clubes: al azar o el que se elija */
+  var cwcHost = null;
+  function pintaAnfitrion() {
+    var b = $('#wHost');
+    if (b) b.textContent = 'Anfitrión del Mundial de Clubes: ' + (cwcHost ? cwcHost.n : 'al azar') + ' ›';
+    if ($('#wHostX')) $('#wHostX').classList.toggle('hidden', !cwcHost);
+  }
+  if ($('#wHostX')) $('#wHostX').onclick = function () { cwcHost = null; pintaAnfitrion(); };
+  if ($('#wHost')) $('#wHost').onclick = function () {
+    Picker.team({
+      title: 'Anfitrión del Mundial de Clubes', nations: false,
+      onPick: function (t) { cwcHost = { n: t.n, l: t.leagueId }; pintaAnfitrion(); }
+    });
+  };
+
   function paintStartPick() {
     var box = $('#wPick'), hay = !!startTeam;
     $('#wBegin').disabled = !hay;
@@ -400,7 +415,7 @@
   $('#wBegin').onclick = function () {
     if (!startTeam) return;
     modo = 'dt';
-    World.create({ manualDraw: $('#wManual').checked });
+    World.create({ manualDraw: $('#wManual').checked, cwcHost: cwcHost });
     miSel = null;
     if ($('#wConSel') && $('#wConSel').checked) {
       pintaSelNac();
@@ -1728,10 +1743,10 @@
       (c.playoffTies || []).concat(c.playoffHechas || []).forEach(function (t) {
         ties.push({ t: t, n: 'Play-off', semanas: World.weeks.playoff });
       });
-      (c.koRounds || []).forEach(function (r) {
+      (c.koRounds || []).forEach(function (r, ri) {
         r.ties.forEach(function (t) {
           ties.push({ t: t, n: r.name, slot: r.slot,
-            semanas: World.weeks.ko[r.slot] || World.weeks.cwc });
+            semanas: cid === 'cwc' ? [World.weeks.cwc[ri]] : (World.weeks.ko[r.slot] || World.weeks.cwc) });
         });
       });
       ties.forEach(function (x) {
@@ -3313,6 +3328,9 @@
   function groupsHTML(c) {
     var qmap = qualifiedMap(c);
     var espera = jornadaEnEspera(c.name);
+    /* el tercero de la Champions, la Europa League y la Libertadores baja */
+    var baja = { ucl: { l: 'E', t: 'Europa League' }, uel: { l: 'C', t: 'Conference League' },
+      libertadores: { l: 'S', t: 'Copa Sudamericana' } }[c.id] || null;
     return '<div class="groups">' + c.groups.map(function (g) {
       var rows = filasGrupoCont(c, g);
       var res = (g.results || []).filter(function (m) { return espera == null || m.md < espera; });
@@ -3323,7 +3341,7 @@
         rows.map(function (r, i) {
           var q = qmap[r.t.leagueId + '|' + r.t.n];
           var cls = q === 'yes' ? 'q-yes' : q === 'po' ? 'q-po' : q === 'alt' ? 'q-alt' : 'q-no';
-          return '<tr class="' + cls + (r.t === me ? ' me' : '') + '"><td class="num">' + (i + 1) + '</td>' +
+          return '<tr class="' + cls + (r.t === me ? ' me' : '') + '"><td class="num">' + (i + 1) + (baja && i === 2 ? '<b class="tercbaja" title="Pasa a ' + esc(baja.t) + '">' + baja.l + '</b>' : '') + '</td>' +
             '<td><div class="tname">' + crest(r.t, 18) + '<span>' + esc(r.t.n) + '</span></div></td>' +
             '<td class="num">' + r.pj + '</td><td class="num"><b>' + r.pts + '</b></td>' +
             '<td class="num">' + (r.gf - r.gc > 0 ? '+' : '') + (r.gf - r.gc) + '</td></tr>';
@@ -3336,7 +3354,8 @@
                   '</span><b>' + m.s[0] + ' - ' + m.s[1] + '</b><span>' + esc(m.a.n) + '</span></div>';
               }).join('') + '</div>';
           }).join('') + '</details>' : '') + '</div>';
-    }).join('') + '</div>' + contLegend(c);
+    }).join('') + '</div>' + contLegend(c) +
+      (baja ? '<p class="hint leg"><b class="tercbaja">' + baja.l + '</b> el tercero pasa a la ' + baja.t + '</p>' : '');
   }
   function qualifiedMap(c) {
     var map = {};

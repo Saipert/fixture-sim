@@ -77,6 +77,14 @@
       : campo.slice().sort(function (a, b) { return (b.ovr || 0) - (a.ovr || 0); });
     var bombos = [], porBombo = Math.ceil(orden.length / n);
     for (var b = 0; b < porBombo; b++) bombos.push(orden.slice(b * n, (b + 1) * n));
+    /* bombos y reparto ya dados (el Mundial de Clubes): las bolas salen de
+       su bombo y cada una va al grupo que le tocó */
+    var plan = null;
+    if (opts.bombos && opts.reparto) {
+      bombos = opts.bombos.map(function (p) { return p.slice(); });
+      plan = {};
+      opts.reparto.forEach(function (g, gi) { g.teams.forEach(function (t) { plan[ident(t)] = gi; }); });
+    }
     var pendientes = bombos.map(function (p) { return baraja(p); });
 
     var gs = [], puestos = {};
@@ -96,6 +104,13 @@
       if (bi >= pendientes.length) return;
       var t = pendientes[bi].shift();
       var o = origen(t, opts.zonaDe);
+      if (plan && plan[ident(t)] != null) {
+        var dest = gs[plan[ident(t)]];
+        dest.teams.push(t); dest.de[o] = 1;
+        puestos[ident(t)] = dest.name;
+        ultima = t.n + ' → ' + dest.name;
+        return;
+      }
       var sitio = gs.filter(function (gr) { return gr.teams.length <= bi; });
       var limpios = sitio.filter(function (gr) { return !gr.de[o]; });
       if (limpios.length) sitio = limpios;
