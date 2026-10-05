@@ -231,12 +231,13 @@
         });
       }
 
-      /* el tercer puesto se juega el mismo día que la final */
+      /* El tercer puesto se juega antes que la final, nunca después: iba
+         detrás en la lista y se jugaba el título primero. */
       if (opts.tercerPuesto && R.pendienteTercero && pairs.length === 1) {
         var t3 = { a: R.pendienteTercero[0], b: R.pendienteTercero[1], legs: [], two: false, w: null };
         R.tercerTie = t3;
         R.pendienteTercero = null;
-        R.pending.push({
+        R.pending.unshift({
           h: t3.a, a: t3.b, neutral: true, knockout: true, tie: t3, note: 'Tercer puesto',
           apply: function (res) {
             t3.s = res.score; t3.pens = res.pens; t3.aet = res.aet;
@@ -420,7 +421,7 @@
     '<button class="mini" data-r="all">Simular todo</button>' +
     '</div></div>' +
     '<div class="hidden" data-r="livebox"></div>' +
-    '<div class="card hidden" data-r="logbox"><h3 data-r="logtitle">Resultados</h3><div class="fx" data-r="log"></div></div>' +
+    '<div class="card hidden" data-r="logbox"><h3 data-r="logtitle">Resultados</h3><div data-r="log"></div></div>' +
     '<div data-r="state"></div>';
 
   function mount(box, R) {
@@ -430,11 +431,17 @@
     Array.prototype.forEach.call(box.querySelectorAll('[data-r]'), function (n) { el[n.dataset.r] = n; });
     var mv = null, busy = false;
 
-    /* un partido que todavía no se ha jugado: los dos escudos y nada más */
+    /* Un partido que todavía no se ha jugado: los dos escudos y, si es la
+       vuelta, cómo quedó la ida, que es lo que hace falta saber antes de
+       verla. Se escribe en la dirección de esta vuelta. */
     function porJugar(m) {
+      var t = m.tie, ida = '';
+      if (t && t.leg1 && m.note === 'vuelta') {
+        ida = '<i class="agg ida">Ida ' + t.leg1[1] + '-' + t.leg1[0] + '</i>';
+      }
       return '<div class="scline porjugar">' +
         '<span class="sc-c" title="' + esc(m.h.n) + '">' + crest(m.h, 34) + '</span>' +
-        '<b>' + (m.note ? esc(m.note) : 'vs') + '</b>' +
+        '<b>' + (m.note ? esc(m.note) : 'vs') + ida + '</b>' +
         '<span class="sc-c" title="' + esc(m.a.n) + '">' + crest(m.a, 34) + '</span></div>';
     }
     function scoreLine(r) {
@@ -471,29 +478,55 @@
           ? '🏆 Campeón: <b>' + esc(R.champion ? R.champion.n : '—') + '</b>' : '');
       ['one', 'live', 'round', 'all'].forEach(function (k) { el[k].disabled = R.done || busy || !nx; });
 
-      /* Al empezar una ronda, el panel se quedaba con los resultados de la
-         anterior y debajo los cruces nuevos, así que los mismos equipos
-         salían dos veces y la cabecera decía la ronda vieja. Si la ronda
-         nueva ya tiene partidos por jugar, lo de antes no pinta nada. */
       var nueva = !R.log.length && !!nx;
-      var lg = R.log.length ? R.log : (nueva ? [] : (R.prevLog || []));
-      var lgName = (R.log.length || nueva) ? R.label : (R.prevLabel || '');
-      /* La ida y la vuelta se juegan dentro de la misma ronda, pero son dos
-         jornadas distintas: manda la que toca ahora. Al acabar la ida, lo
-         que se enseña es la vuelta por jugar, no las dos listas juntas. */
+      var lg = R.log.slice();
+      var lgName = R.label;
+      /* La ida y la vuelta son dos tandas distintas dentro de la misma
+         ronda: manda la que toca ahora. */
       var tanda = nx ? (nx.note || '')
         : (lg.length ? (lg[lg.length - 1].note || '') : '');
-      if (esLeg(tanda)) {
+      var porTanda = esLeg(tanda);
+      if (porTanda) {
         lg = lg.filter(function (x) { return x.note === tanda; });
         lgName += ' · ' + tanda;
       }
-      /* los que faltan de esta misma tanda, sin marcador: así se ve la
-         jornada entera desde el principio */
       var faltan = nx
-        ? R.pending.slice(R.idx).filter(function (m) { return (m.note || '') === tanda; })
+        ? R.pending.slice(R.idx).filter(function (m) { return !porTanda || (m.note || '') === tanda; })
         : [];
-      el.logbox.classList.toggle('hidden', (!lg.length && !faltan.length) || !!R.hideLog);
-      el.log.innerHTML = lg.map(scoreLine).join('') + faltan.map(porJugar).join('');
+
+      /* En grupos, cada grupo con sus partidos: la tabla queda arriba y los
+         resultados sueltos no se sabía de quién eran. En el cuadro, lo
+         jugado y lo que falta, por separado. Y la ronda anterior sigue a la
+         vista hasta que la nueva tenga su primer resultado: antes el último
+         partido de la jornada se perdía al saltar a la siguiente. */
+      function bloque(titulo, filas, pinta) {
+        if (!filas.length) return '';
+        return '<h4 class="fx-tit">' + esc(titulo) + '</h4>' +
+          '<div class="fx">' + filas.map(pinta).join('') + '</div>';
+      }
+      function deNota(l, n) { return l.filter(function (x) { return (x.note || '') === n; }); }
+      var html = '';
+      if (R.phase === 'groups' && R.groups && R.groups.length) {
+        /* mientras la jornada nueva no tenga resultados se siguen viendo los
+           de la anterior: si no, el último partido se perdía al pasar */
+        var fuente = lg.length ? lg : (R.prevLog || []);
+        var deAntes = !lg.length && fuente.length;
+        R.groups.forEach(function (g) {
+          var hechos = deNota(fuente, g.name), pend = deNota(faltan, g.name);
+          if (!hechos.length && !pend.length) return;
+          html += '<h4 class="fx-tit">' + esc(g.name) +
+            (deAntes ? ' <i>' + esc(R.prevLabel || '') + '</i>' : '') + '</h4><div class="fx">' +
+            hechos.map(scoreLine).join('') + pend.map(porJugar).join('') + '</div>';
+        });
+      } else {
+        if (!lg.length && (R.prevLog || []).length) {
+          html += bloque(R.prevLabel || 'Ronda anterior', R.prevLog, scoreLine);
+        }
+        html += bloque(lgName || 'Resultados', lg, scoreLine);
+        html += bloque('Por jugar' + (lgName ? ' · ' + lgName : ''), faltan, porJugar);
+      }
+      el.logbox.classList.toggle('hidden', !html || !!R.hideLog);
+      el.log.innerHTML = html;
       el.logtitle.textContent = lg.length + ' resultado' + (lg.length === 1 ? '' : 's') +
         (faltan.length ? ' · ' + faltan.length + ' por jugar' : '') +
         (lgName ? ' · ' + lgName : '');

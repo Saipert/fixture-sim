@@ -2006,3 +2006,10 @@ body.conclub{scrollbar-color:var(--club-scroll,var(--line)) rgba(255,255,255,.04
   .pk-head{padding:10px 12px;gap:9px}
   .pk-titles b{font-size:14px}
 }
+
+/* los partidos repartidos por grupo, y lo jugado aparte de lo que falta */
+.fx-tit{margin:12px 0 6px;font-size:11px;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--dim);font-weight:700}
+.fx-tit:first-child{margin-top:2px}
+.fx-tit i{font-style:normal;font-weight:400;letter-spacing:.02em;text-transform:none;
+  color:var(--dim);opacity:.75;margin-left:6px}
