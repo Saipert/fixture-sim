@@ -1269,8 +1269,11 @@
       conCupos = cuposTemporada(conComp);
       /* Nada de rellenar todavía: primero los campeones vigentes. Si se
          reparte el resto antes, al buscar un campeón salen todos los clubes
-         ocupados y no se puede elegir ninguno. */
+         ocupados y no se puede elegir ninguno. Pero si esta temporada no
+         tiene campeones que elegir, se reparte ya: si no, se quedaba todo
+         vacío y se podía simular sin equipos. */
       conSel = {};
+      if (conCupos && cuantosCampeonesFaltan() === 0) conPorDefecto();
       $('#conFmt').classList.add('hidden'); $('#conFmtLbl').classList.add('hidden');
       $('#conCupos').classList.toggle('hidden', !conCupos);
       $('#conVerCupos').classList.add('hidden');

@@ -1905,9 +1905,9 @@ body.conclub{scrollbar-color:var(--club-scroll,var(--line)) rgba(255,255,255,.04
 .tb-panel{min-width:0}
 .tb-comp{min-width:0}
 .tb-cuerpo{min-width:0}
-/* la jornada la marca la barra de arriba: aquí sólo se juega partido a
-   partido, que es lo que no desincroniza el calendario */
-.tb-panel .rn-btns [data-r="round"],
+/* «Simular todo» de un torneo suelto sí desincroniza el calendario, así
+   que ése no sale; la jornada completa de una sola competición no, porque
+   el tablero no deja que nadie se adelante más de una jornada */
 .tb-panel .rn-btns [data-r="all"]{display:none}
 @media (max-width:760px){
   .tb-bar{position:static}
