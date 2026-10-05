@@ -294,6 +294,21 @@
     });
   };
 
+  /* el anfitrión del Mundial de Clubes: al azar o el que se elija */
+  var cwcHost = null;
+  function pintaAnfitrion() {
+    var b = $('#wHost');
+    if (b) b.textContent = 'Anfitrión del Mundial de Clubes: ' + (cwcHost ? cwcHost.n : 'al azar') + ' ›';
+    if ($('#wHostX')) $('#wHostX').classList.toggle('hidden', !cwcHost);
+  }
+  if ($('#wHostX')) $('#wHostX').onclick = function () { cwcHost = null; pintaAnfitrion(); };
+  if ($('#wHost')) $('#wHost').onclick = function () {
+    Picker.team({
+      title: 'Anfitrión del Mundial de Clubes', nations: false,
+      onPick: function (t) { cwcHost = { n: t.n, l: t.leagueId }; pintaAnfitrion(); }
+    });
+  };
+
   function paintStartPick() {
     var box = $('#wPick'), hay = !!startTeam;
     $('#wBegin').disabled = !hay;
@@ -400,7 +415,7 @@
   $('#wBegin').onclick = function () {
     if (!startTeam) return;
     modo = 'dt';
-    World.create({ manualDraw: $('#wManual').checked });
+    World.create({ manualDraw: $('#wManual').checked, cwcHost: cwcHost });
     miSel = null;
     if ($('#wConSel') && $('#wConSel').checked) {
       pintaSelNac();
@@ -1728,10 +1743,10 @@
       (c.playoffTies || []).concat(c.playoffHechas || []).forEach(function (t) {
         ties.push({ t: t, n: 'Play-off', semanas: World.weeks.playoff });
       });
-      (c.koRounds || []).forEach(function (r) {
+      (c.koRounds || []).forEach(function (r, ri) {
         r.ties.forEach(function (t) {
           ties.push({ t: t, n: r.name, slot: r.slot,
-            semanas: World.weeks.ko[r.slot] || World.weeks.cwc });
+            semanas: cid === 'cwc' ? [World.weeks.cwc[ri]] : (World.weeks.ko[r.slot] || World.weeks.cwc) });
         });
       });
       ties.forEach(function (x) {

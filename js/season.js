@@ -557,42 +557,98 @@
       if (!hechas) { mundialDeClubes(); return; }
       repinta();
     }
+    /* el que pierde la final de una competición: el subcampeón */
+    function subcampeonDe(R) {
+      var rs = (R && R.koRounds) || [];
+      for (var i = rs.length - 1; i >= 0; i--) {
+        var ts = rs[i].ties || [];
+        if (ts.length === 1 && ts[0].w && ts[0].a && ts[0].b) {
+          return ts[0].w === ts[0].a ? ts[0].b : ts[0].a;
+        }
+      }
+      return null;
+    }
+    var ROL_DE_COMP = { ucl: 'ucl', uel: 'uel', conf: 'conf', lib: 'lib', sud: 'sud',
+      ccc: 'ccc', acl: 'acl', cafcl: 'cafcl', ofccl: 'ofc' };
     function mundialDeClubes() {
       if (!cfg.cwc) { fin(); return; }
-      var plazas = cfg.cwc.plazas, puestos = {}, ocho = [];
+      var porRol = {}, usados = {};
+      function mete(rol, t) {
+        var k = t ? t.leagueId + '|' + t.n : '';
+        if (!t || usados[k]) return;
+        porRol[rol] = t; usados[k] = 1;
+      }
       comps.forEach(function (c) {
-        if (c.extra) return;          /* la Supercopa y la Recopa no dan plaza */
-        var t = campeones[c.id];
-        if (!t) return;
-        var z = c.conf || (cfg.cwc.confDe ? cfg.cwc.confDe(t) : '');
-        if ((puestos[z] || 0) >= (plazas[z] || 0)) return;
-        puestos[z] = (puestos[z] || 0) + 1;
-        ocho.push(t);
+        if (c.extra || !ROL_DE_COMP[c.id]) return;
+        mete(ROL_DE_COMP[c.id], campeones[c.id]);
       });
-      while (ocho.length % 4) ocho.pop();
-      if (ocho.length < 4) { fin(); return; }
-      var st = Comp.structureFor(ocho.length, 4);
+      /* los subcampeones de la Champions y la Libertadores */
+      comps.forEach(function (c) {
+        if (c.id === 'ucl') mete('uclSub', subcampeonDe(c.R));
+        if (c.id === 'lib') mete('libSub', subcampeonDe(c.R));
+      });
       var x = apartado('cwc', cfg.cwc.nombre);
       enseña(x.id);
       var d = x.caja;
-      Sorteo.grupos(d, {
-        campo: ocho, nGrupos: st.groups, azar: false,
-        zonaDe: cfg.cwc.confDe || null,
-        titulo: 'Sorteo del Mundial de Clubes',
-        sub: cfg.cwc.nombre + ' · ' + ocho.length + ' equipos en ' + st.groups + ' grupos de ' + st.groupSize,
-        boton: 'Listo',
-        onListo: function (gs) {
-          x.R = Runner.tournament(ocho, {
-            name: cfg.cwc.nombre, groupSize: 4, groups: gs,
-            neutral: true, legs: 1, groupDouble: false, tercerPuesto: true,
-            antesDelKO: function (R2) { sorteoKO(x, R2); }
-          });
-          x.R.alTerminar = function (f2) { campeones.cwc = f2.champion || null; repinta(); };
-          x.mando = Runner.mount(d, x.R);
-          fase = 'cwc';
-          repinta();
-        }
-      });
+      var anfitrion = null;
+      function sorteaAnfitrion() {
+        var cand = (cfg.cwc.candidatos ? cfg.cwc.candidatos() : []).filter(function (t) {
+          return !usados[t.leagueId + '|' + t.n];
+        });
+        anfitrion = cand.length ? cand[Math.floor(Math.random() * cand.length)] : null;
+      }
+      sorteaAnfitrion();
+      function pintaAnfitrion() {
+        d.innerHTML = '<div class="card so-card"><h3>' + esc(cfg.cwc.nombre) +
+          ' <small>12 equipos · tres grupos de cuatro</small></h3>' +
+          '<p class="hint">Los nueve campeones continentales, los subcampeones de la Champions ' +
+          'y la Libertadores, y el anfitrión.</p>' +
+          '<div class="toolbar"><b>Anfitrión:</b> ' +
+          (anfitrion ? Crest.html(anfitrion, 22) + ' <span>' + esc(anfitrion.n) + '</span>' : '<span class="hint">ninguno</span>') +
+          ' <button class="mini" data-h="elegir">Elegir club</button>' +
+          '<button class="mini" data-h="azar">Al azar</button>' +
+          '<button class="primary" data-h="ok">Sortear los grupos</button></div></div>';
+        d.firstChild.onclick = function (e) {
+          var h = e.target.getAttribute && e.target.getAttribute('data-h');
+          if (h === 'azar') { sorteaAnfitrion(); pintaAnfitrion(); }
+          if (h === 'elegir') {
+            Picker.team({
+              title: 'Anfitrión del Mundial de Clubes', nations: false,
+              filterTeam: function (t) { return !usados[t.leagueId + '|' + t.n]; },
+              onPick: function (t) { anfitrion = t; pintaAnfitrion(); }
+            });
+          }
+          if (h === 'ok') sortea();
+        };
+      }
+      function sortea() {
+        if (anfitrion) porRol.host = anfitrion;
+        var bs = CWC12.bombos(porRol, cfg.cwc.confDe || null);
+        if (!CWC12.completo(bs)) { d.innerHTML = ''; fin(); return; }
+        var doce = [];
+        bs.forEach(function (p) { p.forEach(function (e) { doce.push(e.t); }); });
+        var reparto = CWC12.reparte(bs);
+        Sorteo.grupos(d, {
+          campo: doce, nGrupos: 3, azar: false,
+          bombos: bs.map(function (p) { return p.map(function (e) { return e.t; }); }),
+          reparto: reparto,
+          titulo: 'Sorteo del Mundial de Clubes',
+          sub: cfg.cwc.nombre + ' · 12 equipos en 3 grupos de 4',
+          boton: 'Listo',
+          onListo: function (gs) {
+            x.R = Runner.tournament(doce, {
+              name: cfg.cwc.nombre, groupSize: 4, groups: gs,
+              neutral: true, legs: 1, groupDouble: false, tercerPuesto: true,
+              cuadro: CWC12.cuadro
+            });
+            x.R.alTerminar = function (f2) { campeones.cwc = f2.champion || null; repinta(); };
+            x.mando = Runner.mount(d, x.R);
+            fase = 'cwc';
+            repinta();
+          }
+        });
+      }
+      pintaAnfitrion();
     }
     function fin() {
       fase = 'fin';

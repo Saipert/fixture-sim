@@ -212,9 +212,26 @@
     return s || casa || 'ESP';
   }
 
+  /* «Resto de UEFA» junta clubes de países distintos y no tiene un país de
+     liga: cada club lleva el suyo, y sus jugadores son de ahí. */
+  var PAIS_DE_CLUB = {
+    'Breiðablik': 'ISL', 'Valur Reykjavík': 'ISL', 'Larne': 'NIR', 'Cliftonville': 'NIR', 'Linfield': 'NIR',
+    'Drita': 'KVX', 'Ballkani': 'KVX', 'Prishtina': 'KVX', 'Riga FC': 'LVA', 'RFS': 'LVA',
+    'HJK Helsinki': 'FIN', 'Inter Turku': 'FIN', 'KuPS': 'FIN', 'Sheriff Tiraspol': 'MDA',
+    'BATE Borisov': 'BLR', 'Dinamo Minsk': 'BLR', 'Shkupi': 'MKD', 'Shkëndija': 'MKD', 'Vardar': 'MKD',
+    'Inter Escaldes': 'AND', 'Flora Tallinn': 'EST', 'The New Saints': 'WAL', 'Lincoln Red Imps': 'GIB',
+    'KÍ Klaksvík': 'FRO', 'FC Vaduz': 'LIE', 'Žalgiris Vilnius': 'LTU', 'F91 Dudelange': 'LUX',
+    'Ħamrun Spartans': 'MLT', 'Budućnost Podgorica': 'MNE', 'Tre Penne': 'SMR'
+  };
+  function paisDeClub(equipo) {
+    return equipo && equipo.leagueId === 'otrosuefa' ? (PAIS_DE_CLUB[equipo.n] || null) : null;
+  }
+
   /* la guarda en el propio jugador (p[4]) para no recalcularla nunca más */
   function de(p, equipo) {
     if (!p) return '';
+    var delClub = paisDeClub(equipo);
+    if (delClub) { p[4] = delClub; return p[4]; }
     var soloLocal = equipo && SOLO_LOCALES[equipo.leagueId] ? PAIS_DE_LIGA[equipo.leagueId] : null;
     if (soloLocal) { p[4] = soloLocal; return p[4]; }
     if (p[4]) return p[4];

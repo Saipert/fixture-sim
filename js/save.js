@@ -212,7 +212,8 @@
         }) : null,
         koRounds: (c.koRounds || []).map(function (r) {
           return { name: r.name, slot: r.slot, done: !!r.done, single: !!r.single, isPlayoff: !!r.isPlayoff, ties: r.ties.map(encTie) };
-        })
+        }),
+        tercero: c.tercerPuesto ? encTie(c.tercerPuesto) : null
       };
     });
 
@@ -290,6 +291,7 @@
       me: tid(meTeam),
       year: st.year, week: st.week, total: st.total, manualDraw: st.manualDraw,
       ofcChampion: tid(st.ofcChampion), detail: tid(st.detailTeam),
+      cwcHost: st.cwcHost || null,
       rosters: rosters, leagues: leagues, cups: cups, conts: conts,
       qualification: encQual(st.qualification), history: history, weekLog: weekLog,
       playoffs: encPlayoffs(st.playoffs),
@@ -377,6 +379,7 @@
     var st = World.state;
     st.year = data.year; st.week = data.week; st.total = data.total;
     st.ofcChampion = tref(data.ofcChampion);
+    st.cwcHost = data.cwcHost || null;
     st.detailTeam = tref(data.detail);
     st.caja = data.caja != null ? data.caja : null;
     st.taquilla = data.taquilla || 0;
@@ -445,6 +448,7 @@
       c.koRounds = d.koRounds.map(function (r) {
         return { name: r.name, slot: r.slot, done: r.done, single: r.single, isPlayoff: r.isPlayoff, ties: r.ties.map(decTie) };
       });
+      c.tercerPuesto = d.tercero ? decTie(d.tercero) : null;
     });
 
     function decQual(q) {

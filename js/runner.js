@@ -51,6 +51,7 @@
     if (R.done) return null;
     var m = R.pending[R.idx];
     if (!m) return null;
+    R.prevLog = null;      /* en cuanto se juega algo, lo de la ronda anterior sobra */
     res = res || Engine.simulate(m.h, m.a, {
       quick: true, neutral: !!m.neutral, knockout: !!m.knockout
     });
@@ -360,8 +361,14 @@
           flat = primeros.concat(intercala(segundos, cfg.extraKO));
           byesFijos = primeros;
         } else {
-          var pairs = Comp.seedBracket(R.q.qualified);
-          pairs.forEach(function (p) { flat.push(p[0].t, p[1].t); });
+          if (cfg.cuadro) {
+            /* un cuadro fijado por el reglamento: ya viene en orden de cruces */
+            flat = cfg.cuadro(R.groups, R.q);
+            bombosKO = null;
+          } else {
+            var pairs = Comp.seedBracket(R.q.qualified);
+            pairs.forEach(function (p) { flat.push(p[0].t, p[1].t); });
+          }
         }
         /* si alguien quiere sortear antes, el torneo espera aquí */
         if (cfg.antesDelKO && !R.koSorteado) {
@@ -509,17 +516,21 @@
       if (R.phase === 'groups' && R.groups && R.groups.length) {
         /* mientras la jornada nueva no tenga resultados se siguen viendo los
            de la anterior: si no, el último partido se perdía al pasar */
-        var fuente = lg.length ? lg : (R.prevLog || []);
+        var sinNada = !R.log.length;
+        var fuente = lg.length ? lg : (sinNada ? (R.prevLog || []) : []);
         var deAntes = !lg.length && fuente.length;
         R.groups.forEach(function (g) {
           var hechos = deNota(fuente, g.name), pend = deNota(faltan, g.name);
           if (!hechos.length && !pend.length) return;
-          html += '<h4 class="fx-tit">' + esc(g.name) +
+          /* los partidos del grupo a un lado y su tabla en el espacio libre
+             del otro: en pantalla ancha se ve el avance sin bajar */
+          html += '<div class="fx-grp"><div class="fx-izq"><h4 class="fx-tit">' + esc(g.name) +
             (deAntes ? ' <i>' + esc(R.prevLabel || '') + '</i>' : '') + '</h4><div class="fx">' +
-            hechos.map(scoreLine).join('') + pend.map(porJugar).join('') + '</div>';
+            hechos.map(scoreLine).join('') + pend.map(porJugar).join('') + '</div></div>' +
+            '<div class="fx-der">' + X().groupsHTML([g], R.structure.perGroup, 0) + '</div></div>';
         });
       } else {
-        if (!lg.length && (R.prevLog || []).length) {
+        if (!R.log.length && (R.prevLog || []).length) {
           html += bloque(R.prevLabel || 'Ronda anterior', R.prevLog, scoreLine);
         }
         html += bloque(lgName || 'Resultados', lg, scoreLine);
@@ -537,7 +548,7 @@
         h += '<div class="card"><h3>Clasificación</h3>' +
           X().tableHTML(Comp.sortTable(R.table), { ucl: R.ucl, rel: R.rel, form: true }) + '</div>';
       }
-      if (R.groups && !R.hideGroups) {
+      if (R.groups && !R.hideGroups && R.phase !== 'groups') {
         h += '<div class="card"><h3>Fase de grupos</h3>' +
           X().groupsHTML(R.groups, R.structure.perGroup, R.structure.extra) + '</div>';
       }
