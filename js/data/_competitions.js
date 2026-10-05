@@ -98,10 +98,10 @@ window.CONTINENTAL = [
   { id: 'conf', name: 'UEFA Conference League', conf: 'UEFA', size: 32, maxPerCountry: 3, groupSize: 4, skipTop: 64 },
   { id: 'lib', name: 'Copa Libertadores', conf: 'CONMEBOL', size: 32, maxPerCountry: 6, groupSize: 4 },
   { id: 'sud', name: 'Copa Sudamericana', conf: 'CONMEBOL', size: 32, maxPerCountry: 6, groupSize: 4, skipTop: 32 },
-  { id: 'ccc', name: 'CONCACAF Champions Cup', conf: 'CONCACAF', size: 16, maxPerCountry: 6, groupSize: 0 },
+  { id: 'ccc', name: 'CONCACAF Champions Cup', conf: 'CONCACAF', size: 16, maxPerCountry: 6, groupSize: 4 },
   { id: 'acl', name: 'AFC Champions League Elite', conf: 'AFC', size: 16, maxPerCountry: 4, groupSize: 4 },
   { id: 'cafcl', name: 'CAF Champions League', conf: 'CAF', size: 16, maxPerCountry: 4, groupSize: 4 },
-  { id: 'ofccl', name: 'OFC Champions League', conf: 'OFC', size: 8, maxPerCountry: 8, groupSize: 0 },
+  { id: 'ofccl', name: 'OFC Champions League', conf: 'OFC', size: 8, maxPerCountry: 8, groupSize: 4 },
   { id: 'cwc', name: 'Mundial de Clubes', conf: null, size: 12, maxPerCountry: 2, groupSize: 4,
     porConf: true, formatos: [12, 32] }
 ];

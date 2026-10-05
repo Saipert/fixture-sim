@@ -48,7 +48,7 @@
 
   /* juega el siguiente partido; si `res` viene dado, lo aplica en vez de simular */
   function step(R, res) {
-    if (R.done) return null;
+    if (R.done || bloqueada(R)) return null;
     var m = R.pending[R.idx];
     if (!m) return null;
     R.prevLog = null;      /* en cuanto se juega algo, lo de la ronda anterior sobra */
@@ -71,9 +71,17 @@
       R.prevLog = R.log.slice(); R.prevLabel = R.label;
       R.advance();
     }
+    if (R.alAvanzar) R.alAvanzar(R);
     return { m: m, res: res };
   }
-  function peek(R) { return R.done ? null : R.pending[R.idx] || null; }
+  /* La última jornada de grupos no se juega mientras la competición de arriba
+     no haya cerrado los suyos: de ahí le bajan los terceros para el play-off. */
+  function bloqueada(R) {
+    if (!R.espera || R.done || R.phase !== 'groups' || !R.groups || !R.groups.length) return false;
+    if (R.gi !== R.groups[0].rounds.length - 1) return false;
+    return !!R.espera(R);
+  }
+  function peek(R) { return R.done || bloqueada(R) ? null : R.pending[R.idx] || null; }
   /* «Jornada completa» juega toda la jornada. Lo único que corta es el paso
      de la ida a la vuelta: son dos tandas de partidos, no una. */
   function esLeg(n) { return n === 'ida' || n === 'vuelta'; }
@@ -89,7 +97,7 @@
   }
   function stepAll(R) {
     var guard = 0;
-    while (!R.done && guard++ < 40000) step(R);
+    while (!R.done && guard++ < 40000) { if (!step(R)) break; }
   }
 
   /* =====================================================================
@@ -313,6 +321,8 @@
     var R = base(cfg.name || 'Torneo');
     R.kind = 'tournament';
     R.structure = st;
+    R.espera = cfg.espera || null;
+    R.baja = cfg.baja || null;
     R.groups = cfg.groups || Comp.makeGroups(teams, st.groups, cfg.seeded);
     R.groups.forEach(function (g) {
       g.table = Comp.newTable(g.teams);
@@ -482,7 +492,8 @@
         ? 'Siguiente: ' + esc(nx.h.n) + ' — ' + esc(nx.a.n) +
         (nx.note ? ' <i>(' + esc(nx.note) + ')</i>' : '') + ' · quedan ' + remaining(R) + ' en esta ronda'
         : (R.done && R.label.indexOf('🏆') < 0
-          ? '🏆 Campeón: <b>' + esc(R.champion ? R.champion.n : '—') + '</b>' : '');
+          ? '🏆 Campeón: <b>' + esc(R.champion ? R.champion.n : '—') + '</b>'
+          : (bloqueada(R) ? '⏳ Espera a que la competición de arriba cierre su fase de grupos' : ''));
       ['one', 'live', 'round', 'all'].forEach(function (k) { el[k].disabled = R.done || busy || !nx; });
 
       var nueva = !R.log.length && !!nx;
@@ -527,7 +538,7 @@
           html += '<div class="fx-grp"><div class="fx-izq"><h4 class="fx-tit">' + esc(g.name) +
             (deAntes ? ' <i>' + esc(R.prevLabel || '') + '</i>' : '') + '</h4><div class="fx">' +
             hechos.map(scoreLine).join('') + pend.map(porJugar).join('') + '</div></div>' +
-            '<div class="fx-der">' + X().groupsHTML([g], R.structure.perGroup, 0) + '</div></div>';
+            '<div class="fx-der">' + X().groupsHTML([g], R.structure.perGroup, 0, R.baja) + '</div></div>';
         });
       } else {
         if (!R.log.length && (R.prevLog || []).length) {
@@ -550,7 +561,7 @@
       }
       if (R.groups && !R.hideGroups && R.phase !== 'groups') {
         h += '<div class="card"><h3>Fase de grupos</h3>' +
-          X().groupsHTML(R.groups, R.structure.perGroup, R.structure.extra) + '</div>';
+          X().groupsHTML(R.groups, R.structure.perGroup, R.structure.extra, R.baja) + '</div>';
       }
       if (R.koRounds && R.koRounds.length && !R.hideKO) {
         // sólo los cruces ya resueltos: los que están en juego aún no tienen marcador

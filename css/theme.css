@@ -2021,3 +2021,7 @@ body.conclub{scrollbar-color:var(--club-scroll,var(--line)) rgba(255,255,255,.04
   .fx-grp{grid-template-columns:minmax(0,1fr) minmax(300px,380px);align-items:start}
   .fx-grp .fx-der{padding-top:20px}
 }
+
+/* el tercero que baja a otra competición */
+.tercbaja{color:#ffd23f;font-weight:800;margin-left:3px;font-size:.85em}
+.tercbaja{text-transform:uppercase}

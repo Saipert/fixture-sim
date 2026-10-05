@@ -213,6 +213,24 @@
       if (otro.R) otro.R.cfgExtras = terceros.length;
       c.tercerosHechos = true;
     }
+    /* Una competición no cierra sus grupos hasta que las que le mandan
+       terceros hayan cerrado los suyos. Así el play-off nunca sale vacío,
+       juegue quien juegue su jornada y en el orden que sea. */
+    function esperaALaDeArriba(c) {
+      return comps.some(function (f) {
+        var d = (cfg.cascada || {})[f.id];
+        if (!d || d.terceros !== c.id) return false;
+        if (!f.R || !f.R.groups) return (f.grupos || []).length >= 4;
+        if (f.R.esperaKO || f.R.phase === 'ko' || f.R.done) { bajaTerceros(f); return false; }
+        return true;
+      });
+    }
+    var LETRA_BAJA = { uel: { l: 'E', t: 'Europa League' }, conf: { l: 'C', t: 'Conference League' },
+      sud: { l: 'S', t: 'Copa Sudamericana' } };
+    function bajaDe(c) {
+      var d = (cfg.cascada || {})[c.id];
+      return d && d.terceros ? LETRA_BAJA[d.terceros] || null : null;
+    }
     function ordenDePaso() {
       /* las que alimentan a otra, delante */
       var manda = {};
@@ -406,9 +424,23 @@
               name: c.name, groupSize: c.k.groupSize, groups: gs,
               neutral: true, legs: 2, groupDouble: true,
               nombrePrimera: 'Play-off de octavos',
-              antesDelKO: function (R2) { sorteoKO(c, R2); }
+              antesDelKO: function (R2) { sorteoKO(c, R2); },
+              espera: function () { return esperaALaDeArriba(c); },
+              baja: bajaDe(c)
             };
             c.R = Runner.tournament(campo, c.cfgT);
+            /* al cerrar sus grupos bajan sus terceros y la de abajo se entera,
+               aunque se haya jugado desde su propia pestaña */
+            c.R.alAvanzar = function (R2) {
+              if (c.avisada || !(R2.esperaKO || R2.phase === 'ko' || R2.done)) return;
+              c.avisada = true;
+              bajaTerceros(c);
+              comps.forEach(function (o) {
+                var d = (cfg.cascada || {})[c.id];
+                if (d && d.terceros === o.id && o.mando) o.mando.repaint();
+              });
+              pintaTabs(); pintaBarra();
+            };
             if (c.logo) c.R.logo = c.logo;
           if (c.logo) c.R.logo = c.logo;
         c.mando = Runner.mount(c.caja, c.R);

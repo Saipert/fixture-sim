@@ -237,7 +237,8 @@
     }).join('');
   }
 
-  function groupsHTML(groups, per, extra) {
+  /* baja = { l: 'E', t: 'Europa League' }: los terceros siguen en otra competición */
+  function groupsHTML(groups, per, extra, baja) {
     var bestSet = {};
     groups.forEach(function (g) {
       g.standings.forEach(function (r) { if (r.viaBest) bestSet[r.t.n] = 1; });
@@ -247,12 +248,14 @@
         '<th class="num">PJ</th><th class="num">Pts</th><th class="num">DG</th></tr></thead><tbody>' +
         g.standings.map(function (r, i) {
           var cls = i < per ? 'q-yes' : (bestSet[r.t.n] ? 'q-best' : 'q-no');
-          return '<tr class="' + cls + '"><td class="num">' + (i + 1) + '</td>' +
+          var marca = baja && i === 2 ? '<b class="tercbaja" title="Pasa a ' + esc(baja.t) + '">' + esc(baja.l) + '</b>' : '';
+          return '<tr class="' + cls + '"><td class="num">' + (i + 1) + marca + '</td>' +
             '<td><div class="tname">' + crestOf(r.t, 18) + '<span>' + esc(r.t.n) + '</span></div></td>' +
             '<td class="num">' + r.pj + '</td><td class="num"><b>' + r.pts + '</b></td>' +
             '<td class="num">' + (r.gf - r.gc > 0 ? '+' : '') + (r.gf - r.gc) + '</td></tr>';
         }).join('') + '</tbody></table></div>';
     }).join('') + '</div>' +
+      (baja ? '<p class="hint leg"><b class="tercbaja">' + esc(baja.l) + '</b> el tercero pasa a la ' + esc(baja.t) + '</p>' : '') +
       (extra ? '<p class="hint leg"><span class="sw sw-yes"></span> clasificados · incluye los ' + extra +
         ' mejores ' + (per + 1 === 3 ? 'terceros' : per + 1 === 2 ? 'segundos' : (per + 1) + 'º') + '</p>' : '');
   }
@@ -1638,7 +1641,13 @@
       porConf: !!conComp.porConf, tercerPuesto: !!conComp.porConf,
       neutral: true, legs: conComp.porConf ? 1 : 2,
       groupDouble: !conComp.porConf,  /* a ida y vuelta salvo en el Mundial de Clubes */
-      tras: avisa ? function (R) { R.alTerminar = function (fin) { avisa(fin.champion || null); }; } : null
+      tras: function (R) {
+        /* los terceros de la Champions, la Europa League y la Libertadores bajan */
+        var b = { ucl: { l: 'E', t: 'Europa League' }, uel: { l: 'C', t: 'Conference League' },
+          lib: { l: 'S', t: 'Copa Sudamericana' } }[conComp.id];
+        R.baja = b || null;
+        if (avisa) R.alTerminar = function (fin) { avisa(fin.champion || null); };
+      }
     }, { title: conComp.name + ' · eliminatorias' });
   }
 
