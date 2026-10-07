@@ -91,7 +91,7 @@
     for (var g = 0; g < n; g++) {
       gs.push({ name: 'Grupo ' + String.fromCharCode(65 + g), teams: [], de: {} });
     }
-    var bi = 0, ultima = '';
+    var bi = 0, ultima = '', elegido = null;
 
     function quedan() {
       var q = 0;
@@ -138,11 +138,42 @@
             }).join('') + '</div>';
         }).join('') + '</div></div>' +
         '<div class="drawcol groups-col"><h4 class="drawhd">Grupos</h4><div class="groups">' +
-        gs.map(function (gr) {
+        gs.map(function (gr, gi) {
           return '<div class="gbox"><h4>' + esc(gr.name) + '</h4>' +
-            (gr.teams.length ? gr.teams.map(function (t) { return linea(t); }).join('')
+            (gr.teams.length ? gr.teams.map(function (t, ti) {
+              /* con el sorteo completo, cada equipo se puede tocar para cambiarlo de grupo */
+              if (!hecho) return linea(t);
+              var on = elegido && elegido.gi === gi && elegido.ti === ti;
+              return '<div class="sw-eq" data-sw="' + gi + '|' + ti + '">' + linea(t, on ? 'sw-sel' : '') + '</div>';
+            }).join('')
               : '<p class="hint">vacío</p>') + '</div>';
-        }).join('') + '</div></div></div></div>';
+        }).join('') + '</div></div>' +
+        (hecho ? '<p class="hint sw-hint">' + (elegido
+          ? 'Ahora toca el equipo de otro grupo con el que lo quieres cambiar.'
+          : 'Si quieres, toca un equipo y luego otro de distinto grupo para intercambiarlos.') + '</p>' : '') +
+        '</div>';
+
+      var card = caja.querySelector('.so-card');
+      if (card && hecho) card.addEventListener('click', function (e) {
+        var n = e.target;
+        while (n && n !== card && !(n.getAttribute && n.getAttribute('data-sw'))) n = n.parentNode;
+        if (!n || n === card) return;
+        var par = n.getAttribute('data-sw').split('|'), gi = +par[0], ti = +par[1];
+        if (!elegido || elegido.gi === gi) {
+          elegido = (elegido && elegido.gi === gi && elegido.ti === ti) ? null : { gi: gi, ti: ti };
+        } else {
+          var A = gs[elegido.gi], B = gs[gi], t1 = A.teams[elegido.ti], t2 = B.teams[ti];
+          A.teams[elegido.ti] = t2; B.teams[ti] = t1;
+          puestos[ident(t1)] = B.name; puestos[ident(t2)] = A.name;
+          [A, B].forEach(function (g2) {
+            g2.de = {};
+            g2.teams.forEach(function (t) { g2.de[origen(t, opts.zonaDe)] = 1; });
+          });
+          ultima = t1.n + ' ⇄ ' + t2.n;
+          elegido = null;
+        }
+        pinta();
+      });
 
       manda(caja,
         function () { bola(); pinta(); },

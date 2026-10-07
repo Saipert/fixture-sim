@@ -770,13 +770,38 @@
               : '<small>' + esc(countryName(x.t)) + '</small>') + '</div>';
         }).join('') + '</div>';
     }).join('');
-    $('#wDrawGroups').innerHTML = ds.groups.map(function (g) {
-      return '<div class="gbox"><h4>' + esc(g.name) + '</h4>' + (g.teams.length ? g.teams.map(function (t) {
-        return '<div class="drawline">' + crest(t, 18) + '<span>' + esc(t.n) + '</span>' +
+    /* con el sorteo completo, se pueden cambiar equipos de grupo a mano */
+    var puedeCambiar = !!ds.done;
+    if (!puedeCambiar) swSel = null;
+    $('#wDrawGroups').innerHTML = ds.groups.map(function (g, gi) {
+      return '<div class="gbox"><h4>' + esc(g.name) + '</h4>' + (g.teams.length ? g.teams.map(function (t, ti) {
+        var on = swSel && swSel.gi === gi && swSel.ti === ti;
+        var l = '<div class="drawline' + (on ? ' sw-sel' : '') + '">' + crest(t, 18) + '<span>' + esc(t.n) + '</span>' +
           '<small>' + esc(countryName(t)) + '</small></div>';
+        return puedeCambiar ? '<div class="sw-eq" data-sw="' + gi + '|' + ti + '">' + l + '</div>' : l;
       }).join('') : '<p class="hint">vacío</p>') + '</div>';
-    }).join('');
+    }).join('') + (puedeCambiar ? '<p class="hint sw-hint">' + (swSel
+      ? 'Ahora toca el equipo de otro grupo con el que lo quieres cambiar.'
+      : 'Si quieres, toca un equipo y luego otro de distinto grupo para intercambiarlos.') + '</p>' : '');
   }
+  var swSel = null;
+  $('#wDrawGroups').addEventListener('click', function (e) {
+    var id = World.state && World.state.pendingDraws[0];
+    var c = id && World.state.conts[id], ds = c && c.drawState;
+    if (!ds || !ds.done || ds.kind === 'ko') return;
+    var n = e.target;
+    while (n && n !== this && !(n.getAttribute && n.getAttribute('data-sw'))) n = n.parentNode;
+    if (!n || n === this) return;
+    var par = n.getAttribute('data-sw').split('|'), gi = +par[0], ti = +par[1];
+    if (!swSel || swSel.gi === gi) {
+      swSel = (swSel && swSel.ti === ti) ? null : { gi: gi, ti: ti };
+    } else {
+      var A = ds.groups[swSel.gi], B = ds.groups[gi], t1 = A.teams[swSel.ti];
+      A.teams[swSel.ti] = B.teams[ti]; B.teams[ti] = t1;
+      swSel = null;
+    }
+    renderDraw();
+  });
   /* sorteo de eliminatorias: bombo 1 primeros de grupo, bombo 2 segundos */
   function renderKODraw(ds) {
     var quedan = ds.pot1.length + ds.pot2.length + (ds.current ? 1 : 0);
