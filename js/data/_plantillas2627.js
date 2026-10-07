@@ -9336,7 +9336,7 @@ window.PLANTILLAS_2627 = {
     ["Daniel Velásquez","GK",59,20], ["Deylan Paz","RB",56,21], ["Alexis Gamboa","CB",57,25],
     ["Guillermo Villalobos","CB",56,30], ["John Ruiz","LB",62,20], ["Celso Borges","DM",54,28],
     ["Creichel Pérez","CM",61,28], ["Roan Wilson","AM",58,31], ["Doryan Rodríguez","RW",62,22],
-    ["Ángel Zaldívar","ST",58,24], ["Luis Díaz","LW",84,28], ["Bayron Mora","GK",56,27],
+    ["Ángel Zaldívar","ST",58,24], ["Luis Díaz","LW",67,28], ["Bayron Mora","GK",56,27],
     ["Malcom Pilone","CM",58,32], ["Juanpi","LW",58,23], ["Anthony Hernández","RW",56,23],
     ["Daniel Chacón","CB",55,24], ["Farbod Samadian","LB",54,20], ["Deylan Aguilar","CM",54,33],
     ["Rónald Matarrita","CB",53,32], ["Washington Ortega","GK",53,26], ["Yeison Molina","LB",52,32],
