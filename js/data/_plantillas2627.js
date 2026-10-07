@@ -978,15 +978,15 @@ window.PLANTILLAS_2627 = {
     ["Brian Andrada","LW",54,29], ["Valentino Simoni","RW",51,22]
   ],
   "argentina|Huracán": [
-    ["Dylan Almonacid","GK",73,25], ["Lucca García","RB",75,29], ["Maxi Pacheco","CB",73,25],
-    ["Thiago Donozo","CB",72,25], ["Leonel Villafañe","LB",72,25], ["Lionel Acosta","DM",69,37],
-    ["Luciano Alzaa","CM",69,25], ["Gonzalo Sett","AM",69,25], ["Santiago Ávila","RW",62,25],
-    ["Pablo Páez","ST",63,25], ["Josué Nievas","LW",66,25], ["Esteban Pelayes","GK",72,25],
-    ["Cristian Mas","CB",71,25], ["Leonel Vangioni","RB",71,25], ["Bruno Espina","GK",70,25],
-    ["Nicolás Leal","CB",69,25], ["Cristian Ortubia","LB",69,25], ["Juan Cruz Romero","CM",68,25],
-    ["Gastón Pedernera","DM",67,25], ["Bruno Valdez","CB",64,34], ["Santiago Ferreyra","LW",64,25],
-    ["Germán Torres","ST",63,32], ["Darío Carrizo","ST",62,25], ["Emanuel Díaz","LB",60,24],
-    ["Andrés Chávez","RW",59,25]
+    ["Hernán Galíndez","GK",73,39,"ECU"], ["Lucas Blondel","RB",71,30,"SUI"], ["Fabio Pereyra","CB",71,36,"ARG"],
+    ["Hugo Nervo","CB",72,35,"ARG"], ["César Ibáñez","LB",68,27,"ARG"], ["Rodrigo Fernández Cedrés","DM",70,30,"URU"],
+    ["Leonardo Gil","CM",69,35,"CHI"], ["Oscar Romero","AM",71,34,"PAR"], ["Juan Bisanz","RW",69,25,"ARG"],
+    ["Jordy Caicedo","ST",71,28,"ECU"], ["Oscar Cortés","LW",68,22,"COL"], ["Sebastián Meza","GK",69,26,"ARG"],
+    ["Nazareno Durán","GK",62,22,"ARG"], ["Federico Vera","RB",69,28,"ARG"], ["Daniel Zabala","CB",66,23,"ARG"],
+    ["Ignacio Campo","RB",62,21,"ARG"], ["Máximo Palazzo","CB",61,21,"ARG"], ["Leandro Lescano","LB",62,19,"ARG"],
+    ["Santiago Luján","CM",64,24,"ARG"], ["Facundo Waller","CM",70,29,"URU"], ["Emmanuel Ojeda","DM",66,28,"ARG"],
+    ["Lautaro Mora","DM",58,21,"ARG"], ["Facundo Kalinger","CM",58,21,"ARG"], ["Thaiel Peralta","AM",62,18,"ARG"],
+    ["Ignacio Pussetto","ST",70,30,"ARG"], ["Bruno Barticciotto","ST",66,25,"CHI"], ["Tomás Uribe","RW",58,19,"ARG"]
   ],
   "argentina|Independiente": [
     ["Joaquín Blázquez","GK",73,25,"ARG"], ["Franco Calderón","CB",69,28,"ARG"], ["Jonathan de Irastorza","CB",69,21,"ARG"],
@@ -996,17 +996,17 @@ window.PLANTILLAS_2627 = {
     ["Rodrigo Rey","GK",73,35,"ARG"], ["Santiago Mele","GK",60,29,"URU"], ["Manuel Tasso","GK",60,25,"ARG"],
     ["Diego Segovia","GK",60,26,"URU"], ["Fernando Closter","CB",68,18,"ARG"], ["Facundo Zabala","CB",66,27,"ARG"],
     ["Leonardo Godoy","CB",66,31,"ARG"], ["Gonzalo Bordón","CB",66,21,"ARG"], ["Juan Arrayago","CB",65,18,"ARG"],
-    ["Sebastián Valdéz","CB",65,31,"ARG"], ["Federico Vera","CB",65,28,"ARG"], ["Patricio Ostachuk","CB",65,26,"ARG"],
+    ["Sebastián Valdéz","CB",65,31,"ARG"], ["Patricio Ostachuk","CB",65,26,"ARG"],
     ["Franco Paredes","CB",65,27,"ARG"], ["Agustín Quiroga","CB",63,24,"ARG"], ["Luciano Barros Ayala","CB",63,21,"ARG"],
     ["Matheo Benítez Machuca","CM",67,17,"ARG"], ["Mateo Pérez Curci","CM",67,20,"ARG"], ["Facundo Cruz","CM",67,20,"ARG"],
     ["Iván Marcone","CM",67,36,"ARG"], ["Josías Palais","CM",64,20,"ARG"], ["Tomás Parmo","CM",64,18,"ARG"],
     ["David Martínez","CM",64,22,"ARG"], ["Joel Medina","CM",64,19,"ARG"], ["Imanol Machuca","CM",64,26,"ARG"],
-    ["Chimy Ávila","CM",64,32,"ARG"], ["Rodrigo Fernández Cedrés","CM",64,30,"URU"], ["Kevin López","CM",64,25,"ARG"],
+    ["Chimy Ávila","CM",64,32,"ARG"], ["Kevin López","CM",64,25,"ARG"],
     ["Jhonny Quiñónez","CM",64,28,"ECU"], ["Santiago Salle","CM",63,22,"ARG"], ["Sergio Ortiz","CM",63,25,"ARG"],
     ["Mirko Díaz","CM",63,20,"ARG"], ["Matías Abaldo","ST",70,22,"URU"], ["Nahuel Junco","ST",70,21,"ARG"],
     ["Felipe Tempone","ST",70,20,"ARG"], ["Rodrigo Márquez","ST",65,24,"ARG"], ["Iván Morales","ST",65,27,"CHI"],
     ["Wálter Mazzantti","ST",65,30,"ARG"], ["Ignacio Maestro Puch","ST",65,23,"ARG"], ["Tomás Rambert","ST",65,22,"ARG"],
-    ["Braian Martínez","ST",65,27,"ARG"], ["Santiago López","ST",65,20,"ARG"], ["Ignacio Pussetto","ST",65,31,"ARG"],
+    ["Braian Martínez","ST",65,27,"ARG"], ["Santiago López","ST",65,20,"ARG"], 
     ["Enzo Taborda","ST",65,21,"ARG"], ["Alan Daian Laprida","ST",65,22,"ARG"]
   ],
   "argentina|Independiente Rivadavia": [
