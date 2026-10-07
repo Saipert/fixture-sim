@@ -1003,7 +1003,7 @@ window.PLANTILLAS_2627 = {
     ["Nicolás Bolcato","GK",64,22], ["Ezequiel Bonifacio","RB",70,32], ["Leonard Costa","CB",72,28],
     ["Iván Villalba","CB",68,31], ["Juan Elordi","LB",66,32], ["Luis Sequeira","DM",68,23],
     ["Leonel Bucca","CM",69,27], ["Matías Fernández","AM",63,25], ["Fabrizio Sartori","RW",63,24],
-    ["Maximiliano Salas","ST",76,29], ["Luis Díaz","LW",87,22], ["Emmanuel Gómez Riga","GK",58,25],
+    ["Maximiliano Salas","ST",76,29], ["Luis Díaz","LW",67,22], ["Emmanuel Gómez Riga","GK",58,25],
     ["Álex Arce","LW",75,31], ["Sheyko Studer","CB",68,24], ["José Florentín","CM",67,30],
     ["Nahuel Arena","CB",66,28], ["Stefano Moreyra","CM",66,25], ["Victorio Ramis","ST",66,32],
     ["Kevin Vázquez","CM",65,25], ["Luciano Gómez","CB",63,30], ["Tomás Bottari","CM",63,25],
