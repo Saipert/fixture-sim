@@ -32,9 +32,11 @@
     '4-2-3-1': ['GK', 'RB', 'CB', 'CB', 'LB', 'DM', 'DM', 'RW', 'AM', 'LW', 'ST'],
     '4-4-2': ['GK', 'RB', 'CB', 'CB', 'LB', 'RW', 'CM', 'CM', 'LW', 'ST', 'ST'],
     '4-1-2-1-2': ['GK', 'RB', 'CB', 'CB', 'LB', 'DM', 'CM', 'CM', 'AM', 'ST', 'ST'],
-    '3-5-2': ['GK', 'CB', 'CB', 'CB', 'RWB', 'CM', 'CM', 'CM', 'LWB', 'ST', 'ST'],
+    /* en las líneas de tres, los carrileros son volantes (AM) y no laterales:
+       van en los extremos de la línea del medio */
+    '3-5-2': ['GK', 'CB', 'CB', 'CB', 'AM', 'CM', 'CM', 'CM', 'AM', 'ST', 'ST'],
     '5-3-2': ['GK', 'RWB', 'CB', 'CB', 'CB', 'LWB', 'DM', 'CM', 'AM', 'ST', 'ST'],
-    '3-4-3': ['GK', 'CB', 'CB', 'CB', 'RWB', 'CM', 'CM', 'LWB', 'RW', 'ST', 'LW']
+    '3-4-3': ['GK', 'CB', 'CB', 'CB', 'AM', 'CM', 'CM', 'AM', 'RW', 'ST', 'LW']
   };
   /* penalizacion por jugar fuera de su puesto */
   function misfit(natural, slot) {
