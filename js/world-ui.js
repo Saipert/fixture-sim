@@ -261,6 +261,7 @@
             Carrera.limpia();
             var j = Carrera.crea(datos);
             Carrera.ajustaSeleccion();
+            inyectaJeque();
             enterGame(j.club);
           }
         });
@@ -394,6 +395,24 @@
   selPaint();
   paintStartPick();
 
+  /* Modo jeque: el dinero que se inyecta al club con el que se empieza, en
+     millones y con tope de 300. Se lee de la pantalla de elegir modo. */
+  var JEQUE_MAX = 300;
+  function jequeMillones() {
+    var el = $('#wJeque');
+    var v = el ? Math.floor(+el.value) : 0;
+    return isFinite(v) && v > 0 ? Math.min(JEQUE_MAX, v) : 0;
+  }
+  function inyectaJeque() {
+    var m = jequeMillones();
+    if (!m || !World.state) return;
+    World.state.caja = (World.state.caja || 0) + m * 1e6;
+    World.state.jeque = m;
+  }
+  $('#wJeque').onchange = function () {
+    this.value = jequeMillones();
+  };
+
   function enterGame(team) {
     /* partida nueva: lo que hubiera guardado de otra carrera ya no sirve */
     mundoCarrera = null;
@@ -422,6 +441,7 @@
       miSel = selNac;
     }
     World.state.miSeleccion = miSel ? miSel.s : null;
+    inyectaJeque();
     enterGame(startTeam);
   };
 

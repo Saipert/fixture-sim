@@ -2033,3 +2033,9 @@ body.conclub{scrollbar-color:var(--club-scroll,var(--line)) rgba(255,255,255,.04
 .sw-eq:hover .drawline{background:rgba(255,255,255,.07)}
 .drawline.sw-sel{outline:2px solid #ffd23f;background:rgba(255,210,63,.12);border-radius:8px}
 .sw-hint{margin:8px 2px 0}
+
+/* Modo jeque: el dinero que se inyecta al club antes de empezar */
+.jeque{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:14px;padding:10px 12px;
+  border:1px solid var(--line);border-radius:10px;background:var(--bg2)}
+.jeque input{width:96px}
+.jeque .hint{flex:1 1 220px;margin:0}
