@@ -325,6 +325,10 @@
   <div class="card">
     <h3>2 · Formato</h3>
     <div class="toolbar">
+      <label for="bldName">Nombre del torneo</label>
+      <input type="text" id="bldName" maxlength="60" placeholder="Torneo personalizado" autocomplete="off">
+    </div>
+    <div class="toolbar">
       <label>Fase de grupos</label>
       <select id="bldGroupSize">
         <option value="0">Sin grupos (eliminación directa)</option>
@@ -336,6 +340,18 @@
       <label class="chk"><input type="checkbox" id="bldGroupDouble"> Grupos ida y vuelta</label>
       <label class="chk"><input type="checkbox" id="bldLegs"> Eliminatorias ida y vuelta</label>
       <label class="chk"><input type="checkbox" id="bldSeeded" checked> Bombos por nivel</label>
+    </div>
+    <div class="toolbar">
+      <label for="bldDrawGroups">Sorteo de los grupos</label>
+      <select id="bldDrawGroups">
+        <option value="auto" selected>Sorteo (bolas)</option>
+        <option value="manual">Manual</option>
+      </select>
+      <label for="bldDrawKO">Sorteo de las eliminatorias</label>
+      <select id="bldDrawKO">
+        <option value="auto" selected>Sorteo (bolas)</option>
+        <option value="manual">Manual</option>
+      </select>
     </div>
     <div class="format-box" id="bldFormat"></div>
     <button id="btnBld" class="primary">Jugar torneo</button>

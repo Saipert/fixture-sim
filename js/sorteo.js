@@ -66,10 +66,181 @@
     };
   }
 
+
+  /* =====================================================================
+     SORTEO A MANO
+     Nada de bolas: se toca un equipo y se toca el sitio al que va. Para
+     quien quiere armar los grupos o los cruces a su gusto.
+     ===================================================================== */
+  function barraManual(listo, falta, boton, extra) {
+    return '<div class="toolbar so-bar">' +
+      '<button class="mini" data-so="azar"' + (falta ? '' : ' disabled') + '>Completar al azar</button>' +
+      '<button class="mini" data-so="vaciar">Vaciar</button>' +
+      '<button class="mini' + (listo ? ' primary' : '') + '" data-so="ok"' + (listo ? '' : ' disabled') + '>' +
+      esc(boton || 'Empezar a jugar') + '</button>' +
+      '<span class="hint">' + (listo ? 'Todo colocado. Ya se puede jugar.' : extra) + '</span></div>';
+  }
+  function enlazaManual(caja, alToque) {
+    var card = caja.querySelector('.so-card');
+    if (!card) return;
+    card.onclick = function (e) {
+      var n = e.target;
+      while (n && n !== card && !(n.getAttribute && (n.getAttribute('data-so') || n.getAttribute('data-mp')))) n = n.parentNode;
+      if (!n || n === card) return;
+      alToque(n.getAttribute('data-so'), n.getAttribute('data-mp'));
+    };
+  }
+
+  function gruposManual(caja, opts) {
+    var campo = opts.campo.slice().sort(function (a, b) { return (b.ovr || 0) - (a.ovr || 0); });
+    var n = opts.nGrupos, cupo = Math.ceil(campo.length / n);
+    var pool = campo.slice(), sel = null, ultima = '';
+    var gs = [];
+    for (var g = 0; g < n; g++) gs.push({ name: 'Grupo ' + String.fromCharCode(65 + g), teams: [] });
+
+    function azar() {
+      baraja(pool.slice()).forEach(function (t) {
+        var o = origen(t, opts.zonaDe);
+        var sitio = gs.filter(function (gr) { return gr.teams.length < cupo; });
+        var limpios = sitio.filter(function (gr) {
+          return !gr.teams.some(function (x) { return origen(x, opts.zonaDe) === o; });
+        });
+        if (limpios.length) sitio = limpios;
+        sitio.sort(function (x, y) { return x.teams.length - y.teams.length; });
+        if (!sitio.length) return;
+        sitio[0].teams.push(t);
+        pool.splice(pool.indexOf(t), 1);
+      });
+      sel = null;
+    }
+    function pinta() {
+      var listo = !pool.length;
+      caja.innerHTML = '<div class="card so-card wcdraw"><h3>' +
+        esc((opts.titulo || 'Grupos') + ' · a mano') + ' <small>' +
+        esc(opts.sub || (campo.length + ' equipos · ' + n + ' grupos')) + '</small></h3>' +
+        barraManual(listo, !listo, opts.boton,
+          sel ? 'Ahora toca el grupo donde va ' + sel.n + '.' : 'Toca un equipo y luego su grupo. ' + pool.length + ' sin colocar.') +
+        '<div class="drawsplit"><div class="drawcol pots-col"><h4 class="drawhd">Sin colocar</h4><div class="pots">' +
+        '<div class="potbox now"><h4>Equipos<small>' + pool.length + ' por colocar</small></h4>' +
+        (pool.length ? pool.map(function (t, i) {
+          return '<div class="sw-eq" data-mp="p|' + i + '">' + linea(t, sel === t ? 'sw-sel' : '', String(t.ovr || '')) + '</div>';
+        }).join('') : '<p class="hint">Todos colocados</p>') + '</div></div></div>' +
+        '<div class="drawcol groups-col"><h4 class="drawhd">Grupos</h4><div class="groups">' +
+        gs.map(function (gr, gi) {
+          return '<div class="gbox' + (sel && gr.teams.length < cupo ? ' wait' : '') + '" data-mp="g|' + gi + '"><h4>' +
+            esc(gr.name) + '<small>' + gr.teams.length + '/' + cupo + '</small></h4>' +
+            (gr.teams.length ? gr.teams.map(function (t, ti) {
+              return '<div class="sw-eq" data-mp="q|' + gi + '|' + ti + '">' + linea(t, '', '✕') + '</div>';
+            }).join('') : '<p class="hint">vacío</p>') + '</div>';
+        }).join('') + '</div></div></div></div>';
+      enlazaManual(caja, function (so, mp) {
+        if (so === 'azar') { azar(); return pinta(); }
+        if (so === 'vaciar') {
+          gs.forEach(function (gr) { pool = pool.concat(gr.teams); gr.teams = []; });
+          pool.sort(function (a, b) { return (b.ovr || 0) - (a.ovr || 0); });
+          sel = null; return pinta();
+        }
+        if (so === 'ok') {
+          caja.innerHTML = '';
+          return opts.onListo(gs.map(function (gr) { return { name: gr.name, teams: gr.teams }; }));
+        }
+        var par = mp.split('|');
+        if (par[0] === 'p') { var t = pool[+par[1]]; sel = sel === t ? null : t; }
+        else if (par[0] === 'q') {
+          var gr2 = gs[+par[1]], quita = gr2.teams.splice(+par[2], 1)[0];
+          if (quita) { pool.push(quita); pool.sort(function (a, b) { return (b.ovr || 0) - (a.ovr || 0); }); }
+          sel = null;
+        } else if (par[0] === 'g' && sel) {
+          var dest = gs[+par[1]];
+          if (dest.teams.length < cupo) {
+            dest.teams.push(sel); pool.splice(pool.indexOf(sel), 1); sel = null;
+          }
+        }
+        pinta();
+      });
+    }
+    pinta();
+    caja.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function crucesManual(caja, opts) {
+    var esperan = (opts.esperan || []).slice();
+    var campo = opts.bombos[0].concat(opts.bombos[1]).sort(function (a, b) { return (b.ovr || 0) - (a.ovr || 0); });
+    var pool = campo.slice(), hechos = [], sel = null;
+
+    function azar() {
+      var m = baraja(pool.slice());
+      while (m.length > 1) hechos.push([m.shift(), m.shift()]);
+      pool = m; sel = null;
+    }
+    function pinta() {
+      var listo = pool.length < 2;
+      caja.innerHTML = '<div class="card so-card wcdraw"><h3>' +
+        esc((opts.titulo || 'Cuadro') + ' · a mano') + ' <small>' +
+        esc(opts.sub || (campo.length + ' equipos')) + '</small></h3>' +
+        barraManual(listo, !listo, opts.boton,
+          sel ? 'Ahora toca su rival: ' + sel.n + ' será el local de la ida.' :
+            'Toca un equipo y luego su rival. ' + pool.length + ' sin cruzar.') +
+        '<div class="drawsplit"><div class="drawcol pots-col"><h4 class="drawhd">Sin cruzar</h4><div class="pots">' +
+        '<div class="potbox now"><h4>Equipos<small>' + pool.length + ' por colocar</small></h4>' +
+        (pool.length ? pool.map(function (t, i) {
+          return '<div class="sw-eq" data-mp="p|' + i + '">' + linea(t, sel === t ? 'sw-sel' : '', String(t.ovr || '')) + '</div>';
+        }).join('') : '<p class="hint">Todos cruzados</p>') + '</div>' +
+        (esperan.length ? '<div class="potbox"><h4>Ya esperan<small>' + esperan.length + '</small></h4>' +
+          esperan.map(function (t) { return linea(t, 'done'); }).join('') + '</div>' : '') +
+        '</div></div>' +
+        '<div class="drawcol groups-col"><h4 class="drawhd">Eliminatorias</h4><div class="socruces">' +
+        (hechos.length ? hechos.map(function (p, i) {
+          return '<div class="socruce" data-mp="q|' + i + '"><span class="so-num">' + (i + 1) + '</span>' +
+            '<span class="so-eq">' + crest(p[0], 22) + '<b>' + esc(p[0].n) + '</b></span>' +
+            '<em>vs</em>' +
+            '<span class="so-eq der"><b>' + esc(p[1].n) + '</b>' + crest(p[1], 22) + '</span>' +
+            '<em>✕</em></div>';
+        }).join('') : '<p class="hint">Todavía no has armado ningún cruce.</p>') +
+        '</div></div></div></div>';
+      enlazaManual(caja, function (so, mp) {
+        if (so === 'azar') { azar(); return pinta(); }
+        if (so === 'vaciar') {
+          hechos.forEach(function (p) { pool.push(p[0], p[1]); });
+          hechos = []; sel = null;
+          pool.sort(function (a, b) { return (b.ovr || 0) - (a.ovr || 0); });
+          return pinta();
+        }
+        if (so === 'ok') {
+          caja.innerHTML = '';
+          var lista = [];
+          hechos.forEach(function (p) { lista.push(p[0], p[1]); });
+          /* si queda uno suelto (cuadro impar) pasa de oficio con los que esperan */
+          return opts.onListo(lista, esperan.concat(pool));
+        }
+        var par = mp.split('|');
+        if (par[0] === 'p') {
+          var t = pool[+par[1]];
+          if (!sel) sel = t;
+          else if (sel === t) sel = null;
+          else {
+            hechos.push([sel, t]);
+            pool.splice(pool.indexOf(sel), 1); pool.splice(pool.indexOf(t), 1);
+            sel = null;
+          }
+        } else if (par[0] === 'q') {
+          var quita = hechos.splice(+par[1], 1)[0];
+          pool.push(quita[0], quita[1]);
+          pool.sort(function (a, b) { return (b.ovr || 0) - (a.ovr || 0); });
+          sel = null;
+        }
+        pinta();
+      });
+    }
+    pinta();
+    caja.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
   /* =====================================================================
      SORTEO DE GRUPOS
      ===================================================================== */
   function grupos(caja, opts) {
+    if (opts.manual && !opts.reparto) return gruposManual(caja, opts);
     var campo = opts.campo.slice();
     var n = opts.nGrupos;
     /* con siembra los bombos van por nivel; sin ella, todos al mismo saco */
@@ -192,6 +363,7 @@
      Dos bombos: sale uno de cada uno y queda abierta la eliminatoria.
      ===================================================================== */
   function cruces(caja, opts) {
+    if (opts.manual) return crucesManual(caja, opts);
     var esperan = (opts.esperan || []).slice();
     var b1 = opts.bombos[0].slice(), b2 = opts.bombos[1].slice();
     var nom = opts.nombres || ['Bombo 1', 'Bombo 2'];
