@@ -995,7 +995,14 @@
     superCopas(w, rep);
     if (w === W.cwcDraw) setupCWC(rep);
     var gi = W.cwcGrupos.indexOf(w);
-    if (gi >= 0 && C.cwc.groups) cwcJornada(C.cwc, gi, rep);
+    if (gi >= 0 && C.cwc.groups) {
+      cwcJornada(C.cwc, gi, rep);
+      /* Con la última jornada ya están los cuartos: se arman ahí y no al
+         empezar la fase final, para que el calendario del club clasificado
+         los muestre en cuanto acaban los grupos. Si no, parecía que la
+         temporada del club había terminado. */
+      if (gi === W.cwcGrupos.length - 1 && !C.cwc.koRounds.length) cwcCuartos(C.cwc);
+    }
     var ci = W.cwc.indexOf(w);
     if (ci >= 0) {
       var c = C.cwc;
@@ -1728,6 +1735,14 @@
     state.selCompleta = false;
     return true;
   }
+  /* ¿el club que se sigue está en un Mundial de Clubes que aún no terminó?
+     Aunque ya no juegue (eliminado en grupos), la fase final se tiene que
+     poder ver antes de dar la temporada por cerrada. */
+  function mundialEnCurso() {
+    var c = state && state.conts && state.conts.cwc;
+    return !!(c && !c.champion && c.pool && state.detailTeam &&
+      c.pool.indexOf(state.detailTeam) >= 0 && state.week < W.total);
+  }
   function seleccionesPendientes() {
     return !!(global.SelCarrera && state.selHecha !== state.year);
   }
@@ -1927,7 +1942,7 @@
 
   global.World = {
     create: create, advanceWeek: advanceWeek, advanceTo: advanceTo,
-    advanceUntilTeam: advanceUntilTeam, endSeason: endSeason,
+    advanceUntilTeam: advanceUntilTeam, mundialEnCurso: mundialEnCurso, endSeason: endSeason,
     seasonSummary: seasonSummary, computeQualification: computeQualification,
     cerrarMercado: cerrarMercado,
     teamPlayedIn: teamPlayedIn, weeks: W, zonesFor: zonesFor, leagueCountry: leagueCountry,

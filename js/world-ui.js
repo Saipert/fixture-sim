@@ -1768,6 +1768,10 @@
       (c.playoffTies || []).concat(c.playoffHechas || []).forEach(function (t) {
         ties.push({ t: t, n: 'Play-off', semanas: World.weeks.playoff });
       });
+      /* el tercer puesto del Mundial de Clubes se juega antes que la final */
+      if (cid === 'cwc' && c.tercerPuesto) {
+        ties.push({ t: c.tercerPuesto, n: 'Tercer puesto', semanas: [World.weeks.cwc[2]] });
+      }
       (c.koRounds || []).forEach(function (r, ri) {
         r.ties.forEach(function (t) {
           ties.push({ t: t, n: r.name, slot: r.slot,
@@ -1805,6 +1809,32 @@
         });
       });
     });
+    /* La Supercopa de UEFA y la Recopa: se anuncian en cuanto se sabe quién
+       las juega, o el menú dice «liga» y la simulación rápida saca otro
+       partido. */
+    function campeon(id) { var k = st.conts[id]; return k && k.champion ? k.champion : null; }
+    var SC = st.superCopas || {};
+    var wsc = World.weeks.superCopas;
+    if (SC.uefa || (campeon('ucl') && campeon('uel') && campeon('ucl') !== campeon('uel'))) {
+      var su = SC.uefa, ua = su ? su.a : campeon('ucl'), ub = su ? su.b : campeon('uel');
+      if (ua === who || ub === who) {
+        out.push({ week: wsc[0], cmp: 'Cont.', comp: 'Supercopa de UEFA', round: 'Final',
+          neutral: true, home: ua === who, opp: ua === who ? ub : ua,
+          res: su ? { h: ua, a: ub, s: su.s } : null, pens: su ? su.pens : null });
+      }
+    }
+    var rc = SC.conmebol, la = campeon('libertadores'), sd = campeon('sudamericana');
+    if (rc || (la && sd && la !== sd)) {
+      var ra = rc ? rc.a : sd, rb = rc ? rc.b : la;
+      if (ra === who || rb === who) {
+        out.push({ week: wsc[0], cmp: 'Cont.', comp: 'Recopa Sudamericana', round: 'Ida',
+          home: ra === who, opp: ra === who ? rb : ra,
+          res: rc && rc.leg1 ? { h: ra, a: rb, s: rc.leg1.s } : null });
+        out.push({ week: wsc[1], cmp: 'Cont.', comp: 'Recopa Sudamericana', round: 'Vuelta',
+          home: rb === who, opp: rb === who ? ra : rb,
+          res: rc && rc.leg2 ? { h: rb, a: ra, s: rc.leg2.s } : null, pens: rc ? rc.pens : null });
+      }
+    }
     /* Lo que sigue en la cola todavía no lo viste: no se enseña el marcador
        o el calendario te cuenta el final antes de jugarlo. */
     var enCola = {};
@@ -2082,7 +2112,13 @@
     var nextCard;
     /* lo primero, el parón de selecciones: hasta que no se juegue no tiene
        sentido cerrar la temporada */
-    if ((over || !nx) && !(nx && nx.porVer) &&
+    if (!over && !nx && World.mundialEnCurso && World.mundialEnCurso()) {
+      nextCard = '<div class="nextm"><div class="comp">Mundial de Clubes</div>' +
+        '<p class="hint" style="margin:12px 0">Tu club ya no tiene partidos, pero la fase final ' +
+        'sigue. Avanza fecha a fecha y mírala en «Resultados».</p>' +
+        '<div class="simbtns"><button class="primary" id="bWeek">Seguir el Mundial de Clubes</button>' +
+        '<button class="mini" id="bRest">Ir al final de la temporada</button></div></div>';
+    } else if ((over || !nx) && !(nx && nx.porVer) &&
         World.seleccionesPendientes && World.seleccionesPendientes()) {
       nextCard = '<div class="nextm"><div class="comp">Se acabó la temporada del club</div>' +
         '<p class="hint" style="margin:12px 0">Queda el parón de selecciones. ' +
