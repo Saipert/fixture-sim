@@ -3175,7 +3175,7 @@
       }).join('') : '<p class="hint nc-vacio">' + (pConf === 'MIAS' || pConf === 'SEL'
         ? 'Elige una competición de la lista.' : 'Elige un país para ver sus competiciones.') + '</p>';
       panel.innerHTML = '<div class="nc-pills">' + pills + '</div>' +
-        '<div class="nc-cols"><div class="nc-col">' + izq + '</div>' +
+        '<div class="nc-cols' + (L.cp.length ? ' hay-cp' : '') + '"><div class="nc-col">' + izq + '</div>' +
         '<div class="nc-col">' + der + '</div></div>';
       panel.querySelectorAll('.nc-pill').forEach(function (b) {
         b.onclick = function () { pConf = b.dataset.k; pScope = null; pinta(); };
@@ -3194,6 +3194,9 @@
     pinta();
     var r = btn.getBoundingClientRect();
     panel.style.top = (r.bottom + 6) + 'px';
+    /* si no cabe, el panel entero se desplaza: sin esto, en el móvil las
+       competiciones del país elegido quedaban fuera de la pantalla */
+    panel.style.maxHeight = Math.max(200, window.innerHeight - r.bottom - 14) + 'px';
     panel.style.left = Math.max(8, Math.min(r.left, window.innerWidth - panel.offsetWidth - 8)) + 'px';
     setTimeout(function () {
       document.addEventListener('click', fueraNav, true);
