@@ -256,6 +256,7 @@
       if (modo === 'jugador') {
         $('#wStart').classList.add('hidden');
         CarreraUI.abreCreacion(function (datos) {
+          Mundo.limpio();
           World.create({ manualDraw: false });
           if (window.Carrera) {
             Carrera.limpia();
@@ -415,7 +416,6 @@
 
   function enterGame(team) {
     /* partida nueva: lo que hubiera guardado de otra carrera ya no sirve */
-    mundoCarrera = null;
     me = team;
     if (modo !== 'jugador' && window.Carrera) Carrera.limpia();
     rConf = 'MIAS';
@@ -434,6 +434,7 @@
   $('#wBegin').onclick = function () {
     if (!startTeam) return;
     modo = 'dt';
+    Mundo.limpio();
     World.create({ manualDraw: $('#wManual').checked, cwcHost: cwcHost });
     miSel = null;
     if ($('#wConSel') && $('#wConSel').checked) {
@@ -464,7 +465,7 @@
   }
   refreshSaveInfo();
   $('#wContinue').onclick = function () {
-    try { cargaPartida(SaveGame.load(modo)); } catch (e) { alert('No pude cargar la partida: ' + e.message); }
+    try { Mundo.limpio(); cargaPartida(SaveGame.load(modo)); } catch (e) { alert('No pude cargar la partida: ' + e.message); }
   };
   /* al cargar, el modo lo dice la propia partida */
   function cargaPartida(team) {
@@ -519,6 +520,7 @@
   };
   $('#wFile').onchange = function () {
     var f = this.files[0]; if (!f) return;
+    Mundo.limpio();
     SaveGame.importFile(f, function (err, team) {
       if (err) { alert('No pude abrir el archivo: ' + err.message); return; }
       cargaPartida(team);
@@ -4269,47 +4271,12 @@
     renderBody();
   }
 
-  /* =====================================================================
-     EL MODO CARRERA ES UN MUNDO APARTE
-     Los ascensos, los descensos, los fichajes y los años que cumple cada
-     jugador sólo valen dentro de la partida. Al salir se devuelve el mundo
-     tal y como estaba, y al volver se pone otra vez el de la carrera.
-     ===================================================================== */
-  var mundoOriginal = null, mundoCarrera = null;
-  function capturaMundo() {
-    var snap = { ligas: {}, eq: [] };
-    Object.keys(LEAGUES).forEach(function (id) {
-      var lg = LEAGUES[id];
-      if (!lg || !lg.teams) return;
-      snap.ligas[id] = lg.teams.slice();
-      lg.teams.forEach(function (t) {
-        snap.eq.push({
-          t: t, lg: t.leagueId, ovr: t.ovr,
-          filas: (t.p || []).slice(),
-          datos: (t.p || []).map(function (x) { return x.slice(); })
-        });
-      });
-    });
-    return snap;
-  }
-  function aplicaMundo(snap) {
-    if (!snap) return;
-    Object.keys(snap.ligas).forEach(function (id) {
-      if (LEAGUES[id]) LEAGUES[id].teams = snap.ligas[id].slice();
-    });
-    snap.eq.forEach(function (e) {
-      e.t.leagueId = e.lg;
-      e.t.ovr = e.ovr;
-      e.t.p = e.filas.slice();
-      /* las fichas se rellenan en su sitio: hay medio programa apuntando
-         a ellas y cambiarlas por copias rompería esas referencias */
-      e.filas.forEach(function (fila, i) {
-        var d = e.datos[i];
-        for (var k = 0; k < d.length; k++) fila[k] = d[k];
-        fila.length = d.length;
-      });
-    });
-  }
+  /* El modo carrera es un mundo aparte (ver mundo.js): al entrar se pone el
+     de la partida y al salir se devuelve el original a los demás modos. */
+  window.Career = {
+    preparaMundo: function () { Mundo.entra(started); },
+    sacaMundo: function () { Mundo.sale(started); }
+  };
 
   /* lo que necesita la ficha de club para pintar el calendario de cualquier equipo */
 })();
