@@ -367,7 +367,7 @@
       if (!rondas.length) return '';
       return rondas.map(function (c) {
         return '<div class="br-lista"><h5>' + esc(c.name) +
-          ' <small>' + c.ties.length + ' cruces</small></h5>' +
+          ' <small>' + c.ties.length + (c.ties.length === 1 ? ' cruce' : ' cruces') + '</small></h5>' +
           '<div class="br-listagrid">' + c.ties.map(function (t) {
             return ladoTie(t, c.activa);
           }).join('') + '</div></div>';
@@ -401,6 +401,13 @@
           '<div class="wcbr-col centro"><h5>' + esc(b[0].name) + '</h5>' +
           ladoTie(b[0].ties[0], b[0].activa) + campeonHTML() + '</div></div>' +
           rondasEnListaHTML(previas) + '</div>';
+      }
+      /* En el móvil el cuadro simétrico no cabe: los nombres se cortan y los
+         marcadores quedan diminutos. Ahí va ronda a ronda, una debajo de otra. */
+      if (global.matchMedia && global.matchMedia('(max-width:720px)').matches) {
+        return '<div class="card"><h3>' + esc(opts.title || 'Eliminatorias') +
+          ' <small>' + esc(titulo) + '</small></h3>' +
+          rondasEnListaHTML(previas.concat(b)) + campeonHTML() + '</div>';
       }
       var cuerpo = b.slice(0, b.length - 1), fin = b[b.length - 1];
       var izq = cuerpo.map(function (c) {

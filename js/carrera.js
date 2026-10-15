@@ -469,7 +469,16 @@
   function crecimiento(rend) {
     var b = bandaDeEdad(J.edad);
     var r = Math.max(0, Math.min(1, rend || 0));
-    return Math.round(b.min + r * (b.max - b.min));
+    var d = b.min + r * (b.max - b.min);
+    /* Cuanto más alta la media, más cuesta subir: hasta los 68 se crece a
+       ritmo completo y desde ahí el aumento se va recortando hasta una
+       cuarta parte a los 88. Llegar arriba exige varias temporadas buenas
+       seguidas, pero un crack sigue pudiendo alcanzar los 90 y pico. */
+    if (d > 0) {
+      var f = J.ovr <= 68 ? 1 : J.ovr >= 88 ? 0.25 : 1 - 0.75 * (J.ovr - 68) / 20;
+      d *= f;
+    }
+    return Math.round(d);
   }
 
   /* ---------------------------------------------------------------------

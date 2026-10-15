@@ -700,7 +700,9 @@ span.stars.big{font-size:16px}
 .wcbr.cols-4{grid-template-columns:repeat(4,minmax(0,1fr)) minmax(0,1.15fr) repeat(4,minmax(0,1fr))}
 .wcbr.cols-5{grid-template-columns:repeat(5,minmax(0,1fr)) minmax(0,1.15fr) repeat(5,minmax(0,1fr))}
 .wcbr.una{grid-template-columns:minmax(0,1fr);max-width:320px;margin:0 auto}
-.qsplit.dos{grid-template-columns:1.1fr 1fr 1fr}
+.qsplit.dos{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr) minmax(0,1fr)}
+@media (max-width:1100px){.qsplit.dos{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+@media (max-width:720px){.qsplit.dos{grid-template-columns:minmax(0,1fr)}}
 
 /* llave grande (copas nacionales): columnas seguidas y scroll lateral */
 .llave-larga{overflow-x:auto;padding-bottom:6px}
@@ -2031,3 +2033,23 @@ body.conclub{scrollbar-color:var(--club-scroll,var(--line)) rgba(255,255,255,.04
 .sw-eq:hover .drawline{background:rgba(255,255,255,.07)}
 .drawline.sw-sel{outline:2px solid #ffd23f;background:rgba(255,210,63,.12);border-radius:8px}
 .sw-hint{margin:8px 2px 0}
+
+/* Modo jeque: el dinero que se inyecta al club antes de empezar */
+.jeque{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:14px;padding:10px 12px;
+  border:1px solid var(--line);border-radius:10px;background:var(--bg2)}
+.jeque input{width:96px}
+.jeque .hint{flex:1 1 220px;margin:0}
+
+/* Sorteo de grupos: los grupos van uno debajo de otro, cada uno en una sola
+   fila con sus equipos en línea, así se ven todos a la vez y de un vistazo */
+@media (min-width:721px){
+  .so-card .groups{grid-template-columns:minmax(0,1fr);gap:8px}
+  .so-card .gbox{display:grid;grid-template-columns:76px repeat(4,minmax(0,1fr));grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);
+    align-items:center;gap:10px;padding:8px 12px;border-left:3px solid var(--acc)}
+  .so-card .gbox h4{margin:0;font-size:13px;letter-spacing:.08em;color:var(--acc2)}
+  .so-card .gbox h4 small{float:none;margin-left:6px}
+  .so-card .gbox .sw-eq,.so-card .gbox .drawline{min-width:0;padding:6px 8px;border-radius:8px;background:var(--card)}
+  .so-card .gbox .sw-eq .drawline{padding:0;background:none}
+  .so-card .gbox .drawline span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .so-card .gbox .hint{margin:0}
+}

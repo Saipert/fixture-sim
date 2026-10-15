@@ -8,10 +8,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@200;300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap">
-<link rel="stylesheet" href="css/styles.css?v=20261007021126">
-<link rel="stylesheet" href="css/career.css?v=20261007021126">
-<link rel="stylesheet" href="css/theme.css?v=20261007021126">
-<link rel="stylesheet" href="css/broadcast.css?v=20261007021126">
+<link rel="stylesheet" href="css/styles.css?v=20261015000800">
+<link rel="stylesheet" href="css/career.css?v=20261015000800">
+<link rel="stylesheet" href="css/theme.css?v=20261015000800">
+<link rel="stylesheet" href="css/broadcast.css?v=20261015000800">
 </head>
 <body>
 
@@ -163,6 +163,11 @@
         <span>Empiezas con 16 años en tu país y vives tu carrera: fichajes,
         convocatorias, títulos y la retirada.</span>
       </button>
+    </div>
+    <div class="jeque">
+      <label for="wJeque"><b>💰 Modo jeque</b></label>
+      <input type="number" id="wJeque" min="0" max="300" step="10" value="0" inputmode="numeric" aria-describedby="wJequeAyuda">
+      <span class="hint" id="wJequeAyuda">millones de € que se inyectan al club con el que empieces (máximo 300; 0 lo desactiva).</span>
     </div>
   </div>
 
@@ -325,6 +330,10 @@
   <div class="card">
     <h3>2 · Formato</h3>
     <div class="toolbar">
+      <label for="bldName">Nombre del torneo</label>
+      <input type="text" id="bldName" maxlength="60" placeholder="Torneo personalizado" autocomplete="off">
+    </div>
+    <div class="toolbar">
       <label>Fase de grupos</label>
       <select id="bldGroupSize">
         <option value="0">Sin grupos (eliminación directa)</option>
@@ -336,6 +345,18 @@
       <label class="chk"><input type="checkbox" id="bldGroupDouble"> Grupos ida y vuelta</label>
       <label class="chk"><input type="checkbox" id="bldLegs"> Eliminatorias ida y vuelta</label>
       <label class="chk"><input type="checkbox" id="bldSeeded" checked> Bombos por nivel</label>
+    </div>
+    <div class="toolbar">
+      <label for="bldDrawGroups">Sorteo de los grupos</label>
+      <select id="bldDrawGroups">
+        <option value="auto" selected>Sorteo (bolas)</option>
+        <option value="manual">Manual</option>
+      </select>
+      <label for="bldDrawKO">Sorteo de las eliminatorias</label>
+      <select id="bldDrawKO">
+        <option value="auto" selected>Sorteo (bolas)</option>
+        <option value="manual">Manual</option>
+      </select>
     </div>
     <div class="format-box" id="bldFormat"></div>
     <button id="btnBld" class="primary">Jugar torneo</button>
@@ -394,73 +415,74 @@
 
 
 <!-- datos -->
-<script src="js/data/_competitions.js?v=20261007021126"></script>
-<script src="js/data/_berths.js?v=20261007021126"></script>
-<script src="js/data/_zonas_ar.js?v=20261007021126"></script>
-<script src="js/data/_plantillas2627.js?v=20261007021126"></script>
-<script src="js/data/_crestmap.js?v=20261007021126"></script>
-<script src="js/data/_stadiums.js?v=20261007021126"></script>
-<script src="js/data/_logos.js?v=20261007021126"></script>
-<script src="js/data/_flagmap.js?v=20261007021126"></script>
-<script src="js/data/_nacionalidades.js?v=20261007021126"></script>
-<script src="js/data/_wc21.js?v=20261007021126"></script>
-<script src="js/data/premier.js?v=20261007021126"></script>
-<script src="js/data/laliga.js?v=20261007021126"></script>
-<script src="js/data/seriea.js?v=20261007021126"></script>
-<script src="js/data/ligue1.js?v=20261007021126"></script>
-<script src="js/data/bundesliga.js?v=20261007021126"></script>
-<script src="js/data/argentina.js?v=20261007021126"></script>
-<script src="js/data/brasileirao.js?v=20261007021126"></script>
-<script src="js/data/saudi.js?v=20261007021126"></script>
-<script src="js/data/ligamx.js?v=20261007021126"></script>
-<script src="js/data/mls.js?v=20261007021126"></script>
-<script src="js/data/div2-europa.js?v=20261007021126"></script>
-<script src="js/data/div2-sudamerica.js?v=20261007021126"></script>
-<script src="js/data/argentina3.js?v=20261007021126"></script>
-<script src="js/data/argentina-c.js?v=20261007021126"></script>
-<script src="js/data/federal-amateur.js?v=20261007021126"></script>
-<script src="js/data/federala.js?v=20261007021126"></script>
-<script src="js/data/ligas-sudamerica.js?v=20261007021126"></script>
-<script src="js/data/ligas-europa-a.js?v=20261007021126"></script>
-<script src="js/data/escocia.js?v=20261007021126"></script>
-<script src="js/data/ligas-europa-b.js?v=20261007021126"></script>
-<script src="js/data/div34-inglaterra.js?v=20261007021126"></script>
-<script src="js/data/div2-europa-b.js?v=20261007021126"></script>
-<script src="js/data/ligas-europa-c.js?v=20261007021126"></script>
-<script src="js/data/ligas-resto.js?v=20261007021126"></script>
-<script src="js/data/otros-uefa.js?v=20261007021126"></script>
-<script src="js/data/ligas-uefa-este.js?v=20261007021126"></script>
-<script src="js/data/nations-uefa-conmebol.js?v=20261007021126"></script>
-<script src="js/data/nations-resto.js?v=20261007021126"></script>
-<script src="js/data/nations-fifa-a.js?v=20261007021126"></script>
-<script src="js/data/nations-fifa-b.js?v=20261007021126"></script>
+<script src="js/data/_competitions.js?v=20261015000800"></script>
+<script src="js/data/_berths.js?v=20261015000800"></script>
+<script src="js/data/_zonas_ar.js?v=20261015000800"></script>
+<script src="js/data/_plantillas2627.js?v=20261015000800"></script>
+<script src="js/data/_crestmap.js?v=20261015000800"></script>
+<script src="js/data/_stadiums.js?v=20261015000800"></script>
+<script src="js/data/_logos.js?v=20261015000800"></script>
+<script src="js/data/_flagmap.js?v=20261015000800"></script>
+<script src="js/data/_nacionalidades.js?v=20261015000800"></script>
+<script src="js/data/_wc21.js?v=20261015000800"></script>
+<script src="js/data/premier.js?v=20261015000800"></script>
+<script src="js/data/laliga.js?v=20261015000800"></script>
+<script src="js/data/seriea.js?v=20261015000800"></script>
+<script src="js/data/ligue1.js?v=20261015000800"></script>
+<script src="js/data/bundesliga.js?v=20261015000800"></script>
+<script src="js/data/argentina.js?v=20261015000800"></script>
+<script src="js/data/brasileirao.js?v=20261015000800"></script>
+<script src="js/data/saudi.js?v=20261015000800"></script>
+<script src="js/data/ligamx.js?v=20261015000800"></script>
+<script src="js/data/mls.js?v=20261015000800"></script>
+<script src="js/data/div2-europa.js?v=20261015000800"></script>
+<script src="js/data/div2-sudamerica.js?v=20261015000800"></script>
+<script src="js/data/argentina3.js?v=20261015000800"></script>
+<script src="js/data/argentina-c.js?v=20261015000800"></script>
+<script src="js/data/federal-amateur.js?v=20261015000800"></script>
+<script src="js/data/federala.js?v=20261015000800"></script>
+<script src="js/data/ligas-sudamerica.js?v=20261015000800"></script>
+<script src="js/data/ligas-europa-a.js?v=20261015000800"></script>
+<script src="js/data/escocia.js?v=20261015000800"></script>
+<script src="js/data/ligas-europa-b.js?v=20261015000800"></script>
+<script src="js/data/div34-inglaterra.js?v=20261015000800"></script>
+<script src="js/data/div2-europa-b.js?v=20261015000800"></script>
+<script src="js/data/ligas-europa-c.js?v=20261015000800"></script>
+<script src="js/data/ligas-resto.js?v=20261015000800"></script>
+<script src="js/data/otros-uefa.js?v=20261015000800"></script>
+<script src="js/data/ligas-uefa-este.js?v=20261015000800"></script>
+<script src="js/data/nations-uefa-conmebol.js?v=20261015000800"></script>
+<script src="js/data/nations-resto.js?v=20261015000800"></script>
+<script src="js/data/nations-fifa-a.js?v=20261015000800"></script>
+<script src="js/data/nations-fifa-b.js?v=20261015000800"></script>
 <!-- motor -->
-<script src="js/flags.js?v=20261007021126"></script>
-<script src="js/nacionalidades.js?v=20261007021126"></script>
-<script src="js/fill.js?v=20261007021126"></script>
-<script src="js/stars.js?v=20261007021126"></script>
-<script src="js/crest.js?v=20261007021126"></script>
-<script src="js/picker.js?v=20261007021126"></script>
-<script src="js/matchview.js?v=20261007021126"></script>
-<script src="js/engine.js?v=20261007021126"></script>
-<script src="js/store.js?v=20261007021126"></script>
-<script src="js/competitions.js?v=20261007021126"></script>
-<script src="js/cwc12.js?v=20261007021126"></script>
-<script src="js/draw.js?v=20261007021126"></script>
-<script src="js/market.js?v=20261007021126"></script>
-<script src="js/world.js?v=20261007021126"></script>
-<script src="js/carrera.js?v=20261007021126"></script>
-<script src="js/seleccarrera.js?v=20261007021126"></script>
-<script src="js/save.js?v=20261007021126"></script>
-<script src="js/runner.js?v=20261007021126"></script>
-<script src="js/sorteo.js?v=20261007021126"></script>
-<script src="js/tourview.js?v=20261007021126"></script>
-<script src="js/qualifiers.js?v=20261007021126"></script>
-<script src="js/season.js?v=20261007021126"></script>
-<script src="js/app.js?v=20261007021126"></script>
-<script src="js/carrera-ui.js?v=20261007021126"></script>
-<script src="js/world-ui.js?v=20261007021126"></script>
-<script src="js/profile.js?v=20261007021126"></script>
+<script src="js/flags.js?v=20261015000800"></script>
+<script src="js/nacionalidades.js?v=20261015000800"></script>
+<script src="js/fill.js?v=20261015000800"></script>
+<script src="js/stars.js?v=20261015000800"></script>
+<script src="js/crest.js?v=20261015000800"></script>
+<script src="js/picker.js?v=20261015000800"></script>
+<script src="js/matchview.js?v=20261015000800"></script>
+<script src="js/engine.js?v=20261015000800"></script>
+<script src="js/store.js?v=20261015000800"></script>
+<script src="js/competitions.js?v=20261015000800"></script>
+<script src="js/cwc12.js?v=20261015000800"></script>
+<script src="js/draw.js?v=20261015000800"></script>
+<script src="js/market.js?v=20261015000800"></script>
+<script src="js/world.js?v=20261015000800"></script>
+<script src="js/carrera.js?v=20261015000800"></script>
+<script src="js/seleccarrera.js?v=20261015000800"></script>
+<script src="js/save.js?v=20261015000800"></script>
+<script src="js/runner.js?v=20261015000800"></script>
+<script src="js/sorteo.js?v=20261015000800"></script>
+<script src="js/tourview.js?v=20261015000800"></script>
+<script src="js/qualifiers.js?v=20261015000800"></script>
+<script src="js/season.js?v=20261015000800"></script>
+<script src="js/app.js?v=20261015000800"></script>
+<script src="js/carrera-ui.js?v=20261015000800"></script>
+<script src="js/mundo.js?v=20261015000800"></script>
+<script src="js/world-ui.js?v=20261015000800"></script>
+<script src="js/profile.js?v=20261015000800"></script>
 <script>
 /* GitHub Pages sirve esta página con diez minutos de caché. Como el sello
    de versión de los js y los css va dentro de ella, en el teléfono se

@@ -256,11 +256,13 @@
       if (modo === 'jugador') {
         $('#wStart').classList.add('hidden');
         CarreraUI.abreCreacion(function (datos) {
+          Mundo.limpio();
           World.create({ manualDraw: false });
           if (window.Carrera) {
             Carrera.limpia();
             var j = Carrera.crea(datos);
             Carrera.ajustaSeleccion();
+            inyectaJeque();
             enterGame(j.club);
           }
         });
@@ -394,9 +396,26 @@
   selPaint();
   paintStartPick();
 
+  /* Modo jeque: el dinero que se inyecta al club con el que se empieza, en
+     millones y con tope de 300. Se lee de la pantalla de elegir modo. */
+  var JEQUE_MAX = 300;
+  function jequeMillones() {
+    var el = $('#wJeque');
+    var v = el ? Math.floor(+el.value) : 0;
+    return isFinite(v) && v > 0 ? Math.min(JEQUE_MAX, v) : 0;
+  }
+  function inyectaJeque() {
+    var m = jequeMillones();
+    if (!m || !World.state) return;
+    World.state.caja = (World.state.caja || 0) + m * 1e6;
+    World.state.jeque = m;
+  }
+  $('#wJeque').onchange = function () {
+    this.value = jequeMillones();
+  };
+
   function enterGame(team) {
     /* partida nueva: lo que hubiera guardado de otra carrera ya no sirve */
-    mundoCarrera = null;
     me = team;
     if (modo !== 'jugador' && window.Carrera) Carrera.limpia();
     rConf = 'MIAS';
@@ -415,6 +434,7 @@
   $('#wBegin').onclick = function () {
     if (!startTeam) return;
     modo = 'dt';
+    Mundo.limpio();
     World.create({ manualDraw: $('#wManual').checked, cwcHost: cwcHost });
     miSel = null;
     if ($('#wConSel') && $('#wConSel').checked) {
@@ -422,6 +442,7 @@
       miSel = selNac;
     }
     World.state.miSeleccion = miSel ? miSel.s : null;
+    inyectaJeque();
     enterGame(startTeam);
   };
 
@@ -444,7 +465,7 @@
   }
   refreshSaveInfo();
   $('#wContinue').onclick = function () {
-    try { cargaPartida(SaveGame.load(modo)); } catch (e) { alert('No pude cargar la partida: ' + e.message); }
+    try { Mundo.limpio(); cargaPartida(SaveGame.load(modo)); } catch (e) { alert('No pude cargar la partida: ' + e.message); }
   };
   /* al cargar, el modo lo dice la propia partida */
   function cargaPartida(team) {
@@ -499,6 +520,7 @@
   };
   $('#wFile').onchange = function () {
     var f = this.files[0]; if (!f) return;
+    Mundo.limpio();
     SaveGame.importFile(f, function (err, team) {
       if (err) { alert('No pude abrir el archivo: ' + err.message); return; }
       cargaPartida(team);
@@ -1768,6 +1790,10 @@
       (c.playoffTies || []).concat(c.playoffHechas || []).forEach(function (t) {
         ties.push({ t: t, n: 'Play-off', semanas: World.weeks.playoff });
       });
+      /* el tercer puesto del Mundial de Clubes se juega antes que la final */
+      if (cid === 'cwc' && c.tercerPuesto) {
+        ties.push({ t: c.tercerPuesto, n: 'Tercer puesto', semanas: [World.weeks.cwc[2]] });
+      }
       (c.koRounds || []).forEach(function (r, ri) {
         r.ties.forEach(function (t) {
           ties.push({ t: t, n: r.name, slot: r.slot,
@@ -1805,6 +1831,32 @@
         });
       });
     });
+    /* La Supercopa de UEFA y la Recopa: se anuncian en cuanto se sabe quién
+       las juega, o el menú dice «liga» y la simulación rápida saca otro
+       partido. */
+    function campeon(id) { var k = st.conts[id]; return k && k.champion ? k.champion : null; }
+    var SC = st.superCopas || {};
+    var wsc = World.weeks.superCopas;
+    if (SC.uefa || (campeon('ucl') && campeon('uel') && campeon('ucl') !== campeon('uel'))) {
+      var su = SC.uefa, ua = su ? su.a : campeon('ucl'), ub = su ? su.b : campeon('uel');
+      if (ua === who || ub === who) {
+        out.push({ week: wsc[0], cmp: 'Cont.', comp: 'Supercopa de UEFA', round: 'Final',
+          neutral: true, home: ua === who, opp: ua === who ? ub : ua,
+          res: su ? { h: ua, a: ub, s: su.s } : null, pens: su ? su.pens : null });
+      }
+    }
+    var rc = SC.conmebol, la = campeon('libertadores'), sd = campeon('sudamericana');
+    if (rc || (la && sd && la !== sd)) {
+      var ra = rc ? rc.a : sd, rb = rc ? rc.b : la;
+      if (ra === who || rb === who) {
+        out.push({ week: wsc[0], cmp: 'Cont.', comp: 'Recopa Sudamericana', round: 'Ida',
+          home: ra === who, opp: ra === who ? rb : ra,
+          res: rc && rc.leg1 ? { h: ra, a: rb, s: rc.leg1.s } : null });
+        out.push({ week: wsc[1], cmp: 'Cont.', comp: 'Recopa Sudamericana', round: 'Vuelta',
+          home: rb === who, opp: rb === who ? ra : rb,
+          res: rc && rc.leg2 ? { h: rb, a: ra, s: rc.leg2.s } : null, pens: rc ? rc.pens : null });
+      }
+    }
     /* Lo que sigue en la cola todavía no lo viste: no se enseña el marcador
        o el calendario te cuenta el final antes de jugarlo. */
     var enCola = {};
@@ -2082,7 +2134,13 @@
     var nextCard;
     /* lo primero, el parón de selecciones: hasta que no se juegue no tiene
        sentido cerrar la temporada */
-    if ((over || !nx) && !(nx && nx.porVer) &&
+    if (!over && !nx && World.mundialEnCurso && World.mundialEnCurso()) {
+      nextCard = '<div class="nextm"><div class="comp">Mundial de Clubes</div>' +
+        '<p class="hint" style="margin:12px 0">Tu club ya no tiene partidos, pero la fase final ' +
+        'sigue. Avanza fecha a fecha y mírala en «Resultados».</p>' +
+        '<div class="simbtns"><button class="primary" id="bWeek">Seguir el Mundial de Clubes</button>' +
+        '<button class="mini" id="bRest">Ir al final de la temporada</button></div></div>';
+    } else if ((over || !nx) && !(nx && nx.porVer) &&
         World.seleccionesPendientes && World.seleccionesPendientes()) {
       nextCard = '<div class="nextm"><div class="comp">Se acabó la temporada del club</div>' +
         '<p class="hint" style="margin:12px 0">Queda el parón de selecciones. ' +
@@ -3175,7 +3233,7 @@
       }).join('') : '<p class="hint nc-vacio">' + (pConf === 'MIAS' || pConf === 'SEL'
         ? 'Elige una competición de la lista.' : 'Elige un país para ver sus competiciones.') + '</p>';
       panel.innerHTML = '<div class="nc-pills">' + pills + '</div>' +
-        '<div class="nc-cols"><div class="nc-col">' + izq + '</div>' +
+        '<div class="nc-cols' + (L.cp.length ? ' hay-cp' : '') + '"><div class="nc-col">' + izq + '</div>' +
         '<div class="nc-col">' + der + '</div></div>';
       panel.querySelectorAll('.nc-pill').forEach(function (b) {
         b.onclick = function () { pConf = b.dataset.k; pScope = null; pinta(); };
@@ -3194,6 +3252,9 @@
     pinta();
     var r = btn.getBoundingClientRect();
     panel.style.top = (r.bottom + 6) + 'px';
+    /* si no cabe, el panel entero se desplaza: sin esto, en el móvil las
+       competiciones del país elegido quedaban fuera de la pantalla */
+    panel.style.maxHeight = Math.max(200, window.innerHeight - r.bottom - 14) + 'px';
     panel.style.left = Math.max(8, Math.min(r.left, window.innerWidth - panel.offsetWidth - 8)) + 'px';
     setTimeout(function () {
       document.addEventListener('click', fueraNav, true);
@@ -4210,47 +4271,12 @@
     renderBody();
   }
 
-  /* =====================================================================
-     EL MODO CARRERA ES UN MUNDO APARTE
-     Los ascensos, los descensos, los fichajes y los años que cumple cada
-     jugador sólo valen dentro de la partida. Al salir se devuelve el mundo
-     tal y como estaba, y al volver se pone otra vez el de la carrera.
-     ===================================================================== */
-  var mundoOriginal = null, mundoCarrera = null;
-  function capturaMundo() {
-    var snap = { ligas: {}, eq: [] };
-    Object.keys(LEAGUES).forEach(function (id) {
-      var lg = LEAGUES[id];
-      if (!lg || !lg.teams) return;
-      snap.ligas[id] = lg.teams.slice();
-      lg.teams.forEach(function (t) {
-        snap.eq.push({
-          t: t, lg: t.leagueId, ovr: t.ovr,
-          filas: (t.p || []).slice(),
-          datos: (t.p || []).map(function (x) { return x.slice(); })
-        });
-      });
-    });
-    return snap;
-  }
-  function aplicaMundo(snap) {
-    if (!snap) return;
-    Object.keys(snap.ligas).forEach(function (id) {
-      if (LEAGUES[id]) LEAGUES[id].teams = snap.ligas[id].slice();
-    });
-    snap.eq.forEach(function (e) {
-      e.t.leagueId = e.lg;
-      e.t.ovr = e.ovr;
-      e.t.p = e.filas.slice();
-      /* las fichas se rellenan en su sitio: hay medio programa apuntando
-         a ellas y cambiarlas por copias rompería esas referencias */
-      e.filas.forEach(function (fila, i) {
-        var d = e.datos[i];
-        for (var k = 0; k < d.length; k++) fila[k] = d[k];
-        fila.length = d.length;
-      });
-    });
-  }
+  /* El modo carrera es un mundo aparte (ver mundo.js): al entrar se pone el
+     de la partida y al salir se devuelve el original a los demás modos. */
+  window.Career = {
+    preparaMundo: function () { Mundo.entra(started); },
+    sacaMundo: function () { Mundo.sale(started); }
+  };
 
   /* lo que necesita la ficha de club para pintar el calendario de cualquier equipo */
 })();

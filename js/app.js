@@ -1516,6 +1516,7 @@
     }
     Sorteo.cruces(box, {
       bombos: [b1, b2], nombres: nombres, esperan: r.esperan, choca: mismoPais,
+      manual: !!cfg.manualKO,
       titulo: 'Sorteo del cuadro',
       sub: cfg.name + ' · ' + equipos.length + ' equipos' +
         (r.esperan.length ? ' · ' + r.esperan.length + ' esperan a la segunda ronda' : ''),
@@ -1542,7 +1543,7 @@
 
   /* El sorteo de las eliminatorias dentro de un torneo: la competición se
      para al acabar los grupos y no sigue hasta que salen las bolas. */
-  function sorteoKO(box, R, nom, repinta) {
+  function sorteoKO(box, R, nom, repinta, manual) {
     var e = R.esperaKO;
     if (!e) return;
     var esperan = (e.byes || []).slice();
@@ -1562,6 +1563,7 @@
     box.insertBefore(caja, box.firstChild);
     Sorteo.cruces(caja, {
       bombos: [b1, b2], nombres: nombres, esperan: esperan, choca: choca,
+      manual: !!manual,
       titulo: 'Sorteo de las eliminatorias',
       sub: nom + ' · ' + juegan.length + ' equipos' +
         (esperan.length ? ' · ' + esperan.length + ' ya esperan' : ''),
@@ -1580,7 +1582,7 @@
     if (!st.ok) { box.innerHTML = '<div class="card format-box bad">' + esc(st.msg) + '</div>'; return; }
     if (st.mode !== 'groups') { montaCuadro(box, equipos, cfg, vista); return; }
     Sorteo.grupos(box, {
-      campo: equipos, nGrupos: st.groups, azar: !!cfg.sorteoAzar,
+      campo: equipos, nGrupos: st.groups, azar: !!cfg.sorteoAzar, manual: !!cfg.manualGrupos,
       zonaDe: cfg.porConf ? confDe : null,
       bombos: cfg.bombos || null, reparto: cfg.reparto || null,
       titulo: 'Sorteo de la fase de grupos',
@@ -1593,7 +1595,7 @@
         c.groups = gs;
         /* con el cuadro fijado de antemano no hay sorteo de las eliminatorias */
         if (!cfg.cuadro) c.antesDelKO = function (R2) {
-          sorteoKO(box, R2, cfg.name, function () { if (mando) mando.repaint(); });
+          sorteoKO(box, R2, cfg.name, function () { if (mando) mando.repaint(); }, cfg.manualKO);
         };
         var R = Runner.tournament(equipos, c);
         if (cfg.tras) cfg.tras(R);
@@ -2093,15 +2095,18 @@
 
   $('#btnBld').onclick = function () {
     var box = $('#bldOut');
+    var nombre = ($('#bldName').value || '').trim() || 'Torneo personalizado';
     montaConSorteo(box, picked, {
-      name: 'Torneo personalizado',
+      name: nombre,
+      manualGrupos: $('#bldDrawGroups').value === 'manual',
+      manualKO: $('#bldDrawKO').value === 'manual',
       groupSize: +$('#bldGroupSize').value,
       groupDouble: $('#bldGroupDouble').checked,
       legs: $('#bldLegs').checked ? 2 : 1,
       seeded: $('#bldSeeded').checked,
       sorteoAzar: !$('#bldSeeded').checked,   /* sin siembra, bombo único */
       neutral: true
-    }, { title: 'Torneo personalizado' });
+    }, { title: nombre });
   };
 
   /* =====================================================================

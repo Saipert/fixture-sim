@@ -271,6 +271,13 @@
     var t = ROL_TXT[r] || ROL_TXT.fuera;
     var cab = '<div class="rolbox rol-' + r.replace(/ /g, '-') + '">' +
       '<b>' + t[0] + '</b><small>' + t[1] + '</small></div>';
+    if (!nx && global.World && World.mundialEnCurso && World.mundialEnCurso()) {
+      return cab + '<div class="nextm"><div class="comp">Mundial de Clubes</div>' +
+        '<p class="hint" style="margin:12px 0">Tu club ya no tiene partidos, pero la fase final ' +
+        'sigue. Avanza fecha a fecha y mírala en «Resultados».</p>' +
+        '<div class="simbtns"><button class="primary" id="bWeek">Seguir el Mundial de Clubes</button>' +
+        '<button class="mini" id="bRest">Ir al final de la temporada</button></div></div>';
+    }
     if (!nx) {
       /* antes de cerrar nada, el parón de selecciones: se juega partido a
          partido desde aquí, igual que en modo entrenador */
