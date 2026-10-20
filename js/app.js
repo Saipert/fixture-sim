@@ -2076,7 +2076,101 @@
   };
   $('#bldClear').onclick = function () { picked = []; drawBuilder(); };
   $('#bldGroupSize').onchange = drawBuilder;
-  $('#bldGroupDouble').onchange = drawBuilder;
+  $('#bldKind').onchange = function () {
+    var liga = this.value === 'liga';
+    $('#bldCopa').classList.toggle('hidden', liga);
+    $('#bldLigaBox').classList.toggle('hidden', !liga);
+    $('#btnBld').textContent = liga ? 'Jugar liga' : 'Jugar torneo';
+    drawBuilder();
+  };
+  ['#bldDivs', '#bldDivSize', '#bldUp', '#bldLigaDouble'].forEach(function (id) {
+    $(id).onchange = $(id).oninput = drawBuilder;
+  });
+
+  /* ---------- liga con divisiones: temporadas seguidas con ascensos y descensos ----------
+     Vive solo en esta pantalla: no toca el modo carrera ni las plantillas de los demás modos. */
+  function ligaCfg() {
+    var D = Math.max(1, Math.min(6, Math.floor(+$('#bldDivs').value) || 1));
+    var size = Math.max(4, Math.min(24, Math.floor(+$('#bldDivSize').value) || 4));
+    var up = D > 1 ? Math.max(0, Math.min(Math.floor(size / 2), Math.floor(+$('#bldUp').value) || 0)) : 0;
+    var need = D * size, has = picked.length;
+    var c = { D: D, size: size, up: up, dbl: $('#bldLigaDouble').checked, need: need };
+    c.ok = has === need;
+    c.msg = D + (D === 1 ? ' división' : ' divisiones') + ' de ' + size + ' equipos' +
+      (D > 1 ? ', suben y bajan ' + up : '') + (c.dbl ? ', ida y vuelta' : ', a una vuelta') + '. ' +
+      (c.ok ? 'Listo para jugar.' : has < need ? 'Faltan ' + (need - has) + ' equipos (hacen falta ' + need + ').'
+        : 'Sobran ' + (has - need) + ' equipos (hacen falta ' + need + ').');
+    return c;
+  }
+  function ligaMonta(box, nombre, c) {
+    var divs = picked.slice().sort(function (a, b) { return b.ovr - a.ovr; });
+    divs = Array.apply(null, Array(c.D)).map(function (_, i) { return divs.slice(i * c.size, (i + 1) * c.size); });
+    var temporada = 0, hist = [], ultima = null;
+
+    function juega() {
+      temporada++;
+      var res = divs.map(function (d) { return Comp.playLeague(d, { double: c.dbl }).table; });
+      var mov = res.map(function () { return { sube: [], baja: [] }; });
+      if (c.up) for (var i = 0; i < c.D - 1; i++) {
+        mov[i].baja = res[i].slice(-c.up).map(function (r) { return r.t; });
+        mov[i + 1].sube = res[i + 1].slice(0, c.up).map(function (r) { return r.t; });
+      }
+      ultima = { n: temporada, res: res, mov: mov };
+      hist.push({ n: temporada, camp: res.map(function (t) { return t[0].t; }), mov: mov });
+      /* la composición de la temporada siguiente */
+      divs = res.map(function (t, i) {
+        var quedan = t.map(function (r) { return r.t; }).filter(function (x) {
+          return mov[i].baja.indexOf(x) < 0 && mov[i].sube.indexOf(x) < 0;
+        });
+        return quedan.concat(i > 0 ? mov[i - 1].baja : [], i < c.D - 1 ? mov[i + 1].sube : []);
+      });
+    }
+    function nombres(a) { return a.map(function (t) { return esc(t.n); }).join(', ') || '—'; }
+    function pinta() {
+      var h = '<div class="card"><h3>' + esc(nombre) + (ultima ? ' <small>Temporada ' + ultima.n + '</small>' : '') + '</h3>' +
+        '<div class="toolbar"><button class="primary" id="ldUna">' + (ultima ? 'Simular la temporada ' + (temporada + 1) : 'Simular la primera temporada') + '</button>' +
+        '<label for="ldN">Varias seguidas</label><input type="number" id="ldN" min="2" max="50" value="5" inputmode="numeric" style="width:70px">' +
+        '<button id="ldVarias" class="mini">Simular</button></div></div>';
+      if (!ultima) {
+        divs.forEach(function (d, i) {
+          h += '<div class="card"><h3>División ' + (i + 1) + ' <small>' + d.length + ' equipos</small></h3><div class="chips">' +
+            d.map(function (t) { return '<span class="chip">' + crestOf(t, 18) + esc(t.n) + '</span>'; }).join('') + '</div></div>';
+        });
+      } else {
+        ultima.res.forEach(function (tb, i) {
+          h += '<div class="card"><h3>División ' + (i + 1) + ' <small>campeón: ' + esc(tb[0].t.n) + '</small></h3>' +
+            '<table class="tb-liga"><thead><tr><th class="num">#</th><th>Equipo</th><th class="num">PJ</th><th class="num">G</th>' +
+            '<th class="num">E</th><th class="num">P</th><th class="num">DG</th><th class="num">Pts</th></tr></thead><tbody>';
+          tb.forEach(function (r, k) {
+            var z = ultima.mov[i].sube.indexOf(r.t) >= 0 || (i === 0 && k === 0) ? 'z1' : ultima.mov[i].baja.indexOf(r.t) >= 0 ? 'zr' : '';
+            h += '<tr class="' + z + '"><td class="num"><span class="pos-chip">' + (k + 1) + '</span></td>' +
+              '<td><div class="tname">' + crestOf(r.t, 20) + '<span>' + esc(r.t.n) + '</span></div></td>' +
+              '<td class="num">' + r.pj + '</td><td class="num">' + r.g + '</td><td class="num">' + r.e + '</td><td class="num">' + r.p + '</td>' +
+              '<td class="num">' + (r.gf - r.gc > 0 ? '+' : '') + (r.gf - r.gc) + '</td><td class="num"><b>' + r.pts + '</b></td></tr>';
+          });
+          h += '</tbody></table>';
+          if (c.up) h += '<p class="hint">' + (i > 0 ? '⬆ Ascienden: ' + nombres(ultima.mov[i].sube) + '. ' : '') +
+            (i < c.D - 1 ? '⬇ Descienden: ' + nombres(ultima.mov[i].baja) + '.' : '') + '</p>';
+          h += '</div>';
+        });
+        h += '<div class="card"><h3>Historial de campeones</h3><div style="overflow-x:auto"><table><thead><tr><th class="num">Temp.</th>' +
+          divs.map(function (_, i) { return '<th>División ' + (i + 1) + '</th>'; }).join('') + '</tr></thead><tbody>' +
+          hist.slice().reverse().map(function (r) {
+            return '<tr><td class="num">' + r.n + '</td>' + r.camp.map(function (t) {
+              return '<td><div class="tname">' + crestOf(t, 18) + '<span>' + esc(t.n) + '</span></div></td>';
+            }).join('') + '</tr>';
+          }).join('') + '</tbody></table></div></div>';
+      }
+      box.innerHTML = h;
+      $('#ldUna', box).onclick = function () { juega(); pinta(); };
+      $('#ldVarias', box).onclick = function () {
+        var n = Math.max(2, Math.min(50, Math.floor(+$('#ldN', box).value) || 2));
+        for (var k = 0; k < n; k++) juega();
+        pinta();
+      };
+    }
+    pinta();
+  }
 
   function drawBuilder() {
     $('#bldList').innerHTML = picked.length ? picked.map(function (t, i) {
@@ -2085,26 +2179,24 @@
     $$('#bldList .chip button').forEach(function (b) {
       b.onclick = function () { picked.splice(+b.dataset.i, 1); drawBuilder(); };
     });
-    var liga = $('#bldGroupSize').value === 'liga';
-    var st = liga
-      ? (picked.length >= 2 ? { ok: true } : { ok: false, msg: 'Hacen falta al menos 2 equipos.' })
-      : Comp.structureFor(picked.length, +$('#bldGroupSize').value);
+    var st = Comp.structureFor(picked.length, +$('#bldGroupSize').value);
     var fb = $('#bldFormat');
     fb.className = 'format-box' + (st.ok ? '' : ' bad');
-    fb.innerHTML = '<b>' + picked.length + ' equipos</b> · ' + (liga && st.ok
-      ? 'Liga: todos contra todos' + ($('#bldGroupDouble').checked ? ', ida y vuelta.' : ', a una vuelta.')
-      : esc(Comp.describe(st)));
-    $('#btnBld').disabled = !st.ok;
+    fb.innerHTML = '<b>' + picked.length + ' equipos</b> · ' + esc(Comp.describe(st));
+    var lg = ligaCfg(), lb = $('#bldLigaFormat');
+    lb.className = 'format-box' + (lg.ok ? '' : ' bad');
+    lb.innerHTML = '<b>' + picked.length + ' equipos</b> · ' + esc(lg.msg);
+    $('#btnBld').disabled = $('#bldKind').value === 'liga' ? !lg.ok : !st.ok;
   }
   drawBuilder();
 
   $('#btnBld').onclick = function () {
     var box = $('#bldOut');
     var nombre = ($('#bldName').value || '').trim() || 'Torneo personalizado';
-    if ($('#bldGroupSize').value === 'liga') {
-      var Rl = Runner.league(picked.slice(), { name: nombre, double: $('#bldGroupDouble').checked });
-      TourView.attach(Rl, { title: nombre });
-      Runner.mount(box, Rl);
+    if ($('#bldKind').value === 'liga') {
+      var lc = ligaCfg();
+      if (!lc.ok) return;
+      ligaMonta(box, nombre, lc);
       box.scrollIntoView({ behavior: 'smooth', block: 'start' });
       return;
     }
