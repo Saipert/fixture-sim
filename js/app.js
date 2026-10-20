@@ -2083,92 +2083,159 @@
     $('#btnBld').textContent = liga ? 'Jugar liga' : 'Jugar torneo';
     drawBuilder();
   };
-  ['#bldDivs', '#bldDivSize', '#bldUp', '#bldLigaDouble'].forEach(function (id) {
+  ['#bldDivs', '#bldDivSize', '#bldUp', '#bldLigaDouble', '#bldReparto'].forEach(function (id) {
     $(id).onchange = $(id).oninput = drawBuilder;
   });
 
   /* ---------- liga con divisiones: temporadas seguidas con ascensos y descensos ----------
      Vive solo en esta pantalla: no toca el modo carrera ni las plantillas de los demás modos. */
+  var ligaDiv = new Map();   /* equipo -> división elegida a mano (0 = primera) */
+  function pintaReparto(c) {
+    var box = $('#bldAsign');
+    if (!c.manual) { box.innerHTML = ''; return; }
+    c.divs.forEach(function (d, i) { d.forEach(function (t) { ligaDiv.set(t, i); }); });
+    var h = '<div class="toolbar"><button class="mini" id="bldPorNivel">Repartir por nivel</button></div>';
+    c.divs.forEach(function (d, i) {
+      h += '<div class="card"><h3>División ' + (i + 1) + ' <small' + (d.length === c.size ? '' : ' style="color:var(--warn)"') + '>' +
+        d.length + ' de ' + c.size + '</small></h3><div class="asign">' +
+        d.map(function (t) {
+          var k = picked.indexOf(t);
+          return '<div class="asig-fila"><span class="tname">' + crestOf(t, 18) + '<span>' + esc(t.n) + '</span></span>' +
+            '<select data-k="' + k + '" aria-label="División de ' + esc(t.n) + '">' +
+            c.divs.map(function (_, j) { return '<option value="' + j + '"' + (j === i ? ' selected' : '') + '>División ' + (j + 1) + '</option>'; }).join('') +
+            '</select></div>';
+        }).join('') + '</div></div>';
+    });
+    box.innerHTML = h;
+    $$('select', box).forEach(function (sel) {
+      sel.onchange = function () { ligaDiv.set(picked[+sel.dataset.k], +sel.value); drawBuilder(); };
+    });
+    $('#bldPorNivel', box).onclick = function () { ligaDiv.clear(); drawBuilder(); };
+  }
   function ligaCfg() {
     var D = Math.max(1, Math.min(6, Math.floor(+$('#bldDivs').value) || 1));
     var size = Math.max(4, Math.min(24, Math.floor(+$('#bldDivSize').value) || 4));
     var up = D > 1 ? Math.max(0, Math.min(Math.floor(size / 2), Math.floor(+$('#bldUp').value) || 0)) : 0;
     var need = D * size, has = picked.length;
     var c = { D: D, size: size, up: up, dbl: $('#bldLigaDouble').checked, need: need };
-    c.ok = has === need;
+    c.manual = $('#bldReparto').value === 'manual';
+    /* los equipos por división: por nivel, o como los haya puesto el usuario */
+    var rank = picked.slice().sort(function (a, b) { return b.ovr - a.ovr; });
+    c.divs = Array.apply(null, Array(D)).map(function () { return []; });
+    rank.forEach(function (t, i) {
+      var d = c.manual && ligaDiv.has(t) ? ligaDiv.get(t) : Math.floor(i / size);
+      c.divs[Math.max(0, Math.min(D - 1, d))].push(t);
+    });
+    c.ok = has === need && (!c.manual || c.divs.every(function (d) { return d.length === size; }));
     c.msg = D + (D === 1 ? ' división' : ' divisiones') + ' de ' + size + ' equipos' +
       (D > 1 ? ', suben y bajan ' + up : '') + (c.dbl ? ', ida y vuelta' : ', a una vuelta') + '. ' +
-      (c.ok ? 'Listo para jugar.' : has < need ? 'Faltan ' + (need - has) + ' equipos (hacen falta ' + need + ').'
+      (c.ok ? 'Listo para jugar.' : has === need ? 'Ajusta el reparto: cada división necesita ' + size + ' equipos.' : has < need ? 'Faltan ' + (need - has) + ' equipos (hacen falta ' + need + ').'
         : 'Sobran ' + (has - need) + ' equipos (hacen falta ' + need + ').');
     return c;
   }
   function ligaMonta(box, nombre, c) {
-    var divs = picked.slice().sort(function (a, b) { return b.ovr - a.ovr; });
-    divs = Array.apply(null, Array(c.D)).map(function (_, i) { return divs.slice(i * c.size, (i + 1) * c.size); });
-    var temporada = 0, hist = [], ultima = null;
+    var divs = c.divs.map(function (d) { return d.slice(); });
+    var temporada = 1, hist = [], R = [], tab = 0, cerrada = false, pendiente = null, ultimaMov = null, token = {};
+    box.__liga = token;
 
-    function juega() {
-      temporada++;
-      var res = divs.map(function (d) { return Comp.playLeague(d, { double: c.dbl }).table; });
+    function nuevas() {
+      R = divs.map(function (d, i) {
+        var r = Runner.league(d, { name: nombre + ' · División ' + (i + 1), double: c.dbl });
+        TourView.attach(r, { title: 'División ' + (i + 1) });
+        return r;
+      });
+      cerrada = false; ultimaMov = null;
+    }
+    function acabadas() { return R.every(function (r) { return r.done; }); }
+    /* la temporada terminó: quién sube, quién baja y cómo queda la siguiente */
+    function cierra() {
+      if (cerrada) return;
+      cerrada = true;
+      var res = R.map(function (r) { return Comp.sortTable(r.table).map(function (x) { return x.t; }); });
       var mov = res.map(function () { return { sube: [], baja: [] }; });
       if (c.up) for (var i = 0; i < c.D - 1; i++) {
-        mov[i].baja = res[i].slice(-c.up).map(function (r) { return r.t; });
-        mov[i + 1].sube = res[i + 1].slice(0, c.up).map(function (r) { return r.t; });
+        mov[i].baja = res[i].slice(-c.up);
+        mov[i + 1].sube = res[i + 1].slice(0, c.up);
       }
-      ultima = { n: temporada, res: res, mov: mov };
-      hist.push({ n: temporada, camp: res.map(function (t) { return t[0].t; }), mov: mov });
-      /* la composición de la temporada siguiente */
-      divs = res.map(function (t, i) {
-        var quedan = t.map(function (r) { return r.t; }).filter(function (x) {
-          return mov[i].baja.indexOf(x) < 0 && mov[i].sube.indexOf(x) < 0;
-        });
+      pendiente = res.map(function (t, i) {
+        var quedan = t.filter(function (x) { return mov[i].baja.indexOf(x) < 0 && mov[i].sube.indexOf(x) < 0; });
         return quedan.concat(i > 0 ? mov[i - 1].baja : [], i < c.D - 1 ? mov[i + 1].sube : []);
       });
+      ultimaMov = mov;
+      hist.push({ n: temporada, camp: res.map(function (t) { return t[0]; }) });
     }
+    function siguiente() { divs = pendiente; temporada++; nuevas(); }
     function nombres(a) { return a.map(function (t) { return esc(t.n); }).join(', ') || '—'; }
+
+    function movHTML() {
+      if (!ultimaMov) return '';
+      var h = '<div class="card"><h3>Temporada ' + temporada + ' terminada</h3>';
+      R.forEach(function (r, i) {
+        h += '<p class="hint"><b>División ' + (i + 1) + '</b> · campeón: ' + esc(r.champion.n) +
+          (c.up ? (i > 0 ? ' · ⬆ Ascienden: ' + nombres(ultimaMov[i].sube) : '') +
+            (i < c.D - 1 ? ' · ⬇ Descienden: ' + nombres(ultimaMov[i].baja) : '') : '') + '</p>';
+      });
+      return h + '</div>';
+    }
+    function histHTML() {
+      if (!hist.length) return '';
+      return '<div class="card"><h3>Historial de campeones</h3><div style="overflow-x:auto"><table><thead><tr><th class="num">Temp.</th>' +
+        divs.map(function (_, i) { return '<th>División ' + (i + 1) + '</th>'; }).join('') + '</tr></thead><tbody>' +
+        hist.slice().reverse().map(function (r) {
+          return '<tr><td class="num">' + r.n + '</td>' + r.camp.map(function (t) {
+            return '<td><div class="tname">' + crestOf(t, 18) + '<span>' + esc(t.n) + '</span></div></td>';
+          }).join('') + '</tr>';
+        }).join('') + '</tbody></table></div></div>';
+    }
+    function actualiza() {
+      if (box.__liga !== token) return false;
+      if (!cerrada && acabadas()) cierra();
+      $('#ldMov', box).innerHTML = movHTML();
+      $('#ldHist', box).innerHTML = histHTML();
+      $('#ldSig', box).disabled = !cerrada;
+      $('#ldTodo', box).disabled = cerrada;
+      return true;
+    }
     function pinta() {
-      var h = '<div class="card"><h3>' + esc(nombre) + (ultima ? ' <small>Temporada ' + ultima.n + '</small>' : '') + '</h3>' +
-        '<div class="toolbar"><button class="primary" id="ldUna">' + (ultima ? 'Simular la temporada ' + (temporada + 1) : 'Simular la primera temporada') + '</button>' +
+      var h = '<div class="card"><h3>' + esc(nombre) + ' <small>Temporada ' + temporada + '</small></h3>' +
+        '<div class="toolbar"><button class="primary" id="ldTodo">Simular toda la temporada</button>' +
+        '<button id="ldSig" class="primary" disabled>Siguiente temporada</button>' +
         '<label for="ldN">Varias seguidas</label><input type="number" id="ldN" min="2" max="50" value="5" inputmode="numeric" style="width:70px">' +
-        '<button id="ldVarias" class="mini">Simular</button></div></div>';
-      if (!ultima) {
-        divs.forEach(function (d, i) {
-          h += '<div class="card"><h3>División ' + (i + 1) + ' <small>' + d.length + ' equipos</small></h3><div class="chips">' +
-            d.map(function (t) { return '<span class="chip">' + crestOf(t, 18) + esc(t.n) + '</span>'; }).join('') + '</div></div>';
-        });
-      } else {
-        ultima.res.forEach(function (tb, i) {
-          h += '<div class="card"><h3>División ' + (i + 1) + ' <small>campeón: ' + esc(tb[0].t.n) + '</small></h3>' +
-            '<table class="tb-liga"><thead><tr><th class="num">#</th><th>Equipo</th><th class="num">PJ</th><th class="num">G</th>' +
-            '<th class="num">E</th><th class="num">P</th><th class="num">DG</th><th class="num">Pts</th></tr></thead><tbody>';
-          tb.forEach(function (r, k) {
-            var z = ultima.mov[i].sube.indexOf(r.t) >= 0 || (i === 0 && k === 0) ? 'z1' : ultima.mov[i].baja.indexOf(r.t) >= 0 ? 'zr' : '';
-            h += '<tr class="' + z + '"><td class="num"><span class="pos-chip">' + (k + 1) + '</span></td>' +
-              '<td><div class="tname">' + crestOf(r.t, 20) + '<span>' + esc(r.t.n) + '</span></div></td>' +
-              '<td class="num">' + r.pj + '</td><td class="num">' + r.g + '</td><td class="num">' + r.e + '</td><td class="num">' + r.p + '</td>' +
-              '<td class="num">' + (r.gf - r.gc > 0 ? '+' : '') + (r.gf - r.gc) + '</td><td class="num"><b>' + r.pts + '</b></td></tr>';
-          });
-          h += '</tbody></table>';
-          if (c.up) h += '<p class="hint">' + (i > 0 ? '⬆ Ascienden: ' + nombres(ultima.mov[i].sube) + '. ' : '') +
-            (i < c.D - 1 ? '⬇ Descienden: ' + nombres(ultima.mov[i].baja) + '.' : '') + '</p>';
-          h += '</div>';
-        });
-        h += '<div class="card"><h3>Historial de campeones</h3><div style="overflow-x:auto"><table><thead><tr><th class="num">Temp.</th>' +
-          divs.map(function (_, i) { return '<th>División ' + (i + 1) + '</th>'; }).join('') + '</tr></thead><tbody>' +
-          hist.slice().reverse().map(function (r) {
-            return '<tr><td class="num">' + r.n + '</td>' + r.camp.map(function (t) {
-              return '<td><div class="tname">' + crestOf(t, 18) + '<span>' + esc(t.n) + '</span></div></td>';
-            }).join('') + '</tr>';
-          }).join('') + '</tbody></table></div></div>';
-      }
+        '<button id="ldVarias" class="mini">Simular</button></div>' +
+        '<div class="ld-tabs">' + R.map(function (_, i) {
+          return '<button class="mini' + (i === tab ? ' on' : '') + '" data-t="' + i + '">División ' + (i + 1) + '</button>';
+        }).join('') + '</div></div>' +
+        R.map(function (_, i) { return '<div class="ld-panel' + (i === tab ? '' : ' hidden') + '" data-p="' + i + '"></div>'; }).join('') +
+        '<div id="ldMov"></div><div id="ldHist"></div>';
       box.innerHTML = h;
-      $('#ldUna', box).onclick = function () { juega(); pinta(); };
+      R.forEach(function (r, i) { Runner.mount($('[data-p="' + i + '"]', box), r); });
+      $$('.ld-tabs button', box).forEach(function (b) {
+        b.onclick = function () {
+          tab = +b.dataset.t;
+          $$('.ld-tabs button', box).forEach(function (x) { x.classList.toggle('on', x === b); });
+          $$('.ld-panel', box).forEach(function (x) { x.classList.toggle('hidden', +x.dataset.p !== tab); });
+        };
+      });
+      $('#ldTodo', box).onclick = function () {
+        R.forEach(function (r) { Runner.stepAll(r); });
+        pinta(); actualiza();
+      };
+      $('#ldSig', box).onclick = function () { siguiente(); pinta(); actualiza(); };
       $('#ldVarias', box).onclick = function () {
         var n = Math.max(2, Math.min(50, Math.floor(+$('#ldN', box).value) || 2));
-        for (var k = 0; k < n; k++) juega();
-        pinta();
+        for (var k = 0; k < n; k++) {
+          R.forEach(function (r) { Runner.stepAll(r); });
+          cierra(); siguiente();
+        }
+        pinta(); actualiza();
       };
+      actualiza();
     }
+    /* los botones de cada división juegan por su cuenta: se vigila cuándo acaba la temporada */
+    var timer = setInterval(function () {
+      if (!actualiza()) clearInterval(timer);
+    }, 600);
+    nuevas();
     pinta();
   }
 
@@ -2184,6 +2251,7 @@
     fb.className = 'format-box' + (st.ok ? '' : ' bad');
     fb.innerHTML = '<b>' + picked.length + ' equipos</b> · ' + esc(Comp.describe(st));
     var lg = ligaCfg(), lb = $('#bldLigaFormat');
+    pintaReparto(lg);
     lb.className = 'format-box' + (lg.ok ? '' : ' bad');
     lb.innerHTML = '<b>' + picked.length + ' equipos</b> · ' + esc(lg.msg);
     $('#btnBld').disabled = $('#bldKind').value === 'liga' ? !lg.ok : !st.ok;
