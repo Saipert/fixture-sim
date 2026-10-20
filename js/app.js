@@ -186,9 +186,9 @@
   function tableHTML(rows, opts) {
     opts = opts || {};
     var n = rows.length;
-    var html = '<table><thead><tr><th class="num">#</th><th>Equipo</th><th class="num">PJ</th><th class="num">G</th>' +
-      '<th class="num">E</th><th class="num">P</th><th class="num">GF</th><th class="num">GC</th><th class="num">DG</th>' +
-      '<th class="num">Pts</th>' + (opts.form ? '<th>Últimos</th>' : '') + '</tr></thead><tbody>';
+    var html = '<table' + (opts.form ? ' class="tb-liga"' : '') + '><thead><tr><th class="num">#</th><th>Equipo</th><th class="num">PJ</th><th class="num">G</th>' +
+      '<th class="num">E</th><th class="num">P</th><th class="num gfc">GF</th><th class="num gfc">GC</th><th class="num">DG</th>' +
+      '<th class="num">Pts</th>' + (opts.form ? '<th class="form">Últimos</th>' : '') + '</tr></thead><tbody>';
     rows.forEach(function (r, i) {
       var z = '';
       if (opts.ucl != null) {
@@ -198,7 +198,7 @@
       html += '<tr class="' + z + me + '"><td class="num"><span class="pos-chip">' + (i + 1) + '</span></td>' +
         '<td><div class="tname">' + crestOf(r.t, 20) + '<span>' + esc(r.t.n) + '</span></div></td>' +
         '<td class="num">' + r.pj + '</td><td class="num">' + r.g + '</td><td class="num">' + r.e + '</td>' +
-        '<td class="num">' + r.p + '</td><td class="num">' + r.gf + '</td><td class="num">' + r.gc + '</td>' +
+        '<td class="num">' + r.p + '</td><td class="num gfc">' + r.gf + '</td><td class="num gfc">' + r.gc + '</td>' +
         '<td class="num">' + (r.gf - r.gc > 0 ? '+' : '') + (r.gf - r.gc) + '</td><td class="num"><b>' + r.pts + '</b></td>';
       if (opts.form) {
         html += '<td class="form">' + r.form.slice(-5).map(function (f) { return '<span class="' + f + '">' + f + '</span>'; }).join('') + '</td>';
