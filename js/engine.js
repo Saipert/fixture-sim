@@ -474,8 +474,46 @@
     };
   }
 
+  /* Un partido con el marcador elegido a mano. Los goleadores y los minutos
+     se reparten solos, como en una simulación. Si es eliminatoria y acaba
+     empatado, `penWinner` ('home' | 'away') dice quién pasa en los penales. */
+  function simulateFixed(homeData, awayData, opts) {
+    opts = opts || {};
+    var sc = opts.score || [0, 0];
+    var r = simulate(homeData, awayData, { quick: true, neutral: opts.neutral });
+    r.events = [];
+    [[r.home, sc[0]], [r.away, sc[1]]].forEach(function (par) {
+      var T = par[0], n = par[1];
+      T.players.forEach(function (p) { p.goals = 0; p.assists = 0; });
+      T.goals = n;
+      var xi = T.xi.filter(function (p) { return p.pos !== 'GK'; });
+      var pesos = xi.map(function (p) { return (GOAL_W[p.pos] || 0.5) * p.rat; });
+      var tot = pesos.reduce(function (a, b) { return a + b; }, 0);
+      var mins = [];
+      for (var i = 0; i < n; i++) {
+        var x = rnd() * tot, k = 0;
+        while (k < pesos.length - 1 && x > pesos[k]) { x -= pesos[k]; k++; }
+        xi[k].goals++;
+        var m = 1 + Math.floor(rnd() * 90);
+        r.events.push({ min: m, side: T.side, type: 'goal', scorer: xi[k].name });
+      }
+    });
+    r.events.sort(function (a, b) { return a.min - b.min; });
+    r.score = [sc[0], sc[1]];
+    r.pens = null; r.aet = false;
+    if (opts.knockout && sc[0] === sc[1]) {
+      r.aet = true;
+      var homeWins = opts.penWinner !== 'away';
+      var low = 3 + Math.floor(rnd() * 2);
+      r.pens = { a: homeWins ? low + 1 : low, b: homeWins ? low : low + 1, log: [] };
+    }
+    r.winner = r.pens ? (r.pens.a > r.pens.b ? 'home' : 'away')
+      : (sc[0] > sc[1] ? 'home' : sc[0] < sc[1] ? 'away' : 'draw');
+    return r;
+  }
+
   global.Engine = {
-    simulate: simulate, buildTeam: buildTeam, strengths: strengths, overall: overall,
+    simulateFixed: simulateFixed, simulate: simulate, buildTeam: buildTeam, strengths: strengths, overall: overall,
     group: group, FORMATIONS: FORMATIONS, autoLineup: autoLineup, misfit: misfit,
     BANQUILLO: BANQUILLO, CONVOCADOS: 11 + BANQUILLO
   };

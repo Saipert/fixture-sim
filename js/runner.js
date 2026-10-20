@@ -436,7 +436,9 @@
     '<button class="mini" data-r="live">Ver en vivo</button>' +
     '<button class="mini" data-r="round">Jornada completa</button>' +
     '<button class="mini" data-r="all">Simular todo</button>' +
-    '</div></div>' +
+    '<button class="mini" data-r="man">Resultado manual</button>' +
+    '</div>' +
+    '<div class="rn-man hidden" data-r="manual"></div></div>' +
     '<div class="hidden" data-r="livebox"></div>' +
     '<div class="card hidden" data-r="logbox"><h3 data-r="logtitle">Resultados</h3><div data-r="log"></div></div>' +
     '<div data-r="state"></div>';
@@ -494,7 +496,8 @@
         : (R.done && R.label.indexOf('🏆') < 0
           ? '🏆 Campeón: <b>' + esc(R.champion ? R.champion.n : '—') + '</b>'
           : (bloqueada(R) ? '⏳ Espera a que la competición de arriba cierre su fase de grupos' : ''));
-      ['one', 'live', 'round', 'all'].forEach(function (k) { el[k].disabled = R.done || busy || !nx; });
+      ['one', 'live', 'round', 'all', 'man'].forEach(function (k) { el[k].disabled = R.done || busy || !nx; });
+      if (!nx) el.manual.classList.add('hidden');
 
       var nueva = !R.log.length && !!nx;
       var lg = R.log.slice();
@@ -669,6 +672,40 @@
         onClose: function () { cerrarVivo(); busy = false; paint(); }
       });
       el.livebox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+
+    /* El resultado de un partido a mano: solo el marcador, los goleadores y los
+       minutos salen solos. Aquí no se pasa por el modo carrera. */
+    el.man.onclick = function () {
+      var m = peek(R);
+      if (!m || busy) return;
+      if (!el.manual.classList.contains('hidden')) { el.manual.classList.add('hidden'); return; }
+      el.manual.innerHTML =
+        '<div class="rn-man-t">' + crest(m.h, 26) + '<b>' + esc(m.h.n) + '</b>' +
+        '<input type="number" min="0" max="30" value="0" inputmode="numeric" data-m="h" aria-label="Goles de ' + esc(m.h.n) + '">' +
+        '<span>-</span>' +
+        '<input type="number" min="0" max="30" value="0" inputmode="numeric" data-m="a" aria-label="Goles de ' + esc(m.a.n) + '">' +
+        '<b>' + esc(m.a.n) + '</b>' + crest(m.a, 26) + '</div>' +
+        '<div class="rn-man-p hidden" data-m="pen"><label>Empate: pasa por penales</label>' +
+        '<select data-m="pw"><option value="home">' + esc(m.h.n) + '</option><option value="away">' + esc(m.a.n) + '</option></select></div>' +
+        '<div class="rn-man-b"><button class="primary" data-m="ok">Aplicar resultado</button>' +
+        '<button class="mini" data-m="no">Cancelar</button></div>';
+      var f = {};
+      Array.prototype.forEach.call(el.manual.querySelectorAll('[data-m]'), function (n) { f[n.dataset.m] = n; });
+      function num(i) { return Math.max(0, Math.min(30, Math.floor(+i.value) || 0)); }
+      function empate() { f.pen.classList.toggle('hidden', !(m.knockout && num(f.h) === num(f.a))); }
+      f.h.oninput = f.a.oninput = empate;
+      f.no.onclick = function () { el.manual.classList.add('hidden'); };
+      f.ok.onclick = function () {
+        var res = Engine.simulateFixed(m.h, m.a, {
+          score: [num(f.h), num(f.a)], neutral: !!m.neutral, knockout: !!m.knockout, penWinner: f.pw.value
+        });
+        el.manual.classList.add('hidden');
+        cerrarVivo();
+        step(R, res);
+        paint();
+      };
+      el.manual.classList.remove('hidden');
     };
 
     paint();
