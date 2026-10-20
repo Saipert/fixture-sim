@@ -4275,8 +4275,9 @@
      de la partida y al salir se devuelve el original a los demás modos. */
   window.Career = {
     preparaMundo: function () { Mundo.entra(started); },
-    sacaMundo: function () { Mundo.sale(started); }
+    sacaMundo: function () { Mundo.sale(started); },
+    /* lo que necesita la ficha de club para pintar el calendario de cualquier equipo */
+    started: function () { return started; },
+    calendarFor: calendarFor
   };
-
-  /* lo que necesita la ficha de club para pintar el calendario de cualquier equipo */
 })();
