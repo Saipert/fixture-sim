@@ -2082,3 +2082,10 @@ body.conclub{scrollbar-color:var(--club-scroll,var(--line)) rgba(255,255,255,.04
 .ld-tabs{display:flex;gap:6px;margin-top:12px;overflow-x:auto;padding-bottom:2px}
 .ld-tabs button{flex:0 0 auto}
 .ld-tabs button.on{background:var(--acc);color:#04121f;border-color:var(--acc)}
+
+/* resultado manual de un partido */
+.rn-man{margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
+.rn-man-t{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap}
+.rn-man-t input{width:58px;text-align:center;font-size:18px;font-weight:800}
+.rn-man-p{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px;flex-wrap:wrap}
+.rn-man-b{display:flex;gap:8px;justify-content:center;margin-top:10px}
