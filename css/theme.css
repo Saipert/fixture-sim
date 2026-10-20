@@ -2053,3 +2053,11 @@ body.conclub{scrollbar-color:var(--club-scroll,var(--line)) rgba(255,255,255,.04
   .so-card .gbox .drawline span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .so-card .gbox .hint{margin:0}
 }
+
+/* ficha de club en móvil: los números pasan a una fila propia, sin pisar el nombre */
+@media (max-width:720px){
+  .pf-head{flex-wrap:wrap;gap:10px 12px}
+  .pf-id{flex:1 1 0;min-width:0}
+  .pf-st{order:5;flex:1 0 100%;justify-content:space-between;gap:8px;flex-wrap:wrap}
+  .pf-grid{grid-template-columns:minmax(0,1fr)}
+}

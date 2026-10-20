@@ -2076,6 +2076,7 @@
   };
   $('#bldClear').onclick = function () { picked = []; drawBuilder(); };
   $('#bldGroupSize').onchange = drawBuilder;
+  $('#bldGroupDouble').onchange = drawBuilder;
 
   function drawBuilder() {
     $('#bldList').innerHTML = picked.length ? picked.map(function (t, i) {
@@ -2084,11 +2085,15 @@
     $$('#bldList .chip button').forEach(function (b) {
       b.onclick = function () { picked.splice(+b.dataset.i, 1); drawBuilder(); };
     });
-    var gs = +$('#bldGroupSize').value;
-    var st = Comp.structureFor(picked.length, gs);
+    var liga = $('#bldGroupSize').value === 'liga';
+    var st = liga
+      ? (picked.length >= 2 ? { ok: true } : { ok: false, msg: 'Hacen falta al menos 2 equipos.' })
+      : Comp.structureFor(picked.length, +$('#bldGroupSize').value);
     var fb = $('#bldFormat');
     fb.className = 'format-box' + (st.ok ? '' : ' bad');
-    fb.innerHTML = '<b>' + picked.length + ' equipos</b> · ' + esc(Comp.describe(st));
+    fb.innerHTML = '<b>' + picked.length + ' equipos</b> · ' + (liga && st.ok
+      ? 'Liga: todos contra todos' + ($('#bldGroupDouble').checked ? ', ida y vuelta.' : ', a una vuelta.')
+      : esc(Comp.describe(st)));
     $('#btnBld').disabled = !st.ok;
   }
   drawBuilder();
@@ -2096,6 +2101,13 @@
   $('#btnBld').onclick = function () {
     var box = $('#bldOut');
     var nombre = ($('#bldName').value || '').trim() || 'Torneo personalizado';
+    if ($('#bldGroupSize').value === 'liga') {
+      var Rl = Runner.league(picked.slice(), { name: nombre, double: $('#bldGroupDouble').checked });
+      TourView.attach(Rl, { title: nombre });
+      Runner.mount(box, Rl);
+      box.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
     montaConSorteo(box, picked, {
       name: nombre,
       manualGrupos: $('#bldDrawGroups').value === 'manual',
