@@ -2068,3 +2068,6 @@ body.conclub{scrollbar-color:var(--club-scroll,var(--line)) rgba(255,255,255,.04
   .tb-liga .gfc,.tb-liga th.form,.tb-liga td.form{display:none}
   .rn-bar{position:static}
 }
+
+/* liga con divisiones: los números en una fila compacta */
+#bldLigaBox input[type=number]{width:84px}
