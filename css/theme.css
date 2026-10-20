@@ -2061,3 +2061,10 @@ body.conclub{scrollbar-color:var(--club-scroll,var(--line)) rgba(255,255,255,.04
   .pf-st{order:5;flex:1 0 100%;justify-content:space-between;gap:8px;flex-wrap:wrap}
   .pf-grid{grid-template-columns:minmax(0,1fr)}
 }
+
+/* tabla de liga en móvil: sin goles a favor/en contra ni últimos partidos, y la
+   barra de control deja de flotar encima del título de la tabla */
+@media (max-width:720px){
+  .tb-liga .gfc,.tb-liga th.form,.tb-liga td.form{display:none}
+  .rn-bar{position:static}
+}
