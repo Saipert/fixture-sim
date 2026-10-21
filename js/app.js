@@ -60,6 +60,17 @@
   });
   var NATIONS = LG[NAT] ? LG[NAT].teams : [];
 
+  /* la barra de control de los torneos se pega justo debajo de la cabecera,
+     que en el móvil mide distinto según cuánto se parta el título */
+  function mideCabecera() {
+    var tb = document.querySelector('.topbar');
+    if (tb) document.documentElement.style.setProperty('--cab', tb.offsetHeight + 'px');
+  }
+  mideCabecera();
+  window.addEventListener('resize', mideCabecera);
+  window.addEventListener('load', mideCabecera);
+  setInterval(mideCabecera, 1500);
+
   function refreshOvr(t) { t.ovr = Engine.overall(t); }
   /* el uid viaja en el escudo: al pulsarlo se abre la ficha del club */
   function crestOf(t, s) {

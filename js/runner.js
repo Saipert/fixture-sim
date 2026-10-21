@@ -453,14 +453,14 @@
     /* Un partido que todavía no se ha jugado: los dos escudos y, si es la
        vuelta, cómo quedó la ida, que es lo que hace falta saber antes de
        verla. Se escribe en la dirección de esta vuelta. */
-    function porJugar(m) {
+    function porJugar(m, sinNota) {
       var t = m.tie, ida = '';
       if (t && t.leg1 && m.note === 'vuelta') {
         ida = '<i class="agg ida">Ida ' + t.leg1[1] + '-' + t.leg1[0] + '</i>';
       }
       return '<div class="scline porjugar">' +
         '<span class="sc-c" title="' + esc(m.h.n) + '">' + crest(m.h, 34) + '</span>' +
-        '<b>' + (m.note ? esc(m.note) : 'vs') + ida + '</b>' +
+        '<b>' + (m.note && !sinNota ? esc(m.note) : 'vs') + ida + '</b>' +
         '<span class="sc-c" title="' + esc(m.a.n) + '">' + crest(m.a, 34) + '</span></div>';
     }
     function scoreLine(r) {
@@ -540,7 +540,7 @@
              del otro: en pantalla ancha se ve el avance sin bajar */
           html += '<div class="fx-grp"><div class="fx-izq"><h4 class="fx-tit">' + esc(g.name) +
             (deAntes ? ' <i>' + esc(R.prevLabel || '') + '</i>' : '') + '</h4><div class="fx">' +
-            hechos.map(scoreLine).join('') + pend.map(porJugar).join('') + '</div></div>' +
+            hechos.map(scoreLine).join('') + pend.map(function (m) { return porJugar(m, true); }).join('') + '</div></div>' +
             '<div class="fx-der">' + X().groupsHTML([g], R.structure.perGroup, 0, R.baja) + '</div></div>';
         });
       } else {
