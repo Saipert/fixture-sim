@@ -311,12 +311,14 @@
   /* Se lanza alternando y se para en cuanto la tanda está decidida: si al
      que va detrás no le alcanzan los penales que le quedan, no se patea más.
      Por eso una tanda nunca puede acabar 5-2. */
+  /* Una tanda es cara o cruz. Antes cada tiro llevaba cuatro milésimas por
+     punto de media, así que con veinte de diferencia uno metía el 83% y el
+     otro el 67%; sobre cinco tiros eso casi siempre decidía, y los grandes
+     no perdían nunca en penales. Ahora los dos tiran igual, y quién gana
+     sale del azar y no de la ficha. */
   function penaltyShootout(A, B) {
-    var oa = Engine.overall(A), ob = Engine.overall(B);
     var pa = 0, pb = 0, ka = 0, kb = 0;
-    function mete(local) {
-      return Math.random() < 0.75 + ((local ? oa - ob : ob - oa)) * 0.004;
-    }
+    function mete() { return Math.random() < 0.75; }
     /* decidida cuando al de atrás no le dan los tiros que le quedan */
     function resuelta() {
       return pa > pb + (5 - kb) || pb > pa + (5 - ka);
